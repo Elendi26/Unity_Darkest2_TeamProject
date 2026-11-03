@@ -12,12 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf19261dd824c1142be7721269163954, type: 3}
   m_Name: Map Config
   m_EditorClassIdentifier: 
-  _rowCount: 10
-  _minNodePerRow: 3
-  _maxNodePerRow: 4
+  _id: 
+  _displayName: "\uAD50\uC678"
+  _rowCount: 6
+  _minNodePerRow: 2
+  _maxNodePerRow: 3
   _branchChance: 0.6
   _startNode: {fileID: 11400000, guid: b3986bd1f6b5ac8419383011ca6e7a50, type: 2}
   _endNode: {fileID: 11400000, guid: 2c6b8ba5fa341004ba45b84a9626bd52, type: 2}
+  _preEndNode: {fileID: 11400000, guid: 1ff8ea9a4f6b1ae4f8e361ed14ce5cad, type: 2}
   _fallbackNode: {fileID: 11400000, guid: 0b24377c8f0fa3c42b5109cbf8360c4d, type: 2}
   _nodePool:
   - {fileID: 11400000, guid: cbbefe2c1cb1ead42a3c76b615908c6e, type: 2}
