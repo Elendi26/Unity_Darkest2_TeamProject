@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Start
   m_EditorClassIdentifier: 
   _type: 1
-  _icon: {fileID: 21300000, guid: 2a7df03423be85b48af581ed52d977b3, type: 2}
+  _icon: {fileID: 21300000, guid: 4fed078f50a540745a048640ebf7aec1, type: 2}
   _weight: 1
   _maxPerBiome: 1
   _minRow: 1
