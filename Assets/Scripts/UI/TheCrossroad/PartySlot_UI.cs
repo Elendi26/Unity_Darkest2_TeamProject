@@ -16,6 +16,9 @@ public class PartySlot_UI : MonoBehaviour, IDropHandler, IPointerClickHandler
     [SerializeField] private int _slotIndex;
 
     [Header("초상화 띄울 이미지")]
+    [SerializeField] private GameObject _portrait;
+
+    [Header("빈슬롯 기본 이미지")]
     [SerializeField] private GameObject _image;
 
     [Header("클릭시 하이라이트")]
@@ -41,6 +44,13 @@ public class PartySlot_UI : MonoBehaviour, IDropHandler, IPointerClickHandler
     // 프로퍼티
     public HeroDataSO HeroData => _heroData;
 
+    private void Start()
+    {
+        _portrait.SetActive(false);
+        _image.SetActive(true);
+        _slotHL.SetActive(false);
+    }
+
     public void OnDrop(PointerEventData eventData)
     {
         /*
@@ -58,8 +68,9 @@ public class PartySlot_UI : MonoBehaviour, IDropHandler, IPointerClickHandler
             if (data != null)
             {
                 _heroData = data.HeroData;
-                _image.SetActive(true);
-                _image.GetComponent<Image>().sprite = _heroData.HeroPortrait;
+                _image.SetActive(false);
+                _portrait.SetActive(true);
+                _portrait.GetComponent<Image>().sprite = _heroData.HeroPortrait;
                 HeroDropped?.Invoke(_slotIndex, _heroData);
             }
         }
@@ -127,10 +138,11 @@ public class PartySlot_UI : MonoBehaviour, IDropHandler, IPointerClickHandler
         _heroData = data;
 
         // 이미지 켜고
-        _image.SetActive(true);
+        _image.SetActive(false);
+        _portrait.SetActive(true);
 
         // 이미지에 데이터 초상화 넣고
-        _image.GetComponent<Image>().sprite = data.HeroPortrait;
+        _portrait.GetComponent<Image>().sprite = data.HeroPortrait;
     }
 
     public void SlotClear()
@@ -138,7 +150,8 @@ public class PartySlot_UI : MonoBehaviour, IDropHandler, IPointerClickHandler
         // 슬롯의 영웅 데이터 지우고 이미지 없애기
         inParty = false;
         _heroData = null;
-        _image.SetActive(false);
+        _image.SetActive(true);
+        _portrait.SetActive(false);
 
     }
 

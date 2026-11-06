@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca260144fb5fd22468f3e474ca3786fd, type: 3}
+  m_Name: HighWayMan 2
+  m_EditorClassIdentifier: 
+  _saveID: Test_HighWayMan
+  _jobTitle: "\uB178\uC0C1\uAC15\uB3C4"
+  _heroName: "\uB514\uC2A4\uB9C8\uC2A43"
+  _heroSmallTalk: "\"\uC624\uB9CC \uAC00\uC9C0 \uD3ED\uB825\uC73C\uB85C \uBB34\uC790\uBE44\uD55C
+    \uC774\uB4DD\uC744 \uCDE8\uD558\uB294 \uC790\uB85C\uB2E4.\""
+  _heroSpecs:
+  - "+ \uBAA8\uB4E0 \uC704\uCE58"
+  - "+ \uB192\uC740 \uD53C\uD574"
+  - "+ \uB2E4\uC6A9\uB3C4"
+  - "+ \uBC18\uACA9"
+  _heroHP: 35
+  _heroSpeed: 5
+  _resBleeding: 30
+  _resPoisoning: 30
+  _resBurn: 30
+  _resStun: 30
+  _resMove: 30
+  _resWeakening: 30
+  _resDisease: 30
+  _resDeathBlow: 60
+  _heroStressValue: 0
+  _heroPortrait: {fileID: 21300000, guid: 7fbf6953932fda341b24c7a8a093155c, type: 2}
+  _heroRank: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
+  _heroSkills:
+  - {fileID: 21300000, guid: 2b65c9090941eb847b5f0a4f0a8406b4, type: 2}
+  - {fileID: 21300000, guid: c36a2d1886bc0254f85b5f16098d206b, type: 2}
+  - {fileID: 21300000, guid: 7f3ff4f0f15ce7b48ab9101649bbd1aa, type: 2}
+  - {fileID: 21300000, guid: 4f720017ec35f7548b459235edff4830, type: 2}
+  - {fileID: 21300000, guid: 7029848f2027db34aba8e3ae19fc5808, type: 2}
+  _heroModel: {fileID: 8156765513646132436, guid: e4d64cc8ebd046a4eb3269b30dff5d72, type: 3}

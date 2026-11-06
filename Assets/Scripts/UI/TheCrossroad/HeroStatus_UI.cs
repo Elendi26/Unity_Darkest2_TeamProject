@@ -23,8 +23,6 @@ public class HeroStatus_UI : MonoBehaviour
 	[Header("특성 텍스트 프리팹")]
 	[SerializeField] private GameObject _traitPrefab;
 
-
-
 	[Header("위치 및 대상 표시할 이미지")]
 	[SerializeField] private Image _indicator;
 
@@ -50,7 +48,12 @@ public class HeroStatus_UI : MonoBehaviour
 			_jobTitle.text = string.Empty;
             _heroName.text = string.Empty;
 			_heroSmalltalk.text = string.Empty;
-			_indicator = null;
+
+			if(_indicator != null)
+			{
+				_indicator.sprite = null;
+			}
+
 
 			// 생성되어있는 프리팹 파괴
 			for (int i = 0; i < _heroSpec.transform.childCount; i++)
@@ -70,7 +73,6 @@ public class HeroStatus_UI : MonoBehaviour
 		{
 			TextUpdate(data);
 			TraitsUpdate(data);
-			ModelUpdate(data);
 		}
 
 
@@ -110,20 +112,4 @@ public class HeroStatus_UI : MonoBehaviour
 		
 	}
 	
-
-	/// <summary>
-	/// 현재 모델링이 있는지 확인하고, 있으면 기존 데이터 지우고 생성, 없으면 지금 데이터로 바로 생성
-	/// </summary>
-	/// <param name="data"></param>
-	private void ModelUpdate(HeroDataSO data)
-	{
-		if(_currentModel != null)
-		{
-			Destroy( _currentModel );
-
-		}
-
-		_currentModel = Instantiate(data.HeroModel, _heroModelSpace.position, _heroModelSpace.rotation);
-		
-	}
 }

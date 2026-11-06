@@ -30,6 +30,11 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     // 프로퍼티 
     public HeroDataSO HeroData => _heroData;
 
+    private void Start()
+    {
+        _pointerImage.gameObject.SetActive(false);
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         /*
