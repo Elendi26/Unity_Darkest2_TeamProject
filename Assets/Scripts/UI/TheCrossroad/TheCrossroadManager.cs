@@ -19,18 +19,29 @@ public class TheCrossroadManager : MonoBehaviour
     [Header("영웅 정보 UI 참조")]
     [SerializeField] private HeroStatus_UI _heroStatus;
 
+    [Header("하이라이트 리셋용 스크립트 참조")]
+    [SerializeField] private ClickHandler _clickHandler;
+
     [Header("영웅 Status 캔버스 그룹 참조")]
     [SerializeField] private CanvasGroup _statusCanvas;
 
     [Header("영웅 팝업 UI 캔버스 그룹 참조")]
     [SerializeField] private CanvasGroup _heroPopupCanvas;
 
+    [Header("파티 출정 버튼")]
+    [SerializeField] private CanvasGroup _departureButton;
+
 
 
     #endregion
 
+    // 내부 변수
+    private bool _onPopup;
+   
+
     void Start()
     {
+        // 구독
         for(int i = 0;  i < _partySlots.Length; i++)
         {
             _partySlots[i].HeroDropped += DropHerotoParty;
@@ -46,15 +57,46 @@ public class TheCrossroadManager : MonoBehaviour
             _heroRoster[i].HeroRosterDoubleClicked += HeroRosterDoubleClicked;
         }
 
-        if(_heroPopupCanvas != null)
+        _clickHandler.ClickEmptySpace += HighlightReset;
+
+        // 팝업창 시작할 때는 꺼놓기
+        if (_heroPopupCanvas != null)
         {
+            _onPopup = false;
             _heroPopupCanvas.alpha = 0f;
             _heroPopupCanvas.blocksRaycasts = false;
             _heroPopupCanvas.interactable = false;
         }
 
+        // 기본 시작할 때 영웅 정보 띄워놓기
+        if (_heroRoster[3].HeroData != null)
+        {
+            HeroDataSO data = _heroRoster[3].HeroData;
+            _heroStatus.UpdateStatus(data);
+            HeroPopup_UI.instance.HeroDataUpdate(data);
+        }
+
+        if(_departureButton != null)
+        {
+            _departureButton.alpha = 0f;
+            _departureButton.interactable = false;
+            _departureButton.blocksRaycasts = false;
+        }
+
     }
 
+    private void Update()
+    {
+        // esc로도 팝업창 닫을 수 있게
+        if(Input.GetKeyDown(KeyCode.Escape) && _onPopup == true)
+        {
+            ExitPopup();
+        }
+    }
+
+    /// <summary>
+    /// 이벤트 구독 해제
+    /// </summary>
     private void OnDisable()
     {
         for (int i = 0; i < _partySlots.Length; i++)
@@ -71,6 +113,8 @@ public class TheCrossroadManager : MonoBehaviour
             _heroRoster[i].HeroRosterLeftClicked -= HeroRosterClicked;
             _heroRoster[i].HeroRosterDoubleClicked -= HeroRosterDoubleClicked;
         }
+
+        _clickHandler.ClickEmptySpace -= HighlightReset;
     }
 
     /// <summary>
@@ -80,12 +124,31 @@ public class TheCrossroadManager : MonoBehaviour
     /// <param name="data"></param>
     private void DropHerotoParty(int partySlotIndex, HeroDataSO data)
     {
+        // 기존 슬롯에 들어있는 데이터를 일단 변수로 저장 데이터 없으면 null
+        HeroDataSO inSlotData = _heroDatas[partySlotIndex];
+
+        // 파티 데이터를 동기화한다.
+        _heroDatas[partySlotIndex] = data;
+
+        if(inSlotData != null && inSlotData != data)
+        {
+            for(int i = 0; i < _heroRoster.Length; i++)
+            {
+                if (_heroRoster[i].HeroData == inSlotData)
+                {
+                    _heroRoster[i].inParty = false;
+                    _heroRoster[i].RosterStateUpdate();
+                }
+            }
+        }
+
         for(int i = 0; i < _partySlots.Length; i++)
         {
             // 드랍했는데, 중복된 데이터가 다른 슬롯에 있다면 다른 슬롯의 데이터 삭제
             if (_partySlots[i].HeroData == data && i != partySlotIndex)
             {
                 _partySlots[i].SlotClear();
+                _heroDatas[i] = null;
             }
 
         }
@@ -98,13 +161,12 @@ public class TheCrossroadManager : MonoBehaviour
                 // 파티에 들어온 상태로 바꾸고
                 _heroRoster[j].inParty = true;
 
-                // 로스터 초상화의 색을 바꾸고
+                // 로스터 초상화의 색을 바꾼다.
                 _heroRoster[j].RosterStateUpdate();
-
-                // 파티 데이터를 동기화한다.
-                _heroDatas[partySlotIndex] = data;
             }
         }
+
+        ActiveDepartureButton();
     }
 
     /// <summary>
@@ -117,11 +179,15 @@ public class TheCrossroadManager : MonoBehaviour
         {
             for(int i = 0; i < _heroDatas.Length; i++)
             {
-                if (_heroDatas[i] == data)
+                if (_partySlots[i].HeroData == data)
                 {
-                    _heroDatas[i] = null;
+                    _partySlots[i].SlotClear();
+
                 }
             }
+
+            ActiveDepartureButton();
+
         }
 
         // 영웅 로스터 확인해서 파티에 빠졌다면 색 변경
@@ -180,6 +246,7 @@ public class TheCrossroadManager : MonoBehaviour
                 if (_partySlots[i].HeroData == null)
                 {
                     _partySlots[i].SlotDataAdd(data);
+                    _heroDatas[i] = data;
 
                     for(int j = 0; j < _heroRoster.Length; j++)
                     {
@@ -199,6 +266,7 @@ public class TheCrossroadManager : MonoBehaviour
             }
         }
 
+        ActiveDepartureButton();
 
     }
 
@@ -210,12 +278,29 @@ public class TheCrossroadManager : MonoBehaviour
     {
         HeroPopup_UI.instance.HeroDataUpdate(data);
 
+        List<HeroDataSO> heroes = new List<HeroDataSO>();
+
+        for (int i = 0; i < _heroRoster.Length; i++)
+        {
+            if(_heroRoster[i].HeroData != null)
+            {
+                heroes.Add(_heroRoster[i].HeroData);
+            }
+        }
+
+        int currentIndex = heroes.IndexOf(data);
+
+        HeroPopup_UI.instance.OpenPopup(heroes, currentIndex);
+
         if (_heroPopupCanvas != null)
         {
+            _onPopup = true;
             _heroPopupCanvas.alpha = 1f;
             _heroPopupCanvas.blocksRaycasts = true;
             _heroPopupCanvas.interactable = true;
         }
+
+        
 
 
     }
@@ -244,11 +329,78 @@ public class TheCrossroadManager : MonoBehaviour
     /// 영웅 로스터 슬롯 단일 클릭시 하이라이트 켜고 끄기
     /// </summary>
     /// <param name="data"></param>
-    private void HeroRosterClicked(HeroDataSO data)
+    private void HeroRosterClicked(int slotIndex, HeroDataSO data)
     {
         if(data != null)
         {
             _heroStatus.UpdateStatus(data);
+            HeroPopup_UI.instance.HeroDataUpdate(data);
+        }
+
+        for (int i = 0; i < _heroRoster.Length; i++)
+        {
+            if (i == slotIndex)
+            {
+                _heroRoster[i].SlotHighlight(true);
+            }
+
+            else
+            {
+                _heroRoster[i].SlotHighlight(false);
+            }
+        }
+    }
+
+    private void ActiveDepartureButton()
+    {
+
+        bool _fullParty = System.Array.TrueForAll(_partySlots, slot => slot.HeroData != null);
+
+        if ( _fullParty )
+        {
+            _departureButton.alpha = 1f;
+            _departureButton.interactable = true;
+            _departureButton.blocksRaycasts = true;
+        }
+
+        else
+        {
+            _departureButton.alpha = 0f;
+            _departureButton.interactable = false;
+            _departureButton.blocksRaycasts = false;
+        }
+
+
+    }
+
+
+    /// <summary>
+    /// 팝업 창 닫기
+    /// </summary>
+    public void ExitPopup()
+    {
+        if (_heroPopupCanvas != null)
+        {
+            _onPopup = false;
+            _heroPopupCanvas.alpha = 0f;
+            _heroPopupCanvas.blocksRaycasts = false;
+            _heroPopupCanvas.interactable = false;
+        }
+    }
+
+    /// <summary>
+    /// 빈 공간 클릭하면 기존 하이라이트 모두 꺼지게하는 함수
+    /// </summary>
+    public void HighlightReset()
+    {
+        for(int i = 0; i < _heroRoster.Length; i++)
+        {
+            _heroRoster[i].SlotHighlight(false);
+        }
+
+        for(int j = 0; j < _partySlots.Length; j++)
+        {
+            _partySlots[j].SlotHighlight(false);
         }
     }
 

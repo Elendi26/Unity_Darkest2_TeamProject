@@ -11,6 +11,9 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
     [Header("영웅 데이터 SO 참조")]
     [SerializeField] private HeroDataSO _heroData;
 
+    [Header("영웅 로스터 슬롯 인덱스")]
+    [SerializeField] private int _slotIndex; 
+
     [Header("영웅 초상화가 들어갈 슬롯 위치 이미지")]
     [SerializeField] private GameObject _portrait;
 
@@ -19,6 +22,9 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
 
     [Header("좌클릭시 테두리 하이라이트")]
     [SerializeField] private GameObject _frameHL;
+
+    [Header("파티 참여 시 테두리 하이라이트")]
+    [SerializeField] private GameObject _frameHL2;
 
     [Header("매니저 참조")]
     [SerializeField] private TheCrossroadManager _manager;
@@ -29,7 +35,7 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
     // 이벤트
 
     public event Action<HeroDataSO> HeroRosterRightClicked;
-    public event Action<HeroDataSO> HeroRosterLeftClicked;
+    public event Action<int, HeroDataSO> HeroRosterLeftClicked;
     public event Action<HeroDataSO> HeroRosterDoubleClicked;
 
 
@@ -57,6 +63,9 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
         {
             _grayPortrait.SetActive(true);
         }
+
+        _frameHL.SetActive(false);
+        _frameHL2.SetActive(false);
 
     }
 
@@ -89,21 +98,11 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
                 HeroRosterDoubleClicked?.Invoke(_heroData);
                 _lastClick = -999f;
 
-                if(inParty == false)
-                {
-                    RosterStateUpdate();
-                }
-
-                else
-                {
-                    RosterStateUpdate();
-                }
-                
             }
 
             else if(clickInterval > _doubleClickTime)
             {
-                HeroRosterLeftClicked?.Invoke(_heroData);
+                HeroRosterLeftClicked?.Invoke(_slotIndex, _heroData);
                 _lastClick = Time.time;
             }
         }
@@ -117,6 +116,8 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
     {
         if(!inParty)
         {
+            _frameHL2.SetActive(false);
+
             if (_portrait != null)
             {
                 _portrait.SetActive(false);
@@ -130,6 +131,8 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
 
         else
         {
+            _frameHL2.SetActive(true);
+
             if (_portrait != null)
             {
                 _portrait.SetActive(true);
@@ -139,6 +142,15 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
             {
                 _grayPortrait.SetActive(false);
             }
+        }
+    }
+
+    public void SlotHighlight(bool isClicked)
+    {
+        // 하이라이트 활성화 비활성화 작업
+        if (_frameHL != null)
+        {
+            _frameHL.SetActive(isClicked);
         }
     }
 }
