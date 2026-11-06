@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bce350e4230aa349ab9a623eb6f02f0, type: 3}
+  m_Name: SkillBasicData_ 1
+  m_EditorClassIdentifier: 
+  _heroName: 
+  _index: 0
+  _rank: 0
+  _target: 0
+  _type: 0
+  _areaOfEffect: 0
+  _critical: 0
+  _cooldown: -1
+  _charges: -1
+  _skillEffect:
+  - rid: 1669732216709840897
+  _skillSelfEffect: 0
+  _skillEffectForSelf: []
+  _testSprite: {fileID: 0}
+  _testAnimation: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: 1669732216709840897
+      type: {class: CSkillDamage, ns: , asm: Assembly-CSharp}
+      data:
+        _minDamage: 0
+        _maxDamage: 0
