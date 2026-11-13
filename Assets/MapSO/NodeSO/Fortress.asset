@@ -19,3 +19,4 @@ MonoBehaviour:
   _minRow: 1
   _allowConsecutive: 1
   _uniqueInRow: 0
+  _landmarkPrefab: {fileID: 1000000000000000001, guid: f11c9d62c39c8d3d1f0f170eaf17a4e6, type: 3}

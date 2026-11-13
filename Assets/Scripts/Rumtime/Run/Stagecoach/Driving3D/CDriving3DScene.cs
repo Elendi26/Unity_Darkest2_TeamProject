@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class CDriving3DScene : MonoBehaviour
+public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 {
 	#region 인스펙터
 	[SerializeField] private CStagecoachController _controller;
@@ -22,8 +24,19 @@ public class CDriving3DScene : MonoBehaviour
 	[SerializeField] private Light _torchLight;
 	[SerializeField] private InputAction _driveAction = new InputAction("Drive", InputActionType.Value);
 	[SerializeField] private InputAction _brakeAction = new InputAction("Brake", InputActionType.Button, "<Keyboard>/space");
-	[SerializeField] private Vector2 _torchIntensity = new Vector2(0.4f, 3f);
-	[SerializeField] private Vector2 _torchRange = new Vector2(6f, 16f);
+	// 횃불 수치에 맞춰 마차 횃불 불빛을 바꾸는 곳 (비우면 _torchLight 에 붙여 쓴다)
+	[SerializeField] private CCoachTorchView _torchView;
+	[SerializeField] private CInventoryView _inventoryView;
+	// 노드 도착 지점에 건축물을 세우는 곳 (비우면 같은 오브젝트에서 찾는다)
+	[SerializeField] private CNodeLandmarkSpawner _landmarks;
+	// 도착 지점 몇 m 앞부터 카메라가 건축물 쪽으로 돌지
+	[SerializeField] private float _arrivalFocusLead = 25f;
+	// 도착한 뒤 건축물을 더 비추는 시간 → 끝나면 노드 이벤트 (0 이면 바로 이벤트)
+	[SerializeField] private float _arrivalFocusTime = 1.2f;
+	// 마차에서 이 거리 안의 건축물만 비춘다
+	[SerializeField] private float _arrivalFocusRange = 60f;
+	// 짐칸을 보는 동안 마차를 세울지 (끄면 미니맵처럼 열어 둔 채 달린다)
+	[SerializeField] private bool _stopWhileInventoryOpen = false;
 	[SerializeField] private bool _debugAlwaysDrive = false;
 	[SerializeField] private bool _logInput = false;
 	#endregion
@@ -66,6 +79,11 @@ public class CDriving3DScene : MonoBehaviour
 	private void Start()
 	{
 		SetupDriving();
+
+		if (_inventoryView == null)
+		{
+			_inventoryView = FindFirstObjectByType<CInventoryView>(FindObjectsInactive.Include);
+		}
 
 		if (_controller == null)
 		{
@@ -126,6 +144,7 @@ public class CDriving3DScene : MonoBehaviour
 
 		CheckFallen();
 		TickDrive();
+		TickArrivalFocus();
 	}
 
 	private void FixedUpdate()
@@ -191,19 +210,35 @@ public class CDriving3DScene : MonoBehaviour
 			_path.SetFollow(_coach.transform);
 		}
 
-		if (_chaseCamera == null && Camera.main != null)
+		if (_chaseCamera == null)
 		{
-			_chaseCamera = Camera.main.GetComponent<CChaseCamera>();
+			Camera sceneCamera = FindSceneCamera();
 
-			if (_chaseCamera == null)
+			if (sceneCamera != null)
 			{
-				_chaseCamera = Camera.main.gameObject.AddComponent<CChaseCamera>();
+				_chaseCamera = sceneCamera.GetComponent<CChaseCamera>();
+
+				if (_chaseCamera == null)
+				{
+					_chaseCamera = sceneCamera.gameObject.AddComponent<CChaseCamera>();
+				}
+
+				CPrint.Log($"CDriving3DScene : {sceneCamera.name} 카메라가 마차를 따라갑니다.");
 			}
 		}
 
 		if (_chaseCamera != null)
 		{
 			_chaseCamera.SetTarget(_coach.transform);
+		}
+		else
+		{
+			CPrint.Warn("CDriving3DScene : 이 씬에서 카메라를 못 찾아 마차를 따라가지 않습니다. 인스펙터의 Chase Camera 를 채우세요.");
+		}
+
+		if (_landmarks == null)
+		{
+			_landmarks = GetComponent<CNodeLandmarkSpawner>();
 		}
 
 		_farthestArc = GetTravelled();
@@ -327,6 +362,7 @@ public class CDriving3DScene : MonoBehaviour
 		UnbindRunner();
 		_runner = runner;
 		_runner.OnStateChanged += HandleMapStateChanged;
+		_runner.SetArrivalPresenter(this);
 
 		if (_runner.State == EMapState.SelectingPath)
 		{
@@ -342,11 +378,18 @@ public class CDriving3DScene : MonoBehaviour
 		}
 
 		_runner.OnStateChanged -= HandleMapStateChanged;
+		_runner.SetArrivalPresenter(null);
 		_runner = null;
 	}
 
 	private void HandleMapStateChanged(EMapState prev, EMapState next)
 	{
+		// 노드 이벤트가 끝났다 → 카메라는 다시 마차로
+		if (prev == EMapState.InNode && _chaseCamera != null)
+		{
+			_chaseCamera.ReleaseFocus();
+		}
+
 		if (next == EMapState.SelectingPath)
 		{
 			PrepareFork();
@@ -373,6 +416,11 @@ public class CDriving3DScene : MonoBehaviour
 
 		if (_forkLinks.Count == 1)
 		{
+			if (_forkSigns != null)
+			{
+				_forkSigns.ShowAhead(_path, _forkLinks[0], GetTravelled() + _forkLead);
+			}
+
 			SelectLink(_forkLinks[0]);
 			return;
 		}
@@ -433,12 +481,13 @@ public class CDriving3DScene : MonoBehaviour
 		}
 
 		CPrint.Log($"CDriving3DScene : {link.From.Id} → {link.To.Id} 경로로 출발");
-		PlanNextFork(link.To);
+		PlanNextFork(link);
 	}
 
-	private void PlanNextFork(CNodeInstance node)
+	private void PlanNextFork(CNodeLink link)
 	{
 		CStagecoachConfig config = _controller != null ? _controller.Config : null;
+		CNodeInstance node = link != null ? link.To : null;
 
 		if (node == null || config == null)
 		{
@@ -447,7 +496,17 @@ public class CDriving3DScene : MonoBehaviour
 
 		float arrive = _farthestArc + config.TravelDistance;
 
-		_path.RequestStraight(arrive - _arriveStraight, arrive + _forkLead);
+		// 직선 전용 길(출발→교차로, 성채→여관) → 출발부터 도착까지 통째로 곧은 길 예약
+		bool straightOnly = link.RouteData != null && link.RouteData.StraightOnly;
+		float straightFrom = straightOnly ? _farthestArc : arrive - _arriveStraight;
+
+		_path.RequestStraight(straightFrom, arrive + _forkLead);
+
+		// 도착 지점 길 오른쪽에 노드 건축물
+		if (_landmarks != null)
+		{
+			_landmarks.Request(node.TypeData, arrive);
+		}
 
 		// 도로 이벤트 위치도 출발할 때 정해진다
 		if (_travel != null)
@@ -471,6 +530,12 @@ public class CDriving3DScene : MonoBehaviour
 
 	private bool CanDrive()
 	{
+		// 짐칸이 열려 있으면 입력을 막고 브레이크
+		if (_stopWhileInventoryOpen && _inventoryView != null && _inventoryView.IsOpen)
+		{
+			return false;
+		}
+
 		if (_debugAlwaysDrive)
 		{
 			return true;
@@ -508,6 +573,99 @@ public class CDriving3DScene : MonoBehaviour
 		_driveAction.AddBinding("<Gamepad>/leftStick");
 	}
 
+	// 마차를 따라갈 카메라 → 이 씬에 있는 카메라를 먼저 찾는다
+	//  ㄴ 다른 씬(UI 매니저 등)을 같이 띄우면 Camera.main 이 그 씬 카메라일 수 있다
+	//  ㄴ 렌더 텍스처용 카메라(초상화 등)는 뺀다
+	private Camera FindSceneCamera()
+	{
+		Camera fallback = null;
+		Camera[] cameras = FindObjectsByType<Camera>(FindObjectsSortMode.None);
+
+		for (int i = 0; i < cameras.Length; i++)
+		{
+			Camera camera = cameras[i];
+
+			if (camera == null || camera.gameObject.scene != gameObject.scene || camera.targetTexture != null)
+			{
+				continue;
+			}
+
+			if (camera.CompareTag("MainCamera"))
+			{
+				return camera;
+			}
+
+			if (fallback == null)
+			{
+				fallback = camera;
+			}
+		}
+
+		return fallback != null ? fallback : Camera.main;
+	}
+
+	#region 도착 연출
+	// 도착 지점이 가까워지면 미리 카메라를 건축물 쪽으로 돌린다 (마차가 지나친 뒤가 아니라 직전에)
+	private void TickArrivalFocus()
+	{
+		if (_landmarks == null || _chaseCamera == null || _chaseCamera.IsFocusing)
+		{
+			return;
+		}
+
+		if (_travel == null || _travel.State != ETravelState.Driving)
+		{
+			return;
+		}
+
+		GameObject landmark = _landmarks.FindAhead(GetTravelled(), _arrivalFocusLead);
+
+		if (landmark != null)
+		{
+			_chaseCamera.Focus(landmark.transform);
+		}
+	}
+
+	// 노드에 도착 → (아직 안 돌았으면) 카메라가 건축물로 옮겨 가고, 잠시 뒤 노드 이벤트
+	public void Present(CNodeInstance node, Action onDone)
+	{
+		if (_chaseCamera == null)
+		{
+			onDone?.Invoke();
+			return;
+		}
+
+		if (!_chaseCamera.IsFocusing)
+		{
+			GameObject landmark = _landmarks != null && _coach != null ? _landmarks.FindNearest(_coach.transform.position, _arrivalFocusRange) : null;
+
+			if (landmark == null)
+			{
+				onDone?.Invoke();
+				return;
+			}
+
+			_chaseCamera.Focus(landmark.transform);
+		}
+
+		if (_arrivalFocusTime <= 0f)
+		{
+			onDone?.Invoke();
+			return;
+		}
+
+		StartCoroutine(CoArrivalFocus(onDone));
+	}
+
+	private IEnumerator CoArrivalFocus(Action onDone)
+	{
+		// 노드 이벤트 창이 시간을 멈춰도 흐르게 실제 시간으로 잰다
+		yield return new WaitForSecondsRealtime(_arrivalFocusTime);
+
+		onDone?.Invoke();
+	}
+	#endregion
+
 	private void HandleRoadEventStarted(CRoadEventData data)
 	{
 		if (_coach != null)
@@ -521,17 +679,27 @@ public class CDriving3DScene : MonoBehaviour
 		ApplyTorch();
 	}
 
-	// 횃불이 줄수록 마차 주변이 어두워진다
+	// 횃불이 줄수록 마차 횃불이 약해지고 주변이 어두워진다
 	private void ApplyTorch()
 	{
-		if (_torchLight == null || _torch == null)
+		if (_torch == null)
 		{
 			return;
 		}
 
-		float ratio = _torch.Ratio;
+		if (_torchView == null && _torchLight != null)
+		{
+			_torchView = _torchLight.GetComponent<CCoachTorchView>();
 
-		_torchLight.intensity = Mathf.Lerp(_torchIntensity.x, _torchIntensity.y, ratio);
-		_torchLight.range = Mathf.Lerp(_torchRange.x, _torchRange.y, ratio);
+			if (_torchView == null)
+			{
+				_torchView = _torchLight.gameObject.AddComponent<CCoachTorchView>();
+			}
+		}
+
+		if (_torchView != null)
+		{
+			_torchView.SetLevel(_torch.Ratio);
+		}
 	}
 }

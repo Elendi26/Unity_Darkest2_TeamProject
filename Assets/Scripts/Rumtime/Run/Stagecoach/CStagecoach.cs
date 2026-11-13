@@ -14,8 +14,11 @@ public class CStagecoach
     private readonly CRunData _runData;
     private readonly List<CStagecoachUpgradeData> _equipped = new List<CStagecoachUpgradeData>();
     private readonly Dictionary<EStagecoachSlot, int> _unlockedSlots = new Dictionary<EStagecoachSlot, int>();
+    private readonly CInventory _inventory;
     #endregion
 
+    // 마차 짐칸 (소모품)
+    public CInventory Inventory => _inventory;
     public CRunValue Wheels => _runData.Get(ERunValue.Wheels);
     public CRunValue Armor => _runData.Get(ERunValue.Armor);
     public IReadOnlyList<CStagecoachUpgradeData> Equipped => _equipped;
@@ -25,8 +28,17 @@ public class CStagecoach
         _config = config;
         _runData = runData;
 
-        _runData.Register(ERunValue.Wheels, _config.MaxWheels, _config.MaxWheels);
-        _runData.Register(ERunValue.Armor, _config.MaxArmor, _config.MaxArmor);
+        // 시작은 기본 최대치 → 업그레이드로 상한까지 올린다
+        _runData.Register(ERunValue.Wheels, _config.BaseWheels, _config.BaseWheels);
+        _runData.Register(ERunValue.Armor, _config.BaseArmor, _config.BaseArmor);
+
+        _inventory = new CInventory(GetInventorySlotCount);
+    }
+
+    // 짐칸 수 → 기본 칸 + 업그레이드(InventorySlots)
+    private int GetInventorySlotCount()
+    {
+        return _config.InventorySlots + Mathf.RoundToInt(GetStat(ERunStat.InventorySlots));
     }
 
     public int GetSlotCount(EStagecoachSlot slot)
@@ -63,20 +75,44 @@ public class CStagecoach
         return used;
     }
 
-    public bool TryEquip(CStagecoachUpgradeData upgrade)
+    // 슬롯 None 은 슬롯 제한이 없다 (바퀴·장갑 보강 등)
+    //  ㄴ 내구도 최대치를 올리는 업그레이드는 이미 상한이면 못 단다
+    public bool CanEquip(CStagecoachUpgradeData upgrade)
     {
         if (upgrade == null)
         {
             return false;
         }
 
-        if (GetUsedSlots(upgrade.Slot) >= GetSlotCount(upgrade.Slot))
+        if (upgrade.Slot != EStagecoachSlot.None && GetUsedSlots(upgrade.Slot) >= GetSlotCount(upgrade.Slot))
         {
-            CPrint.Log("슬롯이 가득참");
+            return false;
+        }
+
+        if (RaisesStat(upgrade, ERunStat.MaxWheels) && Wheels.Max >= _config.MaxWheels)
+        {
+            return false;
+        }
+
+        if (RaisesStat(upgrade, ERunStat.MaxArmor) && Armor.Max >= _config.MaxArmor)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool TryEquip(CStagecoachUpgradeData upgrade)
+    {
+        if (!CanEquip(upgrade))
+        {
+            CPrint.Log($"업그레이드 {(upgrade != null ? upgrade.Id : "null")} 를 달 수 없음 (슬롯이 가득 찼거나 상한)");
             return false;
         }
 
         _equipped.Add(upgrade);
+        RefreshDurability();
+        _inventory.NotifySlotsChanged();
         OnEquipped?.Invoke(upgrade);
         return true;
     }
@@ -88,8 +124,56 @@ public class CStagecoach
             return false;
         }
 
+        RefreshDurability();
+        _inventory.NotifySlotsChanged();
         OnUnequipped?.Invoke(upgrade);
         return true;
+    }
+
+    private bool RaisesStat(CStagecoachUpgradeData upgrade, ERunStat stat)
+    {
+        IReadOnlyList<CRunStatModifier> modifiers = upgrade.Modifiers;
+
+        if (modifiers == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < modifiers.Count; i++)
+        {
+            if (modifiers[i] != null && modifiers[i].Stat == stat && modifiers[i].Value > 0f)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // 장착한 업그레이드로 바퀴·장갑 최대치를 다시 정한다
+    private void RefreshDurability()
+    {
+        SetDurabilityMax(Wheels, _config.BaseWheels + Mathf.RoundToInt(GetStat(ERunStat.MaxWheels)), _config.MaxWheels);
+        SetDurabilityMax(Armor, _config.BaseArmor + Mathf.RoundToInt(GetStat(ERunStat.MaxArmor)), _config.MaxArmor);
+    }
+
+    private static void SetDurabilityMax(CRunValue value, int max, int cap)
+    {
+        if (value == null)
+        {
+            return;
+        }
+
+        int next = Mathf.Clamp(max, 0, cap);
+        int added = next - value.Max;
+
+        value.Max = next;
+
+        // 늘어난 칸은 채워서 준다
+        if (added > 0)
+        {
+            value.Add(added);
+        }
     }
 
     public float GetStat(ERunStat stat)

@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f5120d1640e5f249bdb5a6e424e355e, type: 3}
   m_Name: Stagecoach Config
   m_EditorClassIdentifier: 
+  _baseWheels: 2
+  _baseArmor: 2
   _maxWheels: 4
   _maxArmor: 4
   _generalSlots: 1

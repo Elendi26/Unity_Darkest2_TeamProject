@@ -1,15 +1,13 @@
 ﻿using UnityEngine;
 
+// 왼쪽 위 마차 상태 (바퀴·장갑 칸)
+//  ㄴ 금화·파벌은 짐칸 패널 아래, 횃불은 마차 횃불 툴팁에서 보여준다
 public class CStagecoachHUD : MonoBehaviour
 {
 	#region 인스펙터
 	[SerializeField] private CStagecoachController _controller;
 	[SerializeField] private CRunValuePipView _wheelsView;
 	[SerializeField] private CRunValuePipView _armorView;
-	[SerializeField] private CRunValueView _torchView;
-	[SerializeField] private CRunValueView _goldView;
-	[SerializeField] private CRunValueView _factionView;
-	[SerializeField] private CTravelProgressView _travelView;
 	#endregion
 
 	private void Start()
@@ -40,25 +38,9 @@ public class CStagecoachHUD : MonoBehaviour
 
 		BindValue(_wheelsView, runData.Get(ERunValue.Wheels));
 		BindValue(_armorView, runData.Get(ERunValue.Armor));
-		BindValue(_torchView, runData.Get(ERunValue.Torch));
-		BindValue(_goldView, runData.Get(ERunValue.Gold));
-		BindValue(_factionView, runData.Get(ERunValue.Faction));
-
-		if (_travelView != null)
-		{
-			_travelView.Bind(_controller.Travel);
-		}
 	}
 
-	private void BindValue(CRunValuePipView view, CRunValue value)
-	{
-		if (view != null)
-		{
-			view.Bind(value);
-		}
-	}
-
-	private void BindValue(CRunValueView view, CRunValue value)
+	private static void BindValue(CRunValuePipView view, CRunValue value)
 	{
 		if (view != null)
 		{

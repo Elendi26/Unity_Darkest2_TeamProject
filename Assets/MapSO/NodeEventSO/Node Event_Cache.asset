@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba0a89beb8576258e1c7e67e7444235, type: 3}
+  m_Name: Node Event_Cache
+  m_EditorClassIdentifier: 
+  _title: 보급품
+  _body: 길가에 버려진 보급품 상자가 있다. 하나만 챙길 수 있다.
+  _leaveLabel: 그냥 지나간다
+  _options:
+  - Label: 금화를 챙긴다
+    CostType: 1
+    Cost: 0
+    CloseAfter: 1
+    Effects:
+    - rid: 1000
+  - Label: 기름을 챙긴다
+    CostType: 1
+    Cost: 0
+    CloseAfter: 1
+    Effects:
+    - rid: 1001
+  - Label: 예비 바퀴를 챙긴다
+    CostType: 1
+    Cost: 0
+    CloseAfter: 1
+    Effects:
+    - rid: 1002
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: CRunValueDeltaEffect, ns: , asm: Assembly-CSharp}
+      data:
+        _type: 1
+        _delta: 30
+    - rid: 1001
+      type: {class: CRunValueDeltaEffect, ns: , asm: Assembly-CSharp}
+      data:
+        _type: 3
+        _delta: 20
+    - rid: 1002
+      type: {class: CRunValueDeltaEffect, ns: , asm: Assembly-CSharp}
+      data:
+        _type: 4
+        _delta: 1

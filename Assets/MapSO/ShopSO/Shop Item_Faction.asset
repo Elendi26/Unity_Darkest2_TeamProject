@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63bc043e8ac88c899be3eb4ed0463fdd, type: 3}
+  m_Name: Shop Item_Faction
+  m_EditorClassIdentifier: 
+  _displayName: 문장 거래
+  _description: 골드를 주고 문장 5개를 받는다.
+  _icon: {fileID: 21300000, guid: 6c9166303f240564b80cdf28ce315823, type: 2}
+  _costType: 1
+  _cost: 20
+  _stock: 1
+  _weight: 1
+  _blockWhenFull: 0
+  _upgrade: {fileID: 0}
+  _effects:
+  - rid: 1000
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: CRunValueDeltaEffect, ns: , asm: Assembly-CSharp}
+      data:
+        _type: 2
+        _delta: 5

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class CStagecoachController : MonoBehaviour, IRoadTravelProvider
+public class CStagecoachController : MonoBehaviour, IRoadTravelProvider, IRunContextProvider, IStagecoachProvider
 {
     #region 인스펙터
     [SerializeField] private CStagecoachConfig _config;
@@ -11,12 +11,15 @@ public class CStagecoachController : MonoBehaviour, IRoadTravelProvider
     [SerializeField] private int _maxTorch = 100;
     [SerializeField] private int _seed = 0;
     [SerializeField] private MonoBehaviour _eventResolverSource;
+    // 시작할 때 짐칸에 넣어 둘 아이템 (같은 걸 여러 번 넣으면 여러 개)
+    [SerializeField] private CItemData[] _startItems;
     #endregion
 
     #region 내부 변수
     private CRunData _runData;
     private CStagecoach _stagecoach;
     private CRoadTravel _travel;
+    private CRunContext _ctx;
     #endregion
 
     // 역마차 설정 (주행 거리 등)
@@ -25,6 +28,8 @@ public class CStagecoachController : MonoBehaviour, IRoadTravelProvider
     public CStagecoach Stagecoach => _stagecoach;
     public CRoadTravel Travel => _travel;
     IRoadTravel IRoadTravelProvider.Travel => _travel;
+    // 노드 이벤트 등 런 데이터를 바꾸는 쪽에 넘긴다
+    public CRunContext Context => _ctx;
 
     private void Awake()
     {
@@ -40,16 +45,35 @@ public class CStagecoachController : MonoBehaviour, IRoadTravelProvider
         _runData.Register(ERunValue.Torch, _startTorch, _maxTorch);
 
         _stagecoach = new CStagecoach(_config, _runData);
+        AddStartItems();
 
         int seed = _seed != 0 ? _seed : Environment.TickCount;
-        CRunContext ctx = new CRunContext
+        _ctx = new CRunContext
         {
             RunData = _runData,
             Random = new System.Random(seed),
         };
 
         // 런 데이터(CRunContext)는 역마차를 모른다 → 역마차는 주행에 따로 넘긴다
-        _travel = new CRoadTravel(_config, _stagecoach, ctx, GetEventResolver());
+        _travel = new CRoadTravel(_config, _stagecoach, _ctx, GetEventResolver());
+    }
+
+    private void AddStartItems()
+    {
+        if (_startItems == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _startItems.Length; i++)
+        {
+            if (_startItems[i] == null)
+            {
+                continue;
+            }
+
+            _stagecoach.Inventory.Add(_startItems[i], 1);
+        }
     }
 
     private void OnValidate()

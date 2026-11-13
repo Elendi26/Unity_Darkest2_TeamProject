@@ -11,4 +11,5 @@ public enum ENodeType
     CreatureDen,
     Inn,
     Fortress,
+    Crossroad,
 }

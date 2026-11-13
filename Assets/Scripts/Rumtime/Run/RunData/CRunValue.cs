@@ -20,8 +20,19 @@ public class CRunValue
         get => _max;
         set
         {
+            int prevMax = _max;
+
             _max = Mathf.Max(0, value);
+
+            int prev = _current;
+
             SetCurrent(_current);
+
+            // 최대치만 바뀌어도 알린다 → 칸 수 표시 갱신
+            if (prev == _current && prevMax != _max)
+            {
+                OnChanged?.Invoke(_type, _current, _current);
+            }
         }
     }
 

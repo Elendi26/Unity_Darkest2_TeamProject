@@ -30,6 +30,7 @@ public class CForkSignView : MonoBehaviour
 	private RectTransform _canvasRect;
 	private CRoadPath _path;
 	private int _count;
+	private float _aheadArc = -1f;
 	#endregion
 
 	public void Show(CRoadPath path, IReadOnlyList<CNodeLink> links)
@@ -42,6 +43,7 @@ public class CForkSignView : MonoBehaviour
 		BuildIfNeeded();
 
 		_path = path;
+		_aheadArc = -1f;
 		_count = Mathf.Min(links.Count, MAX_SIGNS);
 
 		for (int i = 0; i < _signs.Count; i++)
@@ -60,10 +62,38 @@ public class CForkSignView : MonoBehaviour
 		}
 	}
 
+	// 갈래가 하나뿐인 길 → 갈림길 없이 길 위 arc 지점에 표지판 하나를 세운다
+	public void ShowAhead(CRoadPath path, CNodeLink link, float arc)
+	{
+		if (path == null || link == null)
+		{
+			return;
+		}
+
+		BuildIfNeeded();
+
+		_path = path;
+		_aheadArc = arc;
+		_count = 1;
+
+		for (int i = 0; i < _signs.Count; i++)
+		{
+			_signs[i].Rect.gameObject.SetActive(false);
+		}
+
+		Fill(_signs[0], link, 0, 1);
+
+		if (_logState)
+		{
+			CPrint.Log($"CForkSignView : 외길 표지판 ({arc:F0}m)");
+		}
+	}
+
 	public void Hide()
 	{
 		_count = 0;
 		_path = null;
+		_aheadArc = -1f;
 
 		for (int i = 0; i < _signs.Count; i++)
 		{
@@ -78,19 +108,29 @@ public class CForkSignView : MonoBehaviour
 			return;
 		}
 
-		Camera camera = Camera.main;
+		// 플레이 중 스크립트가 다시 컴파일되면 표지판 목록만 비고 개수는 남는다 → 개수를 맞춘다
+		_count = Mathf.Min(_count, _signs.Count);
+
+		Camera camera = CChaseCamera.CurrentCamera;
 
 		for (int i = 0; i < _count; i++)
 		{
 			CSign sign = _signs[i];
 
-			if (camera == null || !_path.TryGetBranchPoint(i, _signDistance, out Vector3 world))
+			if (camera == null || !TryGetSignPoint(i, out Vector3 world))
 			{
 				sign.Rect.gameObject.SetActive(false);
 				continue;
 			}
 
 			Vector3 screen = camera.WorldToScreenPoint(world + Vector3.up * _signHeight);
+
+			// 외길 표지판은 지나치면 끝
+			if (screen.z <= 0f && _aheadArc >= 0f)
+			{
+				Hide();
+				return;
+			}
 
 			if (screen.z <= 0f)
 			{
@@ -101,6 +141,16 @@ public class CForkSignView : MonoBehaviour
 			sign.Rect.gameObject.SetActive(true);
 			sign.Rect.position = ClampToScreen(screen);
 		}
+	}
+
+	private bool TryGetSignPoint(int index, out Vector3 world)
+	{
+		if (_aheadArc >= 0f)
+		{
+			return _path.TryGetPoint(_aheadArc, out world, out _);
+		}
+
+		return _path.TryGetBranchPoint(index, _signDistance, out world);
 	}
 
 	private Vector3 ClampToScreen(Vector3 screen)
@@ -126,7 +176,8 @@ public class CForkSignView : MonoBehaviour
 		sign.Label.text = $"{GetNodeName(type)}\n<size=18>{GetRouteName(link.RouteData)}</size>\n<size=16>{GetKeyHint(index, count)}</size>";
 	}
 
-	private static string GetNodeName(CNodeTypeData type)
+	// 표지판·디버그 기즈모가 같은 노드 이름을 쓴다
+	public static string GetNodeName(CNodeTypeData type)
 	{
 		if (type == null)
 		{
@@ -151,6 +202,8 @@ public class CForkSignView : MonoBehaviour
 				return "여관";
 			case ENodeType.Fortress:
 				return "망각의 성채";
+			case ENodeType.Crossroad:
+				return "교차로";
 			default:
 				return type.Type.ToString();
 		}
@@ -171,6 +224,8 @@ public class CForkSignView : MonoBehaviour
 				return "위험한 길";
 			case ERouteType.RoughPatch:
 				return "험한 길";
+			case ERouteType.DangerPath:
+				return "위태로운 길";
 			default:
 				return "평범한 길";
 		}
@@ -178,6 +233,11 @@ public class CForkSignView : MonoBehaviour
 
 	private static string GetKeyHint(int index, int count)
 	{
+		if (count == 1)
+		{
+			return "▲ 직진";
+		}
+
 		if (index == 0)
 		{
 			return "◀ A";

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6e903cf4fb547180f0c610a035699d0, type: 3}
+  m_Name: Item_TorchOil
+  m_EditorClassIdentifier: 
+  _displayName: 횃불 기름
+  _description: 쓰면 횃불을 25 채운다.
+  _icon: {fileID: 21300000, guid: 719ce859d6c4bf4409d7cb9c8e68f843, type: 2}
+  _category: 2
+  _maxStack: 4
+  _blockWhenFull: 3
+  _useEffects:
+  - rid: 1000
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: CRunValueDeltaEffect, ns: , asm: Assembly-CSharp}
+      data:
+        _type: 3
+        _delta: 25

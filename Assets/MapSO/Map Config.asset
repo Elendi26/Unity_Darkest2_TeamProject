@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 
   _displayName: "\uAD50\uC678"
-  _rowCount: 6
+  _rowCount: 7
   _minNodePerRow: 2
   _maxNodePerRow: 3
   _branchChance: 0.6
   _startNode: {fileID: 11400000, guid: b3986bd1f6b5ac8419383011ca6e7a50, type: 2}
+  _preStartNode: {fileID: 11400000, guid: fb4fd736bb4ca60a379d5b4e3457bd07, type: 2}
   _endNode: {fileID: 11400000, guid: 2c6b8ba5fa341004ba45b84a9626bd52, type: 2}
   _preEndNode: {fileID: 11400000, guid: 1ff8ea9a4f6b1ae4f8e361ed14ce5cad, type: 2}
   _fallbackNode: {fileID: 11400000, guid: 0b24377c8f0fa3c42b5109cbf8360c4d, type: 2}
@@ -32,3 +33,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: effe2e4bfd16de44d83c74eddf460f83, type: 2}
   - {fileID: 11400000, guid: 2560155fef3b1b94aab93e219a144b81, type: 2}
   - {fileID: 11400000, guid: b15b5d339c2129241a9810760b14270a, type: 2}
+  - {fileID: 11400000, guid: 55a71c43004f25d4280ef09814f86e12, type: 2}
+  _fixedEdgeRoute: {fileID: 11400000, guid: 9b80030e6d06532a9bb64e6819d6420b, type: 2}
