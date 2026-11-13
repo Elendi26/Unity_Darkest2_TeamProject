@@ -19,3 +19,6 @@ MonoBehaviour:
   _minRow: 2
   _allowConsecutive: 0
   _uniqueInRow: 1
+  _event: {fileID: 11400000, guid: 4e3f8a8bacb087bff55d62498c9f17be, type: 2}
+  _shop: {fileID: 11400000, guid: 3c6847c4b8e110bbdb274c2d2c2dc495, type: 2}
+  _landmarkPrefab: {fileID: 1000000000000000001, guid: 861224ae4f524059624af18b84df5f49, type: 3}

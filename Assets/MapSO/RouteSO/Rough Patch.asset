@@ -16,6 +16,8 @@ MonoBehaviour:
   _weight: 1
   _minRoadEvents: 0
   _maxRadEvents: 1
+  _passEvent: {fileID: 11400000, guid: 6403ee177fc9fd73e9035fc3a9398300, type: 2}
+  _passEventPosition: 0.5
   _travelEffects: []
   references:
     version: 2

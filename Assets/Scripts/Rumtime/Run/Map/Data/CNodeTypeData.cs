@@ -18,6 +18,12 @@ public class CNodeTypeData : ScriptableObject
     [SerializeField] private bool _allowConsecutive = true;
     // 같은 행에 이 종류는 하나만
     [SerializeField] private bool _uniqueInRow = false;
+    // 도착하면 띄울 이벤트 (비우면 통과)
+    [SerializeField] private CNodeEventData _event;
+    // 도착하면 열 상점 (이벤트보다 먼저 쓴다)
+    [SerializeField] private CShopData _shop;
+    // 도착할 때 길 오른쪽에 세울 건축물 (비우면 없음)
+    [SerializeField] private GameObject _landmarkPrefab;
     #endregion
 
     public ENodeType Type => _type;
@@ -27,4 +33,10 @@ public class CNodeTypeData : ScriptableObject
     public int MinRow => _minRow;
     public bool AllowConsecutive => _allowConsecutive;
     public bool UniqueInRow => _uniqueInRow;
+    // 도착하면 띄울 이벤트 (없으면 null)
+    public CNodeEventData Event => _event;
+    // 도착하면 열 상점 (없으면 null)
+    public CShopData Shop => _shop;
+    // 도착할 때 길 오른쪽에 세울 건축물 (없으면 null)
+    public GameObject LandmarkPrefab => _landmarkPrefab;
 }

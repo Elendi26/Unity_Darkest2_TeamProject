@@ -128,6 +128,16 @@ public class CRoadTravel : IRoadTravel
     {
         _schedule.Clear();
 
+        // 길 종류마다 정해진 이벤트 (험한 길 → 바퀴 손상 등)
+        //  ㄴ 이 이벤트가 있는 길은 무작위 이벤트를 넣지 않는다 → 길당 한 번만
+        CRouteTypeData route = _link.RouteData;
+
+        if (route != null && route.PassEvent != null)
+        {
+            _schedule.Add(new CScheduledEvent { Position = route.PassEventPosition, Data = route.PassEvent });
+            return;
+        }
+
         if (count > _config.EventPositions.Count)
         {
             CPrint.Once("road_event_overflow", $"이벤트 {count}개 중 위치가 정해진 {_config.EventPositions.Count}개만 배치합니다.");

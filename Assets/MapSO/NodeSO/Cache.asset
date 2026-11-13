@@ -18,3 +18,5 @@ MonoBehaviour:
   _maxPerBiome: 99
   _minRow: 1
   _allowConsecutive: 1
+  _event: {fileID: 11400000, guid: d2c108643da1448cf3b4e662cc660144, type: 2}
+  _landmarkPrefab: {fileID: 1000000000000000001, guid: 78e5bcad21eac6f98ec7268a51ac13ea, type: 3}

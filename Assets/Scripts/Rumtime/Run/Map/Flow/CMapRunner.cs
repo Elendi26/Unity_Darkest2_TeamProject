@@ -15,6 +15,8 @@ public class CMapRunner
     private readonly Dictionary<ENodeType, INodeHandler> _handlers = new Dictionary<ENodeType, INodeHandler>();
     private EMapState _state = EMapState.None;
     private CNodeInstance _current;
+    private INodeArrivalPresenter _arrivalPresenter;
+    private CNodeInstance _enteredNode;
     private bool _logState = true;
     #endregion
 
@@ -25,6 +27,12 @@ public class CMapRunner
     {
         _graph = graph;
         _travel = travel;
+    }
+
+    // 도착 연출을 넣는다 (null 이면 바로 노드 이벤트)
+    public void SetArrivalPresenter(INodeArrivalPresenter presenter)
+    {
+        _arrivalPresenter = presenter;
     }
 
     public void RegisterHandler(INodeHandler handler)
@@ -91,11 +99,31 @@ public class CMapRunner
         _current.IsRevealed = true;
 
         SetState(EMapState.InNode);
+
+        // 도착 연출이 있으면 끝난 뒤에 노드 이벤트로
+        if (_arrivalPresenter != null)
+        {
+            _arrivalPresenter.Present(node, () => EnterArrivedNode(node));
+            return;
+        }
+
+        EnterCurrentNode();
+    }
+
+    // 연출이 끝났을 때 아직 그 노드에 있을 때만 들어간다 (두 번 불려도 한 번만)
+    private void EnterArrivedNode(CNodeInstance node)
+    {
+        if (_state != EMapState.InNode || _current != node || _enteredNode == node)
+        {
+            return;
+        }
+
         EnterCurrentNode();
     }
 
     private void EnterCurrentNode()
     {
+        _enteredNode = _current;
         OnNodeEntered?.Invoke(_current);
 
         ENodeType type = _current.TypeData != null ? _current.TypeData.Type : ENodeType.None;

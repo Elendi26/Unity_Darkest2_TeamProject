@@ -158,9 +158,11 @@ public class DebugGizmo : MonoBehaviour
             return;
         }
 
-        string type = isHidden || node.TypeData == null ? "?" : node.TypeData.Type.ToString();
+        // 숨김 노드도 이름은 보여 준다 (숨김 여부는 회색 구로 구분)
+        string type = CForkSignView.GetNodeName(node.TypeData);
+        string hidden = isHidden ? " (숨김)" : string.Empty;
 
-        UnityEditor.Handles.Label(pos + Vector3.up * (_nodeRadius + 0.3f), $"{node.Id} {type}");
+        UnityEditor.Handles.Label(pos + Vector3.up * (_nodeRadius + 0.3f), $"{node.Id} {type}{hidden}");
 #endif
     }
 
@@ -197,6 +199,8 @@ public class DebugGizmo : MonoBehaviour
                 return new Color(0.6f, 0.3f, 0.9f);
             case ENodeType.Fortress:
                 return new Color(0.55f, 0.1f, 0.15f);
+            case ENodeType.Crossroad:
+                return new Color(0.85f, 0.75f, 0.55f);
         }
 
         return Color.gray;
@@ -215,18 +219,10 @@ public class DebugGizmo : MonoBehaviour
                 return new Color(1f, 0.3f, 0.3f);
             case ERouteType.RoughPatch:
                 return new Color(1f, 0.55f, 0f);
+            case ERouteType.DangerPath:
+                return new Color(0.6f, 0.3f, 0.85f);
         }
 
         return Color.white;
-    }
-
-    void Start()
-    {
-        
-    }
-
-    void Update()
-    {
-        
     }
 }

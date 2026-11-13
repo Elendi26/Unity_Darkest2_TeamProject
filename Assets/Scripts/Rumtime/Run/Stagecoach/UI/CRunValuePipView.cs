@@ -9,6 +9,8 @@ public class CRunValuePipView : MonoBehaviour
 	#region 인스펙터
 	[SerializeField] private RectTransform _pipRoot;
 	[SerializeField] private Image _pipTemplate;
+	// 칸마다 쓸 아이콘 (바퀴·방패 등, 비우면 템플릿 그림 그대로)
+	[SerializeField] private Sprite _pipSprite;
 	[SerializeField] private Text _countText;
 	[SerializeField] private Color _fullColor = new Color(0.95f, 0.8f, 0.45f);
 	[SerializeField] private Color _emptyColor = new Color(0.25f, 0.22f, 0.2f, 0.8f);
@@ -97,6 +99,13 @@ public class CRunValuePipView : MonoBehaviour
 			Image pip = Instantiate(_pipTemplate, _pipRoot);
 
 			pip.name = $"Pip_{_pips.Count}";
+
+			if (_pipSprite != null)
+			{
+				pip.sprite = _pipSprite;
+				pip.preserveAspect = true;
+			}
+
 			_pips.Add(pip);
 		}
 

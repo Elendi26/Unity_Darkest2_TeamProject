@@ -31,11 +31,16 @@ public class CMapGenerator
             return null;
         }
 
-        // 확정 노드 행을 끼우려면 출발·성채·여관 최소 3행이 필요하다
         if (_config.PreEndNode != null && _config.RowCount < 3)
         {
             CPrint.Warn("CMapGenerator : 행이 3개 미만이라 여관 직전 확정 노드를 넣지 않습니다.");
         }
+
+        if (_config.PreStartNode != null && !IsPreStartRow(1, _config.RowCount - 1))
+        {
+            CPrint.Warn("CMapGenerator : 행이 모자라 출발 다음 확정 노드(교차로)를 넣지 않습니다.");
+        }
+
         _random = new System.Random(seed);
         _typeCounts.Clear();
 
@@ -55,8 +60,8 @@ public class CMapGenerator
 
         for (int row = 0; row <= lastRow; row++)
         {
-            // 첫 행·마지막 행·여관 직전 확정 행은 노드 1개 → 모든 경로가 반드시 지나간다
-            bool isEdge = row == 0 || row == lastRow || IsPreEndRow(row, lastRow);
+            // 첫 행·마지막 행·출발 다음/여관 직전 확정 행은 노드 1개
+            bool isEdge = row == 0 || row == lastRow || IsPreStartRow(row, lastRow) || IsPreEndRow(row, lastRow);
             int count = isEdge ? 1 : _random.Next(_config.MinNodePerRow, _config.MaxNodePerRow + 1);
 
             graph.AddRow(count);
@@ -136,6 +141,12 @@ public class CMapGenerator
                     node.TypeData = _config.EndNode;
                     node.IsRevealed = true;
                 }
+                else if (IsPreStartRow(row, lastRow))
+                {
+                    // 출발하자마자 모든 경로가 모이는 곳이라 처음부터 공개
+                    node.TypeData = _config.PreStartNode;
+                    node.IsRevealed = true;
+                }
                 else if (IsPreEndRow(row, lastRow))
                 {
                     // 반드시 지나가는 노드라 처음부터 공개
@@ -204,10 +215,17 @@ public class CMapGenerator
         return _config.PreEndNode != null && lastRow >= 2 && row == lastRow - 1;
     }
 
+    // 출발 바로 다음 확정 노드(교차로)를 넣는 행인지
+    //  ㄴ 마지막 행·여관 직전 행과 겹치면 넣지 않는다
+    private bool IsPreStartRow(int row, int lastRow)
+    {
+        return _config.PreStartNode != null && row == 1 && row < lastRow && !IsPreEndRow(row, lastRow);
+    }
+
     private bool CanPlace(CNodeTypeData data, CNodeInstance node)
     {
         // 출발·여관·확정 노드는 정해진 행 전용
-        if (data == _config.StarNode || data == _config.EndNode || data == _config.PreEndNode)
+        if (data == _config.StarNode || data == _config.EndNode || data == _config.PreStartNode || data == _config.PreEndNode)
         {
             return false;
         }
@@ -240,10 +258,16 @@ public class CMapGenerator
 
     private void AssignRoutes(CMapGraph graph)
     {
+        int lastRow = graph.RowCount - 1;
+
         for (int i = 0; i < graph.Links.Count; i++)
         {
             CNodeLink link = graph.Links[i];
-            CRouteTypeData route = PickWeighted(_config.RoutePool, item => item.Weight);
+
+            // 출발→교차로, 성채→여관 길은 고정 길(안전한 길) → 시작과 끝은 위험 없이
+            CRouteTypeData route = IsFixedEdgeLink(link, lastRow)
+                ? _config.FixedEdgeRoute
+                : PickWeighted(_config.RoutePool, item => item.Weight);
 
             link.RouteData = route;
 
@@ -255,6 +279,24 @@ public class CMapGenerator
 
             link.RoadEventCount = _random.Next(route.MinRoadEvents, route.MaxRadEvents + 1);
         }
+    }
+
+    // 고정 길을 깔아야 하는 연결인지 (출발→교차로 / 성채→여관)
+    private bool IsFixedEdgeLink(CNodeLink link, int lastRow)
+    {
+        if (_config.FixedEdgeRoute == null || link.From == null || link.To == null)
+        {
+            return false;
+        }
+
+        int toRow = link.To.Row;
+
+        if (link.From.Row == 0 && IsPreStartRow(toRow, lastRow))
+        {
+            return true;
+        }
+
+        return toRow == lastRow && IsPreEndRow(link.From.Row, lastRow);
     }
 
     private T PickWeighted<T>(IReadOnlyList<T> items, Func<T, float> getWeight) where T : class
