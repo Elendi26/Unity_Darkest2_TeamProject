@@ -7,7 +7,7 @@ using UnityEngine;
 public class HeroDataSO : ScriptableObject
 {
     // 데이터 저장을 위한 고유 ID
-    [SerializeField] private string _saveID = "Test_HighWayMan";
+    [SerializeField] private string _heroID = "Test_HighWayMan";
 
     #region 인스펙터
     [Header("직업 이름")]
@@ -51,8 +51,12 @@ public class HeroDataSO : ScriptableObject
 	[Header("위치 및 대상 표시 이미지")]
 	[SerializeField] private Sprite _heroRank;
 
-	[Header("영웅 스킬 이미지")]
-	[SerializeField] private Sprite[] _heroSkills;
+	//[header("영웅 스킬 이미지")]
+	//[serializefield] private sprite[] _heroskills;
+
+	//TODO : 스킬 SO파일 배열 / 리스트로 추가하기
+	[Header("영웅 스킬 5개 배치")]
+	[SerializeField] private List<DummySkillDataSO> _heroSkills = new List<DummySkillDataSO>();
 
 	[Header("영웅 3D 모델")]
 	[SerializeField] private GameObject _heroModel;
@@ -61,7 +65,7 @@ public class HeroDataSO : ScriptableObject
 
 	// 프로퍼티
 
-	public string SaveID => _saveID;
+	public string HeroID => _heroID;
 
 	public string JobTitle => _jobTitle;
 	public string HeroName => _heroName;
@@ -82,7 +86,7 @@ public class HeroDataSO : ScriptableObject
 
 	public Sprite HeroPortrait => _heroPortrait;
 	public Sprite HeroRank => _heroRank;
-	public Sprite[] HeroSkills => _heroSkills;
+	public List<DummySkillDataSO> HeroSkills => _heroSkills;
 	public GameObject HeroModel => _heroModel;
 	
 

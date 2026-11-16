@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca260144fb5fd22468f3e474ca3786fd, type: 3}
   m_Name: HighWayMan
   m_EditorClassIdentifier: 
-  _saveID: Test_HighWayMan
+  _heroID: Test_HighWayMan1
   _jobTitle: "\uB178\uC0C1\uAC15\uB3C4"
   _heroName: "\uB514\uC2A4\uB9C8\uC2A41"
   _heroSmallTalk: "\"\uC624\uB9CC \uAC00\uC9C0 \uD3ED\uB825\uC73C\uB85C \uBB34\uC790\uBE44\uD55C
@@ -36,9 +36,9 @@ MonoBehaviour:
   _heroPortrait: {fileID: 21300000, guid: 7fbf6953932fda341b24c7a8a093155c, type: 2}
   _heroRank: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
   _heroSkills:
-  - {fileID: 21300000, guid: 2b65c9090941eb847b5f0a4f0a8406b4, type: 2}
-  - {fileID: 21300000, guid: c36a2d1886bc0254f85b5f16098d206b, type: 2}
-  - {fileID: 21300000, guid: 7f3ff4f0f15ce7b48ab9101649bbd1aa, type: 2}
-  - {fileID: 21300000, guid: 4f720017ec35f7548b459235edff4830, type: 2}
-  - {fileID: 21300000, guid: 7029848f2027db34aba8e3ae19fc5808, type: 2}
+  - {fileID: 11400000, guid: 19a2c9826f71340418e91bf6e9097b1b, type: 2}
+  - {fileID: 11400000, guid: b119beeb758883e4987074d45506dda6, type: 2}
+  - {fileID: 11400000, guid: bcf196faa8090b7458c1fa7e139bdf16, type: 2}
+  - {fileID: 11400000, guid: 12699d90b899eac40acf9c042789d9bb, type: 2}
+  - {fileID: 11400000, guid: d09dc58eac1fd5840a542ca944793f5f, type: 2}
   _heroModel: {fileID: 8156765513646132436, guid: e4d64cc8ebd046a4eb3269b30dff5d72, type: 3}

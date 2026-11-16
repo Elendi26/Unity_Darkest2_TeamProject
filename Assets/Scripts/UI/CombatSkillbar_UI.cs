@@ -13,7 +13,7 @@ public class CombatSkillbar_UI : MonoBehaviour
     [SerializeField] private CanvasGroup _skillTooltipPanel;
 
     [Header("테스트용 더미 스킬 데이터")]
-    [SerializeField] private List<DummySkillData> _dummyDatas = new List<DummySkillData>();
+    [SerializeField] private List<DummySkillDataSO> _dummyDatas = new List<DummySkillDataSO>();
 
     #endregion
 
@@ -39,7 +39,8 @@ public class CombatSkillbar_UI : MonoBehaviour
 
     private void Start()
     {
-        // 테스트 용 더미 스킬 데이터
+        
+        /* 테스트 용 더미 스킬 데이터
         for (int i = 0; i < _skillSlot.Count; i++)
         {
             if (_skillSlot[i] == null) continue;
@@ -52,6 +53,7 @@ public class CombatSkillbar_UI : MonoBehaviour
                 }
             }
         }
+        */
         
     }
 
@@ -101,7 +103,7 @@ public class CombatSkillbar_UI : MonoBehaviour
         _onPointerSlot = slot;
         // 툴팁 데이터 전달
         SkillUITooltipManager.Instance.SetSkillData(slot.SkillData);
-        SetPanelOnOff(true);
+        SkillUITooltipManager.Instance.ShowTooltip();
     }
 
     /// <summary>
@@ -129,13 +131,13 @@ public class CombatSkillbar_UI : MonoBehaviour
             }
 
             // 선택한 스킬의 패널을 킨다. 
-            SetPanelOnOff(true);
+            SkillUITooltipManager.Instance.ShowTooltip();
         }
 
         // 선택한 슬롯 없이 포인터를 뺐다면 그냥 끈다.
         else
         {
-            SetPanelOnOff(false);
+            SkillUITooltipManager.Instance.HideTooltip();
         }
     }
 
@@ -147,14 +149,13 @@ public class CombatSkillbar_UI : MonoBehaviour
     {
         if(slot.SlotType == SlotTypes.TurnChange)
         {
-            CPrint.Log("넘기기는 클릭을 받지 않는다.");
             return;
         }
 
         // 이미 선택한 슬롯을 다시 클릭한 경우
         if (_selectSlot == slot)
         {
-            SetPanelOnOff(true);
+            SkillUITooltipManager.Instance.ShowTooltip();
             return;
         }
 
@@ -172,7 +173,7 @@ public class CombatSkillbar_UI : MonoBehaviour
         // 선택한 스킬 툴팁 데이터 전달하고
         SkillUITooltipManager.Instance.SetSkillData(_selectSlot.SkillData);
         // 패널을 켠다
-        SetPanelOnOff(true);
+        SkillUITooltipManager.Instance.ShowTooltip(); ;
         // 스킬을 선택하였다면 해당 이벤트를 보낸다.
         OnSkillSelected?.Invoke(_selectSlot);
 
@@ -192,7 +193,7 @@ public class CombatSkillbar_UI : MonoBehaviour
                 StopCoroutine(_TurnPassCo);
             }
 
-            // TODO : 3초 동안 누르는 타이머 (코루틴 or 유니테스크) 진행
+            // TODO : 2초 동안 누르는 타이머 (코루틴 or 유니테스크) 진행
             _TurnPassCo = StartCoroutine(TurnPass_Co(slot));
         }
     }
@@ -218,27 +219,17 @@ public class CombatSkillbar_UI : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 패널을 끄고 켜는 함수인데 활성화 / 비활성화 처리보다는 캔버스 그룹의 투명도를 조절하여 부드러운 on/off를 구현했다.
-    /// </summary>
-    /// <param name="isTurnOn"></param>
-    private void SetPanelOnOff(bool isTurnOn)
-    {
-        float panelAlpha = isTurnOn ? 1.0f : 0.0f;
-        _skillTooltipPanel.alpha = panelAlpha;
-    }
-
     private IEnumerator TurnPass_Co(CombatSkillSlot_UI slot)
     {
         float current = 0f; 
         
-        while (current < 3.0f)
+        while (current < 2.0f)
         {
             // 시간 추가하고
             current += Time.deltaTime;
 
             // 게이지에 동기화
-            slot.GaugeCharge(current / 3.0f);
+            slot.GaugeCharge(current / 2.0f);
             yield return null;
         }
 
@@ -249,6 +240,17 @@ public class CombatSkillbar_UI : MonoBehaviour
 
         // 턴 넘기기
         // TODO : 턴 넘기는 이벤트 or 함수 호출
-        CPrint.Log("3초 동안 유지완료, 턴 넘김");
+        CPrint.Log("2초 동안 유지완료, 턴 넘김");
     }
+
+
+    /// <summary>
+    /// 현재 턴을 잡은 영웅의 장착중인 스킬 리스트를 호출하는 함수
+    /// </summary>
+    public void HeroTurnSkillDataSet(/*리스트로 된 스킬 데이터를 받아야지*/)
+    {
+
+    }
+
+
 }

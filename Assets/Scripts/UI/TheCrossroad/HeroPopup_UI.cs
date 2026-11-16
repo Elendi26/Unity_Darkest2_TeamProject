@@ -1,8 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
+using static UserProfileData;
 
 public enum PopupTab
 {
@@ -40,8 +44,8 @@ public class HeroPopup_UI : MonoBehaviour
     [Header("상태 캔버스 그룹")]
     [SerializeField] private CanvasGroup _stsCanvas;
 
-    [Header("전투 기술이 들어갈 이미지 공간")]
-    [SerializeField] private GameObject[] _combatSkills;
+    [Header("팝업 스킬 슬롯 참조")]
+    [SerializeField] private PopupSkillSlot_UI[] _skillSlots;
 
     [Header("3D 모델 생성 위치")]
     [SerializeField] private Transform _modelSpawnPoint;
@@ -79,13 +83,17 @@ public class HeroPopup_UI : MonoBehaviour
 
     // 내부 변수
 
-    private int _currentHP;
-
     private int _currentHeroIndex;
-
+        
     private GameObject _currentModel;
 
-    void Start()
+    private HeroSaveData _currentHeroSaveData;
+
+    private UserProfileData _currentProfileData;
+
+    private HeroDataSO _currentHeroDataSO;
+
+    private void Awake()
     {
         if (instance == null)
         {
@@ -99,21 +107,39 @@ public class HeroPopup_UI : MonoBehaviour
 
         DontDestroyOnLoad(this);
 
+        for(int i = 0; i < _skillSlots.Length; i++)
+        {
+            _skillSlots[i].OnPopupSkillSlotClicked += SetCombatSkills;
+        }
+    }
+
+    void Start()
+    {
         if(_modelCamera != null)
         {
             _modelCamera.enabled = true;
         }
+    }
 
+    private void OnDisable()
+    {
+        for (int i = 0; i < _skillSlots.Length; i++)
+        {
+            _skillSlots[i].OnPopupSkillSlotClicked -= SetCombatSkills;
+        }
     }
 
     public void OpenPopup(List<HeroDataSO> list, int startIndex)
     {
         _currentHeroIndex = startIndex;
-        list = _heroes;
-
+        _heroes = list;
         HeroDataUpdate(list[_currentHeroIndex]);
     }
 
+    /// <summary>
+    /// 특정 영웅의 정보 불러오기
+    /// </summary>
+    /// <param name="data"></param>
     public void HeroDataUpdate(HeroDataSO data)
     {
         if(data == null)
@@ -127,6 +153,10 @@ public class HeroPopup_UI : MonoBehaviour
             Destroy(_currentModel);
             _currentModel = null;
         }
+
+        _currentHeroSaveData = null;
+
+        _currentHeroDataSO = data;
 
         // 기본으로 출력할 탭은 전투 기술 탭
         SelectTab(PopupTab.CombatSkills);
@@ -165,14 +195,32 @@ public class HeroPopup_UI : MonoBehaviour
         _heroHP.text = data.HeroHP.ToString();
         _speed.text = data.HeroSpeed.ToString();
 
-        // 둘 중 더 작은 값을 기준으로 반복문 돌릴 수 있게
-        int numA = Mathf.Min(data.HeroSkills.Length, _combatSkills.Length);
-
-        for (int i = 0; i < numA; i++)
+        // 세이브 파일 불러오고
+        if(DataSaveManager.Instance != null)
         {
-            _combatSkills[i].GetComponent<Image>().sprite = data.HeroSkills[i];
+            _currentProfileData = DataSaveManager.Instance.LoadProfile(DataSaveManager.Instance.CurrentSlotIndex);
         }
 
+        if(_currentProfileData == null)
+        {
+            _currentProfileData = new UserProfileData();
+        }
+
+        // 불러온 정보의 영웅과 내부 파티원 리스트에서 동일한 영웅 데이터를 가진 데이터를 찾아서 현재 팝업창에 켜둔 영웅 데이터와 연결한다
+        if(_currentProfileData != null && _currentProfileData.PartyHeroes != null)
+        {
+            for (int i = 0; i < _currentProfileData.PartyHeroes.Count; i++)
+            {
+                if(_currentProfileData.PartyHeroes[i].HeroID == data.HeroID)
+                {
+                    _currentHeroSaveData = _currentProfileData.PartyHeroes[i];
+                    break;
+                }
+            }
+        }
+
+        // 스킬 탭 새로고침
+        RefreshSkillUI();
     }
 
     private void CanvasGroupState(CanvasGroup targetCanvas, bool OnCanvas)
@@ -185,8 +233,6 @@ public class HeroPopup_UI : MonoBehaviour
         targetCanvas.alpha = OnCanvas ? 1f : 0f;
         targetCanvas.interactable = OnCanvas;
         targetCanvas.blocksRaycasts = OnCanvas;
-
-
     }
 
     private void SelectTab(PopupTab targetTab)
@@ -225,6 +271,81 @@ public class HeroPopup_UI : MonoBehaviour
         HeroDataUpdate(_heroes[_currentHeroIndex]);
     }
 
+    /// <summary>
+    /// 장착되어 있는 스킬을 클릭했을 경우 발동하는 함수.
+    /// </summary>
+    /// <param name="skillIndex"></param>
+    public void SetCombatSkills(int skillIndex)
+    {
+        if (_currentHeroSaveData == null || _currentHeroDataSO == null)
+        {
+            return;
+        }
+
+        // 아직 스킬 데이터 SO를 받기 전이기 떄문에 이미지 파일명 프로퍼티를 임시로 받아서 id로 넣는다.
+        // TODO : 스킬 데이터 SO 받으면 SkillID로 변경해야한다.
+        string unSkillID = _currentHeroDataSO.HeroSkills[skillIndex].SkillID;
+
+        if (_currentHeroSaveData.HeroSkillIDs.Contains(unSkillID) == true)
+        {
+            // 기본적으로 스킬이 들어가있는 상태이기 때문에 스킬을 클릭할 경우 장착이 해제되어 장착 스킬 리스트에서 없앤다.
+            _currentHeroSaveData.HeroSkillIDs.Remove(unSkillID);
+        }
+
+        // 장착되어있지 않은 보유 스킬을 누르게 되면 장착 스킬 리스트 마지막에 넣는다.
+        else if (_currentHeroSaveData.HeroSkillIDs.Contains(unSkillID) == false && _currentHeroSaveData.HeroSkillIDs.Count < 5)
+        {
+            _currentHeroSaveData.HeroSkillIDs.Add(unSkillID);
+        }
+
+        RefreshSkillUI();
+
+        // 프로필 내부의 파티원 목록 리스트 순회하여 현재 영웅과 일치하는 고유 ID 찾기
+        if (_currentProfileData != null && _currentProfileData.PartyHeroes != null)
+        {
+            for (int i = 0; i < _currentProfileData.PartyHeroes.Count; i++)
+            {
+                if (_currentProfileData.PartyHeroes[i].HeroID == _currentHeroSaveData.HeroID)
+                {
+                    _currentProfileData.PartyHeroes[i] = _currentHeroSaveData;
+                    break;
+                }
+            }
+        }
+
+        // 매니저가 존재하고, 세이브 데이터가 존재할 때 디스크에 덮어쓸 수 있게 널참조 오류 방지
+        if(DataSaveManager.Instance != null && _currentHeroSaveData != null)
+        {
+            DataSaveManager.Instance.SaveProfile(_currentProfileData, DataSaveManager.Instance.CurrentSlotIndex);
+        }
+
+
+    }
+
+    /// <summary>
+    /// 스킬 슬롯의 하이라이트를 켜고 끄는 함수
+    /// </summary>
+    public void RefreshSkillUI()
+    {
+        // 팝업창 모든 기술 슬롯 순회
+        for (int i = 0; i < _skillSlots.Length;  i++)
+        {
+            Sprite skillSprite = _currentHeroDataSO.HeroSkills[i].SkillIcon;
+            _skillSlots[i].SetSlot(skillSprite);
+
+            // 현재 세이브 데이터에 기술이 들어갔는지 검사하고
+            string skillID = _currentHeroDataSO.HeroSkills[i].SkillID;
+            bool isEquipped = _currentHeroSaveData != null && _currentHeroSaveData.HeroSkillIDs != null && _currentHeroSaveData.HeroSkillIDs.Contains(skillID);
+
+            // 장착 여부에 따라 하이라이트 켜거나 끄기
+            if (_skillSlots[i].FrameHL != null)
+            {
+                _skillSlots[i].FrameHL.SetActive(isEquipped);
+            }
+
+        }
+      
+    }
 
     /// <summary>
     /// 팝업창이 꺼질 때, 카메라도 함께 사용을 중단해야 하므로 호출할 함수
@@ -235,7 +356,5 @@ public class HeroPopup_UI : MonoBehaviour
         {
             _modelCamera.enabled = false;
         }
-
     }
-
 }

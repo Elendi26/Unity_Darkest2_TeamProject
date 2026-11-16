@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.UI.Image;
+using static UserProfileData;
 
 public class TheCrossroadManager : MonoBehaviour
 {
-    public TheCrossroadManager instance;
+    public static TheCrossroadManager instance;
 
     #region 인스펙터
     [Header("파티 슬롯")]
@@ -28,8 +30,14 @@ public class TheCrossroadManager : MonoBehaviour
     [Header("영웅 팝업 UI 캔버스 그룹 참조")]
     [SerializeField] private CanvasGroup _heroPopupCanvas;
 
-    [Header("파티 출정 버튼")]
+    [Header("영웅 팝업창 스킬 슬롯 참조")]
+    [SerializeField] private PopupSkillSlot_UI[] skillSlots;
+
+    [Header("파티 출정 버튼 캔버스그룹")]
     [SerializeField] private CanvasGroup _departureButton;
+
+    [Header("파티 출정 버튼 홀딩 스크립트")]
+    [SerializeField] private HoldButton _holdButton;
 
 
 
@@ -37,12 +45,23 @@ public class TheCrossroadManager : MonoBehaviour
 
     // 내부 변수
     private bool _onPopup;
-   
 
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     void Start()
     {
         // 구독
-        for(int i = 0;  i < _partySlots.Length; i++)
+        for (int i = 0; i < _partySlots.Length; i++)
         {
             _partySlots[i].HeroDropped += DropHerotoParty;
             _partySlots[i].PartySlotRightClicked += HeroPortraitRightClicked;
@@ -59,6 +78,8 @@ public class TheCrossroadManager : MonoBehaviour
 
         _clickHandler.ClickEmptySpace += HighlightReset;
 
+        _holdButton.HoldingFullGauge += OnFullHoldingDepartureButton;
+
         // 팝업창 시작할 때는 꺼놓기
         if (_heroPopupCanvas != null)
         {
@@ -66,6 +87,12 @@ public class TheCrossroadManager : MonoBehaviour
             _heroPopupCanvas.alpha = 0f;
             _heroPopupCanvas.blocksRaycasts = false;
             _heroPopupCanvas.interactable = false;
+        }
+
+        // 영웅 데이터들 먼저 생성시키고
+        if(DataSaveManager.Instance != null)
+        {
+            InitializeHeroSaveData();
         }
 
         // 기본 시작할 때 영웅 정보 띄워놓기
@@ -76,12 +103,14 @@ public class TheCrossroadManager : MonoBehaviour
             HeroPopup_UI.instance.HeroDataUpdate(data);
         }
 
+        // 출정버튼 꺼놓기
         if(_departureButton != null)
         {
             _departureButton.alpha = 0f;
             _departureButton.interactable = false;
             _departureButton.blocksRaycasts = false;
         }
+
 
     }
 
@@ -115,6 +144,8 @@ public class TheCrossroadManager : MonoBehaviour
         }
 
         _clickHandler.ClickEmptySpace -= HighlightReset;
+
+        _holdButton.HoldingFullGauge -= OnFullHoldingDepartureButton;
     }
 
     /// <summary>
@@ -351,9 +382,12 @@ public class TheCrossroadManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 출정버튼이 활성화 되는 함수
+    /// </summary>
     private void ActiveDepartureButton()
     {
-
+        
         bool _fullParty = System.Array.TrueForAll(_partySlots, slot => slot.HeroData != null);
 
         if ( _fullParty )
@@ -370,6 +404,152 @@ public class TheCrossroadManager : MonoBehaviour
             _departureButton.blocksRaycasts = false;
         }
 
+
+
+    }
+
+    /// <summary>
+    /// 출정버튼을 풀홀딩해서 출정을 시작했을 때
+    /// </summary>
+    private void OnFullHoldingDepartureButton()
+    {
+        // 현재 슬롯 번호 가져오고
+        int currentSlot = DataSaveManager.Instance.CurrentSlotIndex;
+
+        // 타이틀에서 만든 프로필 불러오기
+        UserProfileData currentRunData = DataSaveManager.Instance.LoadProfile(currentSlot);
+
+        if ( currentRunData == null )
+        {
+            CPrint.Error("프로필 데이터를 찾을 수 없습니다.");
+            return;
+        }
+
+        // 파티 순서 저장하는 방식
+        // 1. 일단 파티에 들어간 모든 슬롯의 파티번호를 -1로 초기화한다.
+        for(int i = 0; i < currentRunData.PartyHeroes.Count; i++)
+        {
+            currentRunData.PartyHeroes[i].PartySlotIndex = -1;
+        }
+
+        for(int i = 0; i < 4;  i++)
+        {
+            // 각 영웅의 런타임 데이터 생성
+            HeroSaveData targetHero = null;
+
+            // 원본 SO 데이터 참조
+            HeroDataSO originData = _partySlots[i].HeroData;
+
+            for(int j = 0; j < currentRunData.PartyHeroes.Count; j++)
+            {
+                if (currentRunData.PartyHeroes[j].HeroID == originData.HeroID)
+                {
+                    targetHero = currentRunData.PartyHeroes[j];
+                }
+            }
+
+            if (targetHero != null)
+            {
+                // 변화하는 수치, 고정된 수치의 초기값 불러오기
+                targetHero.HeroID = originData.HeroID;
+                targetHero.CurrentHP = originData.HeroHP;
+                targetHero.CurrentStress = 0;
+                targetHero.PartySlotIndex = i;
+
+            }
+        }
+        
+        // 영웅 4명의 데이터 프로필 세이브 데이터에 저장
+        DataSaveManager.Instance.SaveProfile(currentRunData, currentSlot);
+
+        CPrint.Log("파티 결정 및 데이터 저장 완료");
+
+        // TODO : 역마차 씬으로 이동하는 씬 매니저 발동
+
+
+    }
+
+    /// <summary>
+    /// 기본 영웅 4명의 데이터를 생성하여 저장하는 함수
+    /// </summary>
+    private void InitializeHeroSaveData()
+    {
+
+        if (_heroRoster == null || _heroRoster.Length == 0) return;
+
+        // 현재 프로필 슬롯 번호 가져오고
+        int currentSlot = DataSaveManager.Instance.CurrentSlotIndex;
+
+        // 프로필 불러오고
+        UserProfileData currentRunData = DataSaveManager.Instance.LoadProfile(currentSlot);
+
+        if(currentRunData == null)
+        {
+            currentRunData = new UserProfileData();
+        }
+
+        if (currentRunData.PartyHeroes == null)
+        {
+            currentRunData.PartyHeroes = new List<HeroSaveData>();
+        }
+
+        for (int i = 0; i < _heroRoster.Length; i++)
+        {
+
+            // 원본 SO 데이터 참조
+            HeroDataSO originData = _heroRoster[i].HeroData;
+
+            if(originData == null)
+            {
+                continue;
+            }
+
+            bool isExist = false;
+
+            foreach(var heroSave in currentRunData.PartyHeroes)
+            {
+                if (heroSave.HeroID == originData.HeroID)
+                {
+                    // 영웅을 찾았는데, 스킬을 들고 있지 않을경우
+                    if(heroSave.HeroSkillIDs == null || heroSave.HeroSkillIDs.Count == 0)
+                    {
+                        heroSave.HeroSkillIDs = new List<string>();
+
+                        for (int j = 0; j < originData.HeroSkills.Count; j++)
+                        {
+                            heroSave.HeroSkillIDs.Add(originData.HeroSkills[j].SkillID);
+                        }
+                    }
+
+                    isExist = true;
+                    break;
+                }
+            }
+
+
+            if(!isExist)
+            {
+                // 영웅 데이터 처음 생성
+                UserProfileData.HeroSaveData newHeroData = new UserProfileData.HeroSaveData();
+                
+                // 파티 슬롯 번호, 아이디, 스킬 데이터 넣기
+                newHeroData.PartySlotIndex = -1;
+                newHeroData.HeroID = originData.HeroID;
+                newHeroData.HeroSkillIDs = new List<string>();
+
+                // 반복문 돌려서 스킬 리스트에 넣기
+                for(int j = 0; j < originData.HeroSkills.Count; j++)
+                {
+                    newHeroData.HeroSkillIDs.Add(originData.HeroSkills[j].SkillID);
+                }
+
+                currentRunData.PartyHeroes.Add(newHeroData);
+
+            }
+
+        }
+        // 영웅 4명의 데이터 프로필 세이브 데이터에 저장
+        DataSaveManager.Instance.SaveProfile(currentRunData, currentSlot);
 
     }
 
