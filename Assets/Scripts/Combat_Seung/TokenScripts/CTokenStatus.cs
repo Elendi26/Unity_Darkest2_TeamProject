@@ -65,10 +65,10 @@ public enum ETokenBitMask
 
 public class CTokenStatus : MonoBehaviour
 {
-
-    private ETokenBitMask _tokenStatus = ETokenBitMask.None;
+    private ETokenBitMask _tokenBitMask = ETokenBitMask.None;
     private List<STokenData> _tokenData;
 
+    public ETokenBitMask TokenBitMask => _tokenBitMask;
 
     /// <summary>
     /// Resources 사용 중!!!
@@ -83,6 +83,7 @@ public class CTokenStatus : MonoBehaviour
 
             _tokenData = tokenStructData.TokenStructMaker();
         }
+
         else
         {
             Debug.LogWarning("TokenStructData 로드 실패! 확인 요망");
@@ -93,7 +94,7 @@ public class CTokenStatus : MonoBehaviour
     {
         foreach (var token in tokens)
         {
-            _tokenStatus |= token;
+            _tokenBitMask |= token;
         }
     }
 
@@ -101,7 +102,7 @@ public class CTokenStatus : MonoBehaviour
     {
         foreach (var token in tokens)
         {
-            _tokenStatus &= ~token;
+            _tokenBitMask &= ~token;
         }
     }
 

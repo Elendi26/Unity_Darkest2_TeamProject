@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 #region Enum
 
@@ -10,6 +11,13 @@ public enum ESkillType
     Ranged,
     Buff,
     Heal
+}
+
+public enum EInteractCombo
+{
+    None,
+    True,
+    False
 }
 
 [Flags]
@@ -27,7 +35,7 @@ public enum ERank
 
 [System.Serializable]
 [CreateAssetMenu (menuName = "2D3D/SO/SkillBasicDataSO", fileName = "SkillBasicData_")]
-public class CSkillDataSO : ScriptableObject
+public class CSkillDataSO : ScriptableObject, ICombatData
 {
 	#region 인스펙터
 
@@ -53,27 +61,38 @@ public class CSkillDataSO : ScriptableObject
 	[SerializeField] private object _UI; // UI 관련 자유롭게 변경 가능
 	[SerializeField] private Sprite _testSprite;
 	[SerializeField] private Animation _testAnimation;
-
-	#endregion
-
-
-	#region 프로퍼티
-
-	public string HeroName => _heroName;
-	public int Index => _index;
-	public ERank Rank => _rank;
-	public ERank Target => _target;
-	public ESkillType Type => _type;
-	public bool AOE => _areaOfEffect;
-	public int Cooldown => _cooldown;
-	public List<ISkillEffect> SkillEffect => _skillEffect;
-	public List<ISkillEffect> SkillEffectForSelf => _skillEffectForSelf;
-
-	public object UI => _UI;
+    [SerializeField] private Image _activeImage;
+    [SerializeField] private Image _inactiveImage;
 
     #endregion
 
-	public int GetRankBitmask()
+
+    #region 프로퍼티
+
+    public string HeroName => _heroName;
+    public int Index => _index;
+    public ERank Rank => _rank;
+    public ERank Target => _target;
+    public ESkillType Type => _type;
+    public bool AOE => _areaOfEffect;
+    public float Critical => _critical;
+    public int Cooldown => _cooldown;
+    public int Charges => _charges;
+
+    public List<ISkillEffect> SkillEffect => _skillEffect;
+    public bool SkillSelfEffect => _skillSelfEffect;
+    public List<ISkillEffect> SkillEffectForSelf => _skillEffectForSelf;
+
+    public object UI => _UI;
+    public Sprite TestSprite => _testSprite;
+    public Animation TestAnimation => _testAnimation;
+    public Image ActiveImage => _activeImage;
+    public Image InactiveImage => _inactiveImage;
+
+
+    #endregion
+
+    public int GetRankBitmask()
 	{
 		return (int) _rank;
 	}
@@ -88,38 +107,257 @@ public class CSkillDataSO : ScriptableObject
 		return (_heroName, _index);
 	}
 
+    public ICombatData ReturnCombatData()
+    {
+        return this;
+    }
 
-	public void UseSKill(CEntityRuntimeData Entity, params CEntityRuntimeData[] target)
+
+    // 이걸 스킬 작동에서 체크해야 할 지도??
+    public bool CheckCritical(float extraCritical)
 	{
 		bool isCritical = false;
 
-		if (!(_critical <= 0))
-		{
-            isCritical = UnityEngine.Random.Range(0f, 100f) <= _critical;
+        if (!(_critical <= 0))
+        {
+            isCritical = UnityEngine.Random.Range(0f, 100f) <= _critical + extraCritical;
         }
 
-		if (_skillEffect == null)
-		{
-			return;
-        }
+		return isCritical;
+    }
 
-		else
-		{
-            for (int i = 0; i < target.Length; i++)
-            {
-                foreach (var effect in _skillEffect)
+    public void UseSKill(CEntityRuntimeData entity, CEntityRuntimeData target)
+    {
+        Debug.Log($"스킬 사용 : {_heroName}, {_index}");
+
+        switch (_type)
+        {
+            case ESkillType.Melee:
+
+                if (_skillEffect == null)
                 {
-                    effect.SkillEffect(target[i], isCritical);
+                    return;
                 }
-            }
-        }
 
-		if (_skillSelfEffect)
+                else
+                {
+                    foreach (var effect in _skillEffect)
+                    {
+                        effect.SkillEffect(target, CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                    }
+                }
+
+                if (_skillSelfEffect)
+                {
+                    foreach (var effect in _skillEffectForSelf)
+                    {
+                        effect.SkillEffect(entity, CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                    }
+                }
+
+                break;
+
+            case ESkillType.Ranged:
+
+                if (_skillEffect == null)
+                {
+                    return;
+                }
+
+                else
+                {
+                    foreach (var effect in _skillEffect)
+                    {
+                        effect.SkillEffect(target, CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                    }
+                }
+
+                if (_skillSelfEffect)
+                {
+                    foreach (var effect in _skillEffectForSelf)
+                    {
+                        effect.SkillEffect(entity, CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                    }
+                }
+
+                break;
+
+            case ESkillType.Buff:
+
+                if (_skillEffect == null)
+                {
+                    return;
+                }
+
+                else
+                {
+                    foreach (var effect in _skillEffect)
+                    {
+                        effect.SkillEffect(target);
+                    }
+                }
+
+                if (_skillSelfEffect)
+                {
+                    foreach (var effect in _skillEffectForSelf)
+                    {
+                        effect.SkillEffect(entity);
+                    }
+                }
+
+                break;
+
+            case ESkillType.Heal:
+
+                if (_skillEffect == null)
+                {
+                    return;
+                }
+
+                else
+                {
+                    foreach (var effect in _skillEffect)
+                    {
+                        effect.SkillEffect(target, CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                    }
+                }
+
+                if (_skillSelfEffect)
+                {
+                    foreach (var effect in _skillEffectForSelf)
+                    {
+                        effect.SkillEffect(entity, CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                    }
+                }
+
+                break;
+
+            default:
+
+                break;
+        }
+    }
+
+    public void UseSKill(CEntityRuntimeData entity, List<CEntityRuntimeData> targets)
+	{
+        Debug.Log($"다수 대상 스킬 사용 : {_heroName}, {_index}");
+
+        switch (_type)
 		{
-			foreach (var effect in _skillEffectForSelf)
-			{
-				effect.SkillEffect(Entity);
-			}
+			case ESkillType.Melee:
+
+                if (_skillEffect == null)
+                {
+                    return;
+                }
+
+                else
+                {
+                    for (int i = 0; i < targets.Count; i++)
+                    {
+                        foreach (var effect in _skillEffect)
+                        {
+                            effect.SkillEffect(targets[i], CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                        }
+                    }
+                }
+
+                if (_skillSelfEffect)
+                {
+                    foreach (var effect in _skillEffectForSelf)
+                    {
+                        effect.SkillEffect(entity, CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                    }
+                }
+
+                break;
+
+			case ESkillType.Ranged:
+
+                if (_skillEffect == null)
+                {
+                    return;
+                }
+
+                else
+                {
+                    for (int i = 0; i < targets.Count; i++)
+                    {
+                        foreach (var effect in _skillEffect)
+                        {
+                            effect.SkillEffect(targets[i], CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                        }
+                    }
+                }
+
+                if (_skillSelfEffect)
+                {
+                    foreach (var effect in _skillEffectForSelf)
+                    {
+                        effect.SkillEffect(entity, CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                    }
+                }
+
+                break;
+
+			case ESkillType.Buff:
+
+                if (_skillEffect == null)
+                {
+                    return;
+                }
+
+                else
+                {
+                    for (int i = 0; i < targets.Count; i++)
+                    {
+                        foreach (var effect in _skillEffect)
+                        {
+                            effect.SkillEffect(targets[i]);
+                        }
+                    }
+                }
+
+                if (_skillSelfEffect)
+                {
+                    foreach (var effect in _skillEffectForSelf)
+                    {
+                        effect.SkillEffect(entity);
+                    }
+                }
+
+                break;
+
+			case ESkillType.Heal:
+
+                if (_skillEffect == null)
+                {
+                    return;
+                }
+
+                else
+                {
+                    for (int i = 0; i < targets.Count; i++)
+                    {
+                        foreach (var effect in _skillEffect)
+                        {
+                            effect.SkillEffect(targets[i], CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                        }
+                    }
+                }
+
+                if (_skillSelfEffect)
+                {
+                    foreach (var effect in _skillEffectForSelf)
+                    {
+                        effect.SkillEffect(entity, CheckCritical(entity.GetStat(EEntityStat.ExtraCritical)));
+                    }
+                }
+
+                break;
+
+			default:
+				break;
 		}
 	}
 }

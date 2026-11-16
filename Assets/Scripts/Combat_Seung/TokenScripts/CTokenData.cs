@@ -1,14 +1,16 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum ETokenTriggerPoint
 {
     None,
+    //
     Critical,
     Guard,
-    Target,
+    UseToTarget,
     Targeted,
-    Damage,
     Damaged,
+    //
     RoundStart,
     TurnStart,
     TurnOver,
@@ -40,7 +42,46 @@ public struct STokenData
         _tokenDuration = tokenDuration;
         _tokenRemainingTurn = 0;
     }
+
+    public void IncreaseStack()
+    {
+        if (_tokenCurrentStack >= _tokenMaxStack)
+        {
+            return;
+        }
+
+        _tokenCurrentStack++;
+    }
+
+    public bool ReduceStack()
+    {
+        if (_tokenCurrentStack == 0)
+        {
+            return false;
+        }
+
+        _tokenCurrentStack--;
+
+        if (_tokenCurrentStack == 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public void DecrementTurn()
+    {
+        _tokenRemainingTurn--;
+    }
+
+    public void ResetTurn()
+    {
+        _tokenRemainingTurn = _tokenDuration;
+    }
 }
+
+
 
 [System.Serializable]
 public class CTokenData : ITokenInterface
@@ -50,7 +91,7 @@ public class CTokenData : ITokenInterface
     [SerializeField] private int _tokenIndex;
     [SerializeField] private ETokenTriggerPoint _tokenTriggerPoint;
     [SerializeField] private int _tokenMaxStack;
-    [SerializeField] private int _tokenDuration = -1;
+    [SerializeField] private int _tokenDuration = -1; // -1 = None
 
     public STokenData MakeTokenInstance()
     {
@@ -59,3 +100,6 @@ public class CTokenData : ITokenInterface
         return tokenData;
     }
 }
+
+
+

@@ -32,6 +32,9 @@ public class CEntityBasicDataSO : ScriptableObject
 	[Header("이동 가능 거리 / 적일 경우 사이즈")]
 	[SerializeField, Min(0)] private int _movement;
 
+	[Header("모델링 등의 데이터")]
+	[SerializeField] private GameObject _entity;
+
 	#endregion
 
 	#region 프로퍼티
