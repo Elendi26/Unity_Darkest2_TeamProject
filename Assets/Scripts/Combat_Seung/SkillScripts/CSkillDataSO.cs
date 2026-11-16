@@ -55,7 +55,9 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     [PolymorphicDropdown]
 	private List<ISkillEffect> _skillEffect;
 	[SerializeField] private bool _skillSelfEffect = false;
-	[SerializeReference] private List<ISkillEffect> _skillEffectForSelf;
+	[SerializeReference]
+    [PolymorphicDropdown]
+    private List<ISkillEffect> _skillEffectForSelf;
 
 	[Header("UI등")]
 	[SerializeField] private object _UI; // UI 관련 자유롭게 변경 가능
