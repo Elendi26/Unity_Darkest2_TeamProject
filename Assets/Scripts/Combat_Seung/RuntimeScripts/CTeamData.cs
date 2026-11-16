@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -81,6 +82,31 @@ public class CTeamData<T>
 
     public IRankEntity Get(ERank rank)
     {
+        if (_team.TryGetValue(rank, out IRankEntity value))
+        {
+            return value;
+        }
+
+        return default;
+    }
+
+    /// <summary>
+    /// index 는 1~4
+    /// </summary>
+    /// <param name="rank"></param>
+    /// <returns></returns>
+    public IRankEntity Get(int index)
+    {
+        ERank[] ranks = { ERank.One, ERank.Two, ERank.Three, ERank.Four };
+
+        if (index < 0 || index >= ranks.Length)
+        {
+            Debug.Log("데이터 인덱스 오류, int로 입력할 수 있는 랭크는 1~4 범위입니다");
+            return null;
+        }
+
+        ERank rank = ranks[index];
+
         if (_team.TryGetValue(rank, out IRankEntity value))
         {
             return value;

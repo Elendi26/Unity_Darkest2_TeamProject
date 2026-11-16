@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CCombatMechanism : MonoBehaviour
 {
-    private CCombatData _combatData;
+    private CCombatRuntimeData _combatData;
     private CHeroTeamData _heroTeamData;
     private CEnemyGroupCaller _enemyGroupCaller;
 

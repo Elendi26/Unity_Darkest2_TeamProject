@@ -1,8 +1,16 @@
+using JetBrains.Annotations;
 using UnityEngine;
 
 public interface ISkillEffect
 {
     public abstract void SkillEffect(CEntityRuntimeData target, bool critical = false, bool hit = true);
+}
+
+public enum EDamageoverTime
+{
+    Bleed,
+    Blight,
+    Burn
 }
 
 [System.Serializable]
@@ -12,6 +20,7 @@ public class CSkillDamage : ISkillEffect
 
     [SerializeField] private int _minDamage;
     [SerializeField] private int _maxDamage;
+    [SerializeField] private EInteractCombo _combo;
 
     #endregion
 
@@ -24,18 +33,45 @@ public class CSkillDamage : ISkillEffect
             return;
         }
 
-        if (critical)
+        switch (_combo)
         {
-            float CriticalDamage = _maxDamage * 1.5f;
+            case EInteractCombo.None:
 
-            target.ModifyStat(EEntityStat.HP, -CriticalDamage);
+                if (critical)
+                {
+                    float CriticalDamage = _maxDamage * 1.5f;
 
-            return;
+                    target.ModifyStat(EEntityStat.HP, -CriticalDamage);
+
+                    return;
+                }
+
+                float Damage = Random.Range(0, _maxDamage - _minDamage + 1);
+
+                target.ModifyStat(EEntityStat.HP, -Damage);
+
+                break;
+            case EInteractCombo.True:
+
+                int checkCombo = 0;
+
+                checkCombo += (int)ETokenBitMask.Combo;
+
+                if (((int)(target._tokenStatus.TokenBitMask) & checkCombo) != 0)
+                {
+
+                }
+
+                break;
+            case EInteractCombo.False:
+
+
+                break;
+            default:
+                break;
         }
 
-        float Damage = Random.Range(0, _maxDamage - _minDamage + 1);
 
-        target.ModifyStat(EEntityStat.HP, -Damage);
     }
 }
 
@@ -46,6 +82,7 @@ public class CSkillHeal : ISkillEffect
 
     [SerializeField, Range(0f, 100f)] private float _healPercent;
     [SerializeField, Range(0f, 100f)] private float _hpBelow;
+    [SerializeField] private EInteractCombo _combo;
 
     #endregion
 
@@ -78,3 +115,70 @@ public class CSkillHeal : ISkillEffect
 
 }
 
+[System.Serializable]
+public class CAddToken : ISkillEffect // 토큰 적용
+{
+    [SerializeField] private EInteractCombo _combo;
+
+    public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
+    {
+
+    }
+}
+
+[System.Serializable]
+public class CRemoveToken : ISkillEffect
+{
+    [SerializeField] private EInteractCombo _combo;
+
+    public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
+    {
+
+    }
+}
+
+
+[System.Serializable]
+public class CAddTokenDamageoveTime : ISkillEffect
+{
+    [Header("지속 피해 정보")]
+    [SerializeField] private EDamageoverTime _tokenName;
+    [SerializeField] private ETokenTriggerPoint _tokenTriggerPoint;
+    [SerializeField] private EInteractCombo _combo;
+    [SerializeField] private int _tokenDamage;
+    [SerializeField] private int _tokenStack;
+
+    public SDamageoverTime MakeTokenInstance()
+    {
+        SDamageoverTime damageoverTime = new SDamageoverTime(_tokenName, _tokenTriggerPoint, _tokenDamage, _tokenStack);
+
+        return damageoverTime;
+    }
+
+    public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
+    {
+
+    }
+}
+
+[System.Serializable]
+public class CChangeHitRate : ISkillEffect
+{
+    [SerializeField] private EInteractCombo _combo;
+
+    public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
+    {
+        // 아직 미정
+    }
+}
+
+[System.Serializable]
+public class CAddComboToken : ISkillEffect
+{
+    [SerializeField] private EInteractCombo _combo;
+
+    public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
+    {
+
+    }
+}

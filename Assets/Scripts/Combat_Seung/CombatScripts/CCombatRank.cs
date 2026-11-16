@@ -14,35 +14,54 @@ public enum ECombatRank
 public class CCombatRank : MonoBehaviour
 {
     [SerializeField] private ECombatRank _combatRank;
-    [SerializeField] private CEntityRuntimeData _entityRuntimeData;
+    [SerializeField] private bool _team;
+    [SerializeField] private CEntityRuntimeData _entityRuntimeData; // 테스트용으로 열어둠, 원래는 SerializeField 없어도 됨
 
     // 여기에 활성화/비활성화 시키고 싶은 것을 넣고
 
-    private ERank _rank;
+    private int _rank;
+    private bool _targetable = false;
+    private ICombatData _combatData;
 
-    private void Awake()
+    #region 프로퍼티
+    public ICombatData CombatData => _combatData;
+    public bool Targetable => _targetable;
+
+    #endregion
+
+
+    private void OnEnable()
     {
+        ERank rank = ERank.None;
+
         switch (_combatRank)
         {
             case ECombatRank.One:
 
-                _rank |= ERank.One;
+                
+                rank |= ERank.One;
+
+                _rank = (int)rank;
 
                 break;
             case ECombatRank.Two:
 
-                _rank |= ERank.Two;
+                rank |= ERank.Two;
+
+                _rank = (int)rank;
 
                 break;
             case ECombatRank.Three:
 
-                _rank |= ERank.Three;
+                rank |= ERank.Three;
+                _rank = (int)rank;
 
                 break;
 
             case ECombatRank.Four:
 
-                _rank |= ERank.Four;
+                rank |= ERank.Four;
+                _rank = (int)rank;
 
                 break;
             default:
@@ -50,29 +69,135 @@ public class CCombatRank : MonoBehaviour
         }
     }
 
-    private void CheckRank(ERank rank)
+    private void OnDisable()
     {
-        if ((rank & _rank) != 0)
-        {
-            // 활성화
-        }
-
-        else
-        {
-            // 비활성화
-        }
+        _rank = (int)ERank.None;
     }
 
-    private void CheckTarget(ERank target)
+    public void InputEntityData(CEntityRuntimeData entity)
     {
-        if ((target & _rank) != 0)
+        _entityRuntimeData = entity;
+    }
+
+    public void CheckRank(ERank rank, ESkillType type)
+    {
+        int skillRank = (int)rank;
+
+        switch (type)
         {
-            // 활성화
+            case ESkillType.Melee:
+
+                if (!_team)
+                {
+                    if ((skillRank & _rank) != 0)
+                    {
+                        _targetable = true;
+
+                        
+                    }
+
+                    else
+                    {
+                        _targetable = false;
+                    }
+                }
+
+                else
+                {
+                    _targetable = false;
+                }
+
+                    break;
+
+            case ESkillType.Ranged:
+
+                if (!_team)
+                {
+                    if ((skillRank & _rank) != 0)
+                    {
+                        _targetable = true;
+                    }
+
+                    else
+                    {
+                        _targetable = false;
+                    }
+                }
+
+                else
+                {
+                    _targetable = false;
+                }
+
+                break;
+
+            case ESkillType.Buff:
+
+                if (_team)
+                {
+                    if ((skillRank & _rank) != 0)
+                    {
+                        _targetable = true;
+                    }
+
+                    else
+                    {
+                        _targetable = false;
+                    }
+                }
+
+                else
+                {
+                    _targetable = false;
+                }
+
+                    break;
+
+            case ESkillType.Heal:
+
+                if (_team)
+                {
+                    if ((skillRank & _rank) != 0)
+                    {
+                        _targetable = true;
+                    }
+
+                    else
+                    {
+                        _targetable = false;
+                    }
+                }
+
+                else
+                {
+                    _targetable = false;
+                }
+
+                    break;
+
+            default:
+                break;
         }
 
-        else
-        {
-            // 비활성화
-        }
+        // UI Targetable 켜기
+        
+
     }
+
+    public CEntityRuntimeData GetEntityRuntimeData()
+    {
+        return _entityRuntimeData;
+    }
+
+    public int GetDataFromRank_int(EEntityStat status)
+    {
+        return Mathf.RoundToInt(_entityRuntimeData.GetStat(status));
+    }
+
+    public float GetDataFromRank_float(EEntityStat status)
+    {
+        return _entityRuntimeData.GetStat(status);
+    }
+
+
 }

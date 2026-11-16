@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "name": "CombatInputSystem",
+    "maps": [
+        {
+            "name": "Click",
+            "id": "47427fda-d5f4-4105-992a-09bb528e1eab",
+            "actions": [
+                {
+                    "name": "Click",
+                    "type": "Button",
+                    "id": "6c08cf85-79ae-4a9d-97f0-88c566d83a4c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "13b822f4-94d7-4140-aa47-1204280c3948",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
