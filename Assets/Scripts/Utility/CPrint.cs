@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -126,7 +126,7 @@ public class CPrint : MonoBehaviour
             return;
         }
 
-        // ºóÁÙ ¿©·¯ ÁÙ
+        // ë¹ˆì¤„ ì—¬ëŸ¬ ì¤„
         if (lines <= 0)
         {
             return;
@@ -142,18 +142,18 @@ public class CPrint : MonoBehaviour
     }
     public static void Warn(string msg)
     {
-        // ÁÖÈ²»ö
+        // ì£¼í™©ìƒ‰
         Emit(ELogKind.Warn, msg, "WARN", "#FF9100");
     }
     public static void Error(string msg)
     {
-        // »¡°£»ö
+        // ë¹¨ê°„ìƒ‰
         Emit(ELogKind.Error, msg, "ERROR", "#FF1744");
     }
 
     public static void Success(string msg)
     {
-        // ÃÊ·Ï»ö
+        // ì´ˆë¡ìƒ‰
         Emit(ELogKind.Success, msg, "OK", "#00C853");
     }
 
@@ -218,16 +218,16 @@ public class CPrint : MonoBehaviour
             return;
         }
 
-        // 1. ±×·ì Á¦¸ñ Ãâ·Â
+        // 1. ê·¸ë£¹ ì œëª© ì¶œë ¥
         Title(title, lineCh);
-        // 2. ±×·ì ³»ºÎ µé¿©¾²±â
+        // 2. ê·¸ë£¹ ë‚´ë¶€ ë“¤ì—¬ì“°ê¸°
         IndentPush();
-        // ½ÇÇàÇÒ ÄÚµå ºí·ÏÀ» È£Ãâ (Action)
-        // ?.Invoke() : body°¡ nullÀÌ¸é ½ÇÇàÇÏÁö ¾Ê°Ú´Ù -> ¿¹¿Ü ¹æÁö
+        // ì‹¤í–‰í•  ì½”ë“œ ë¸”ë¡ì„ í˜¸ì¶œ (Action)
+        // ?.Invoke() : bodyê°€ nullì´ë©´ ì‹¤í–‰í•˜ì§€ ì•Šê² ë‹¤ -> ì˜ˆì™¸ ë°©ì§€
         body?.Invoke();
-        // ´Ù½Ã º¹±¸ (µé¿©¾²±â)
+        // ë‹¤ì‹œ ë³µêµ¬ (ë“¤ì—¬ì“°ê¸°)
         IndentPop();
-        // ±¸ºĞ¼± -> ½ºÅ¸ÀÏ Æ©´×
+        // êµ¬ë¶„ì„  -> ìŠ¤íƒ€ì¼ íŠœë‹
         Line(lineCh, LineCount);
 
     }
@@ -239,7 +239,7 @@ public class CPrint : MonoBehaviour
             return;
         }
 
-        if (_onceSet.Contains(key)) // ÀÌ¹Ì Å°°¡ ÀÖ´Â °æ¿ì -> ÀçÃâ·Â ±İÁö
+        if (_onceSet.Contains(key)) // ì´ë¯¸ í‚¤ê°€ ìˆëŠ” ê²½ìš° -> ì¬ì¶œë ¥ ê¸ˆì§€
         {
             return;
         }
@@ -253,7 +253,7 @@ public class CPrint : MonoBehaviour
 
     public static void OnceClear()
     {
-        // µî·ÏµÈ Å° ÀüºÎ ºñ¿î´Ù.
+        // ë“±ë¡ëœ í‚¤ ì „ë¶€ ë¹„ìš´ë‹¤.
 
         _onceSet.Clear();
     }

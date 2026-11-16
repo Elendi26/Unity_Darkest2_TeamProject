@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5100ecc095b403bbb73ca750f9c663d1, type: 3}
+  m_Name: Shop_Store
+  m_EditorClassIdentifier: 
+  _title: 상점
+  _body: 떠돌이 상인이 물건을 펼쳐 놓았다.
+  _fixedItems:
+  - {fileID: 11400000, guid: 4b81562cee9bbb266e2ba42fae0e8c79, type: 2}
+  - {fileID: 11400000, guid: 5b2febf8b8f71f748d2a11aa3d850555, type: 2}
+  _pool:
+  - {fileID: 11400000, guid: 2a00aa4bcc27a682e12358d0c6665de8, type: 2}
+  - {fileID: 11400000, guid: b0b59a16c35463d6907de5b41d321b65, type: 2}
+  - {fileID: 11400000, guid: 36605e55eb6efd445e18047cd5d474c2, type: 2}
+  - {fileID: 11400000, guid: 0f35f65df2ed43be69ef30cdcae12921, type: 2}
+  - {fileID: 11400000, guid: 3d4d521138b52b8bc7350fbdafd760c7, type: 2}
+  - {fileID: 11400000, guid: c8be998bb83929dbfae1abf705916536, type: 2}
+  _randomCount: 3

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6e903cf4fb547180f0c610a035699d0, type: 3}
+  m_Name: Item_RepairKit
+  m_EditorClassIdentifier: 
+  _displayName: 수리 도구
+  _description: 쓰면 바퀴를 1 고친다.
+  _icon: {fileID: 21300000, guid: 0e5f82e1ee46ab84095f79c3a75b347f, type: 2}
+  _category: 4
+  _maxStack: 2
+  _blockWhenFull: 4
+  _useEffects:
+  - rid: 1000
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: CRunValueDeltaEffect, ns: , asm: Assembly-CSharp}
+      data:
+        _type: 4
+        _delta: 1

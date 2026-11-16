@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63bc043e8ac88c899be3eb4ed0463fdd, type: 3}
+  m_Name: Shop Item_TorchOil
+  m_EditorClassIdentifier: 
+  _displayName: 횃불 기름
+  _description: 짐칸에 넣어 두고 필요할 때 쓴다. (횃불 +25)
+  _icon: {fileID: 21300000, guid: 719ce859d6c4bf4409d7cb9c8e68f843, type: 2}
+  _costType: 1
+  _cost: 10
+  _stock: 2
+  _weight: 2
+  _blockWhenFull: 0
+  _upgrade: {fileID: 0}
+  _item: {fileID: 11400000, guid: 37c44cbe7d2f0a951da48634c3936172, type: 2}
+  _itemCount: 1
+  _effects: []
+  references:
+    version: 2
+    RefIds: []
