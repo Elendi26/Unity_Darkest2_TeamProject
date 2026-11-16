@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using Newtonsoft.Json;
 
 public class DataSaveManager : MonoBehaviour
 {
     public static DataSaveManager Instance { get; private set; }
 
     // 내부 변수
-    // 게임 시작할 때 자동으로 마지막으로 플레이한 프로필을 저장하기 위한  변수
+    // 게임 시작할 때 자동으로 마지막으로 플레이한 프로필을 저장하기 위한 변수
     private int _currentSlotIndex = -1;
 
     // 프로퍼티
@@ -71,13 +72,32 @@ public class DataSaveManager : MonoBehaviour
     public void SaveProfile(UserProfileData data, int slotIndex)
     {
         // 저장할 경로 확보하고
-        string savepath = SaveDataPath(slotIndex);
-        // 포장하고
-        string json = JsonUtility.ToJson(data, true);
+        string savePath = SaveDataPath(slotIndex);
+
+        
+        // 기존 포장하는 방식
+        // string json = JsonUtility.ToJson(data, true);
+        
+
+        JsonSerializerSettings settings = new JsonSerializerSettings
+        {
+            // 자동 줄바꿈 및 띄어쓰기
+            // TODO : 최종 빌드때는 용량을 줄이기 위해 None으로 변경해야한다.
+            Formatting = Formatting.Indented,
+            // 빈 데이터는 저장을 무시하여 용량 세이브하기
+            NullValueHandling = NullValueHandling.Ignore,
+            // 상속 받은 클래스의 원래 타입을 기억하기
+            TypeNameHandling = TypeNameHandling.Auto
+
+        };
+
+        // 새로운 포장 방식
+        string json = JsonConvert.SerializeObject(data, settings);
         // 디스크에 저장하고
-        System.IO.File.WriteAllText(savepath, json);
+        System.IO.File.WriteAllText(savePath, json);
         // 가장 최신 슬롯으로 저장
         SetCurrentSlot(slotIndex);
+
     }
 
     /// <summary>
@@ -93,14 +113,23 @@ public class DataSaveManager : MonoBehaviour
             return null;
         }
 
+
         // 데이터 읽어올 경로 만들고
         string path = SaveDataPath(slotIndex);
 
         // 디스크에서 읽은 후
         string loadJson = System.IO.File.ReadAllText(path);
 
-        // 불러오기
-        return JsonUtility.FromJson<UserProfileData>(loadJson);
+        // 불러오기 (기존 구형 방식)
+        //return JsonUtility.FromJson<UserProfileData>(loadJson);
+
+        // Newtonsoft 방식 불러오기
+        JsonSerializerSettings settings = new JsonSerializerSettings
+        { 
+            TypeNameHandling = TypeNameHandling.Auto
+        };
+
+        return JsonConvert.DeserializeObject<UserProfileData>(loadJson, settings);
 
     }
     
@@ -131,7 +160,7 @@ public class DataSaveManager : MonoBehaviour
         }
         catch (System.Exception Error)
         {
-            CPrint.Warn("데이터 삭제 중 문제가 발생하였습니다.");
+            CPrint.Error("데이터 삭제 중 문제가 발생하였습니다.");
         }
             
     }

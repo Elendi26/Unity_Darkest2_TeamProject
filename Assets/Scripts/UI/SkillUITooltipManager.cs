@@ -48,6 +48,14 @@ public class SkillUITooltipManager : MonoBehaviour
         HideTooltip();
     }
 
+    public void ShowTooltip()
+    {
+        if (_canvasGroup != null)
+        {
+            _canvasGroup.alpha = 1f;
+        }
+    }
+
     /// <summary>
     /// 스킬 툴팁 숨기기
     /// </summary>
@@ -62,7 +70,7 @@ public class SkillUITooltipManager : MonoBehaviour
     /// <summary>
     /// 스킬 데이터 SO 받아서 정리
     /// </summary>
-    public void SetSkillData(DummySkillData data)
+    public void SetSkillData(DummySkillDataSO    data)
     {
         if (data == null)
         {
