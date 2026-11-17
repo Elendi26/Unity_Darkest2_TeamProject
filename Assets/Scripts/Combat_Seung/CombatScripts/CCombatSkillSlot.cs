@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class CCombatSkillSlot : MonoBehaviour
 {
-    [SerializeField] private Image _image;
+    [SerializeField] private Sprite _sprite;
 
     private bool _active = false;
     private CSkillDataSO _skillData;
@@ -22,12 +22,12 @@ public class CCombatSkillSlot : MonoBehaviour
     {
         if (_active)
         {
-            _image = _skillData.ActiveImage;
+            _sprite = _skillData.ActiveImage;
         }
 
         else
         {
-            _image = _skillData.InactiveImage;
+            _sprite = _skillData.InactiveImage;
         }
     }
 }
