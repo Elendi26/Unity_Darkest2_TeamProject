@@ -15,15 +15,19 @@ public class CCombatCurrentTurn : MonoBehaviour
 {
     private CEntityRuntimeData _entity;
 
+    [SerializeField] private CCombatSelectedSkill _seletedSkill;
+    [SerializeField] private CombatSkillbar_UI _combatSkillbar;
+    
     private List<(bool, CSkillDataSO)> _skillData;
     private List<CCombatSkillSlot> _skillSlots;
 
-    private CCombatSelectedSkill _seletedSkill;
-
     private ECombatSelectType _selectType = ECombatSelectType.None;
 
+    #region 프로퍼티
     public ECombatSelectType SelectType => _selectType;
     public CCombatSelectedSkill SelectedSkill => _seletedSkill;
+
+    #endregion
 
     public void InputCurrentTurnEntity(CEntityRuntimeData entity)
     {
@@ -35,6 +39,9 @@ public class CCombatCurrentTurn : MonoBehaviour
     public void CurrentTurnMech()
     {
         SetSkillData();
+
+        _combatSkillbar.HeroTurnSkillDataSet(_skillData);
+
         SkillSelect();
     }
 

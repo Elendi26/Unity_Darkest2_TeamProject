@@ -24,7 +24,8 @@ public enum EEntityStat
     MoveRes,
     DebuffRes,
     DeathblowRes,
-    ExtraCritical
+    ExtraCritical,
+    Hero
 }
 
 public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
@@ -33,7 +34,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
 
     private string _name;
 
-    private int _maxHP; // 비율 계산용
+    private int _maxHP;
     private int _currentHP;
     private int _maxStress;
     private int _currentStress;
@@ -59,6 +60,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     public CTokenStatus _tokenStatus = new CTokenStatus();
     public List<SDamageoverTime> _damageoverTime = new List<SDamageoverTime>();
 
+    private bool _hero = true;
     private float _extraCritical = 0f;
 
     private void Awake()
@@ -95,6 +97,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
 
         _movement = _heroBasicData.Movement;
 
+        _hero = _heroBasicData.Hero;
         _extraCritical = 0f;
 
         _relationships = new Dictionary<string, int>();
@@ -102,9 +105,6 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         Debug.Log($"[{_name}] 런타임 데이터 초기화 완료 (MaxHP: {_currentHP}, Speed: {_speed})");
     }
 
-    /// <summary>
-    /// 특정 스탯의 값을 증감시키는 통합 함수
-    /// </summary>
     public void ModifyStat(EEntityStat statType, float amount)
     {
         switch (statType)
@@ -148,17 +148,14 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             case EEntityStat.DebuffRes: _debuffRes += amount; break;
             case EEntityStat.DeathblowRes: _deathblowRes += amount; break;
             case EEntityStat.ExtraCritical: _extraCritical += amount; break;
+            case EEntityStat.Hero:
+                Debug.Log("Hero 여부는 변경할 수 없습니다");
+                break;
         }
 
         Debug.Log($"[{_name}] 스탯 변경됨 -> {statType} : {amount}");
     }
 
-
-    /// <summary>
-    /// 스탯 내보내기
-    /// </summary>
-    /// <param name="statType"></param>
-    /// <returns></returns>
     public float GetStat(EEntityStat statType)
     {
         return statType switch
@@ -179,6 +176,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             EEntityStat.DebuffRes => _debuffRes,
             EEntityStat.DeathblowRes => _deathblowRes,
             EEntityStat.ExtraCritical => _extraCritical,
+            EEntityStat.Hero => _hero ? 1f : 0f,
 
             _ => 0f,
         };
@@ -202,10 +200,10 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
                 break;
 
             case EEntityStat.Stress:
-                _currentStress = 0; // 스트레스 초기값은 0
+                _currentStress = 0;
                 break;
             case EEntityStat.MaxStress:
-                _maxStress = 10; // 최대 스트레스 기본값 10
+                _maxStress = 10;
                 break;
 
             case EEntityStat.Speed:
@@ -229,13 +227,15 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             case EEntityStat.DeathblowRes: _deathblowRes = _heroBasicData.DeathblowRes; break;
 
             case EEntityStat.ExtraCritical:
-                _extraCritical = 0f; // 추가 치명타 기본값은 0
+                _extraCritical = 0f;
+                break;
+            case EEntityStat.Hero:
+                _hero = _heroBasicData.Hero;
                 break;
         }
 
         Debug.Log($"[{_name}] 스탯 초기화됨 -> {statType}이(가) 기본값으로 복구되었습니다.");
     }
-
 
     public void InitializeRank(ERank rank)
     {
@@ -257,6 +257,10 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         return this;
     }
 
+    public bool IsHero()
+    {
+        return _hero;
+    }
 
     private void OnDeathblow()
     {
@@ -267,4 +271,3 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     {
         Debug.Log($"{_name}이(가) 붕괴(Meltdown) 상태가 되었습니다!");
     }
-}

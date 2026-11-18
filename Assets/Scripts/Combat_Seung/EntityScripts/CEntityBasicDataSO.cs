@@ -84,6 +84,9 @@ public class CEntityBasicDataSO : ScriptableObject
     public float DebuffRes => _debuffRes;
     public float DeathblowRes => _deathblowRes;
     public float CurrentStress => _currentStress;
+    //
+
+    public bool Hero => _hero;
 
     //
     public int Movement => _movement;
