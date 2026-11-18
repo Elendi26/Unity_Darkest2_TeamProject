@@ -4,25 +4,37 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System;
+using TMPro;
 
-public enum SlotTypes
+public enum ESlotTypes
 {
     Skill,
     Move,
     TurnChange
 }
 
+public enum EUsableSkillState
+{
+    Usable,
+    InvalidRank,
+    ConditionBlocked,
+    OnCooldown
+}
+
 public class CombatSkillSlot_UI : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
 {
     #region 인스펙터
     [Header("슬롯 타입 결정")]
-    [SerializeField] private SlotTypes _slotType;
+    [SerializeField] private ESlotTypes _slotType;
 
     [Header("스킬 슬롯 번호")]
     [SerializeField] private int _slotNum;
 
     [Header("이미지")]
     [SerializeField] private Image _slotImage;
+
+    [Header("재사용 대기 시간 카운트용 텍스트")]
+    [SerializeField] private TextMeshProUGUI _turnCount;
 
     [Header("하이라이트 (1.선택/2.포인터)")]
     [SerializeField] private GameObject _selectHL;
@@ -34,8 +46,14 @@ public class CombatSkillSlot_UI : MonoBehaviour, IPointerClickHandler, IPointerE
     [Header("스킬 데이터")]
     [SerializeField] private CSkillDataSO _skillData;
 
-
     #endregion
+
+    // 내부 변수
+
+    private string _reasonUnusable;
+    private string _countIndex;
+    private EUsableSkillState _usableState;
+
 
     // 이벤트 선언
 
@@ -56,11 +74,17 @@ public class CombatSkillSlot_UI : MonoBehaviour, IPointerClickHandler, IPointerE
 
 
     #region 프로퍼티
-    public SlotTypes SlotType => _slotType;
+    public ESlotTypes SlotType => _slotType;
+
+    public EUsableSkillState UsableState => _usableState;
+
+    public string ReasonUnusable => _reasonUnusable;
+
+    public string CountIndex => _countIndex;
 
     public int SlotNum => _slotNum;
 
-        public CSkillDataSO SkillData => _skillData;
+    public CSkillDataSO SkillData => _skillData;
 
     #endregion
 
@@ -85,6 +109,50 @@ public class CombatSkillSlot_UI : MonoBehaviour, IPointerClickHandler, IPointerE
         }
     }
 
+    public void SetSkillSlot(EUsableSkillState state, int cooldown)
+    {
+        _usableState = state;
+
+        if(_turnCount != null)
+        {
+            _turnCount.text = string.Empty;
+        }
+
+        switch (state)
+        {
+            case EUsableSkillState.Usable:
+
+                _slotImage.color = Color.white;
+                _countIndex = string.Empty;
+                _reasonUnusable = string.Empty;
+
+                break;
+
+            case EUsableSkillState.InvalidRank:
+
+                _slotImage.color = new Color(0.35f, 0.35f, 0.35f, 1f);
+                _reasonUnusable = "사용 불가 위치";
+
+                break;
+
+            case EUsableSkillState.ConditionBlocked:
+
+                _slotImage.color = new Color(0.35f, 0.35f, 0.35f, 1f);
+                _reasonUnusable = "조건 막힘";
+
+                break;
+
+            case EUsableSkillState.OnCooldown:
+
+                _slotImage.color = new Color(0.35f, 0.35f, 0.35f, 1f);
+                _turnCount.text = cooldown > 0 ? cooldown.ToString() : string.Empty;
+                _reasonUnusable = "재사용 대기 중";
+
+                break;
+        }
+
+    }
+
 
     public void OnPointerEnter(PointerEventData eventData)
     {
@@ -100,6 +168,11 @@ public class CombatSkillSlot_UI : MonoBehaviour, IPointerClickHandler, IPointerE
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if(_slotType == ESlotTypes.Skill && _usableState != EUsableSkillState.Usable)
+        {
+            return;
+        }
+
         OnClickedSlot?.Invoke(this);
     }
 
@@ -142,6 +215,5 @@ public class CombatSkillSlot_UI : MonoBehaviour, IPointerClickHandler, IPointerE
             _pointerHL.SetActive(onPointer);
         }
     }
-
 
 }

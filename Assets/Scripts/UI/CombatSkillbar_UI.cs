@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CombatSkillbar_UI : MonoBehaviour
@@ -12,8 +14,8 @@ public class CombatSkillbar_UI : MonoBehaviour
     [Header("툴팁 캔버스 그룹 등록")]
     [SerializeField] private CanvasGroup _skillTooltipPanel;
 
-    [Header("영웅별 스킬 데이터")]
-    [SerializeField] private List<CSkillDataSO> _skillDatas = new List<CSkillDataSO>();
+    [Header("사용 불가능한 원인 텍스트")]
+    [SerializeField] private TextMeshProUGUI _reasonText;
 
     #endregion
 
@@ -39,23 +41,6 @@ public class CombatSkillbar_UI : MonoBehaviour
 
     private void Start()
     {
-        
-        for(int i = 0;  i < _skillSlot.Count; i++)
-        {
-            if( _skillSlot[i] == null )
-            {
-                continue;
-            }
-
-            if (_skillSlot[i].SlotType == SlotTypes.Skill)
-            {
-                if (i < _skillDatas.Count && _skillDatas[i] != null)
-                {
-                    _skillSlot[i].SetIconImage(_skillDatas[i]);
-                }
-            }
-
-        }
         
     }
 
@@ -101,11 +86,27 @@ public class CombatSkillbar_UI : MonoBehaviour
     /// </summary>
     /// <param name="slot"></param>
     private void HandlePointerEntered(CombatSkillSlot_UI slot)
-    {
+    {        
         _onPointerSlot = slot;
-        // 툴팁 데이터 전달
-        SkillUITooltipManager.Instance.SetSkillData(slot.SkillData);
-        SkillUITooltipManager.Instance.ShowTooltip();
+
+        if(slot.SkillData != null)
+        {
+            // 툴팁 데이터 전달
+            SkillUITooltipManager.Instance.SetSkillData(slot.SkillData);
+            SkillUITooltipManager.Instance.ShowTooltip();
+        }
+
+        else
+        {
+            SkillUITooltipManager.Instance.HideTooltip();
+        }
+
+
+
+        if (_reasonText != null)
+        {
+            _reasonText.text = slot.ReasonUnusable;
+        }
     }
 
     /// <summary>
@@ -121,6 +122,11 @@ public class CombatSkillbar_UI : MonoBehaviour
         if (_selectSlot != slot)
         {
             slot.SelectOnHighLight(false);
+        }
+
+        if (_reasonText != null)
+        {
+            _reasonText.text = string.Empty;
         }
 
         // 선택한 슬롯이 남아있다면 
@@ -149,7 +155,7 @@ public class CombatSkillbar_UI : MonoBehaviour
     /// <param name="slot"></param>
     private void HandleClicked(CombatSkillSlot_UI slot)
     {
-        if(slot.SlotType == SlotTypes.TurnChange)
+        if(slot.SlotType == ESlotTypes.TurnChange)
         {
             return;
         }
@@ -187,7 +193,7 @@ public class CombatSkillbar_UI : MonoBehaviour
     /// <param name="slot"></param>
     private void HandlePointerDown(CombatSkillSlot_UI slot)
     {
-        if(slot.SlotType == SlotTypes.TurnChange)
+        if(slot.SlotType == ESlotTypes.TurnChange)
         {
             // 실행 중인 코루틴이 있다면 멈추고
             if(_TurnPassCo != null)
@@ -206,7 +212,7 @@ public class CombatSkillbar_UI : MonoBehaviour
     /// <param name="slot"></param>
     private void HandlePointerUp(CombatSkillSlot_UI slot)
     {
-        if (slot.SlotType == SlotTypes.TurnChange)
+        if (slot.SlotType == ESlotTypes.TurnChange)
         {
             // TODO : 3초 코루틴 정지 및 저장한 코루틴 변수 없애고
             if(_TurnPassCo != null)
@@ -249,9 +255,37 @@ public class CombatSkillbar_UI : MonoBehaviour
     /// <summary>
     /// 현재 턴을 잡은 영웅의 장착중인 스킬 리스트를 호출하는 함수
     /// </summary>
-    public void HeroTurnSkillDataSet(/*리스트로 된 스킬 데이터를 받아야지*/)
+    public void HeroTurnSkillDataSet(List<(EUsableSkillState state, int cooldown, CSkillDataSO data)> skillDatas)
     {
+        if(_selectSlot != null)
+        {
+            // 먼저 이전 영웅 턴에 켜져 있던 하이라이트를 끄고
+            _selectSlot.SelectOnHighLight(false);
+            // 선택하고 있는 슬롯을 비우고
+            _selectSlot = null;
+        }
 
+        // 사용 불가 이유 비우고
+        _reasonText.text = string.Empty;
+        // 스킬 툴팁 초기화
+        SkillUITooltipManager.Instance.HideTooltip();
+
+        int dataIndex = 0;
+
+        // 스킬 슬롯 순회하며 갱신하기
+        for(int i = 0; i < _skillSlot.Count; i++)
+        {
+            // 스킬을 2개나 3개만 장착하고 전투에 진입할 때, dataIndex가 리스트 크기를 넘어가는 것을 방지하기 위한 조건문
+            if (skillDatas != null && dataIndex < skillDatas.Count)
+            {
+                if (_skillSlot[i].SlotType == ESlotTypes.Skill)
+                {
+                    _skillSlot[i].SetIconImage(skillDatas[dataIndex].data);
+                    _skillSlot[i].SetSkillSlot(skillDatas[dataIndex].state, skillDatas[dataIndex].cooldown);
+                    dataIndex++;
+                }
+            }
+        }
     }
 
 

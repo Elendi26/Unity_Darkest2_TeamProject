@@ -76,6 +76,12 @@ public class CombatHeroSpawner : MonoBehaviour
                 }
             }
         }
+
+        else
+        {
+            CPrint.Error("현재 세이브 데이터가 존재하지 않음");
+            return;
+        }
     }
 
     /// <summary>
@@ -99,7 +105,7 @@ public class CombatHeroSpawner : MonoBehaviour
         // 위치, 회전, 스케일 값 고정
         spawnModel.transform.localPosition = Vector3.zero;
         spawnModel.transform.localRotation = Quaternion.Euler(0, _rotationAngle, 0);
-        spawnModel.transform.localScale = Vector3.one * _scaleMulti;
+        spawnModel.transform.localScale = spawnModel.transform.localScale * _scaleMulti;
 
     }
 
