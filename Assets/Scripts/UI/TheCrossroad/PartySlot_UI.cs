@@ -10,7 +10,7 @@ public class PartySlot_UI : MonoBehaviour, IDropHandler, IPointerClickHandler
 {
     #region 인스펙터
     [Header("슬롯에 있는 영웅의 데이터 참조 SO")]
-    [SerializeField] private HeroDataSO _heroData;
+    [SerializeField] private CEntityBasicDataSO _heroData;
 
     [Header("슬롯의 번호")]
     [SerializeField] private int _slotIndex;
@@ -30,11 +30,11 @@ public class PartySlot_UI : MonoBehaviour, IDropHandler, IPointerClickHandler
     #endregion
 
     // 이벤트 (몇번 슬롯에 어떤 영웅 데이터인지)
-    public event Action<int, HeroDataSO> HeroDropped;
+    public event Action<int, CEntityBasicDataSO> HeroDropped;
 
-    public event Action<HeroDataSO> PartySlotRightClicked;
-    public event Action<int> PartySlotLeftClicked;
-    public event Action<HeroDataSO> PartySlotDoubleClicked;
+    public event Action<CEntityBasicDataSO> PartySlotRightClicked;
+    public event Action<int, CEntityBasicDataSO> PartySlotLeftClicked;
+    public event Action<CEntityBasicDataSO> PartySlotDoubleClicked;
 
     // 내부 변수
     private float _lastClick = -999f;
@@ -42,7 +42,7 @@ public class PartySlot_UI : MonoBehaviour, IDropHandler, IPointerClickHandler
     private bool inParty = false;
 
     // 프로퍼티
-    public HeroDataSO HeroData => _heroData;
+    public CEntityBasicDataSO HeroData => _heroData;
 
     private void Start()
     {
@@ -118,9 +118,9 @@ public class PartySlot_UI : MonoBehaviour, IDropHandler, IPointerClickHandler
 
             }
 
-            else if (clickInterval > _doubleClickTime)
+            else if (clickInterval > _doubleClickTime && _heroData != null)
             {
-                PartySlotLeftClicked?.Invoke(_slotIndex);
+                PartySlotLeftClicked?.Invoke(_slotIndex, _heroData);
                 
                 _lastClick = Time.time;
             }
@@ -132,7 +132,7 @@ public class PartySlot_UI : MonoBehaviour, IDropHandler, IPointerClickHandler
     /// 슬롯과 상관없이 로스터 더블클릭으로 슬롯이 채워지는 경우 호출할 함수
     /// </summary>
     /// <param name="data"></param>
-    public void SlotDataAdd(HeroDataSO data)
+    public void SlotDataAdd(CEntityBasicDataSO data)
     {
         // 데이터 넣고
         _heroData = data;

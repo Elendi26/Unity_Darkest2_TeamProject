@@ -16,7 +16,7 @@ public class UserProfileData
     public string LastSaveTime;
 
     // 보유한 촛불 개수
-    public int Candle;
+    public int CandleCount;
 
 
     // TODO : 맵 진행도, 노드 진행도, 역마차 상태, 영웅 데이터 변수 등 추가해야한다.

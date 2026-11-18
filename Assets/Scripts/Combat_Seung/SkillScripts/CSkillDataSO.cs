@@ -37,11 +37,22 @@ public enum ERank
 [CreateAssetMenu (menuName = "2D3D/SO/SkillBasicDataSO", fileName = "SkillBasicData_")]
 public class CSkillDataSO : ScriptableObject, ICombatData
 {
-	#region 인스펙터
+    #region 인스펙터
 
-	[Header("기본 데이터")]
+    [Header("기본 데이터")]
     [SerializeField] private string _heroName;
-	[SerializeField] private int _index;
+    [Header("스킬 고유 ID")]
+    [SerializeField] private string _skillID;
+    [Header("스킬 이름")]
+    [SerializeField] private string _skillName;
+    [Header("스킬 설명")]
+    [SerializeField] private string _skillExplain;
+    [Header("스킬 원거리 or 근거리 타입")]
+    [SerializeField] private string _skillType;
+    [Header("스킬 세부 타입(피해 주는 스킬, 회복 스킬 등")]
+    [SerializeField] private string _skillDetail;
+
+    [SerializeField] private int _index;
 	[SerializeField] private ERank _rank; // 스킬 고를 때 스킬 아이콘 활성화/비활성화 여부 확인
 	[SerializeField] private ERank _target; // 스킬 고른 후 대상을 선택할 때 대상 활성화/비활성화 여부 확인
 	[SerializeField] private ESkillType _type;
@@ -59,12 +70,15 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     [PolymorphicDropdown]
     private List<ISkillEffect> _skillEffectForSelf;
 
-	[Header("UI등")]
-	[SerializeField] private object _UI; // UI 관련 자유롭게 변경 가능
-	[SerializeField] private Sprite _testSprite;
-	[SerializeField] private Animation _testAnimation;
-    [SerializeField] private Image _activeImage;
-    [SerializeField] private Image _inactiveImage;
+    [Header("스킬 아이콘 이미지")]
+    [SerializeField] private Sprite _skillIcon;
+    [Header("스킬 근거리 or 원거리 이미지")]
+    [SerializeField] private Sprite _skillTypeIcon;
+    [Header("스킬 사용 가능 자리 및 공격 가능 자리 이미지")]
+    [SerializeField] private Sprite _skillRangeImage;
+    [SerializeField] private Animation _testAnimation;
+    [SerializeField] private Sprite _activeImage;
+    [SerializeField] private Sprite _inactiveImage;
 
     #endregion
 
@@ -72,6 +86,11 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     #region 프로퍼티
 
     public string HeroName => _heroName;
+    public string SkillID => _skillIcon.name;
+    public string SkillName => _skillName;
+    public string SkillExplain => _skillExplain;
+    public string SkillType => _skillType;
+    public string SkillDetail => _skillDetail;
     public int Index => _index;
     public ERank Rank => _rank;
     public ERank Target => _target;
@@ -85,11 +104,14 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     public bool SkillSelfEffect => _skillSelfEffect;
     public List<ISkillEffect> SkillEffectForSelf => _skillEffectForSelf;
 
-    public object UI => _UI;
-    public Sprite TestSprite => _testSprite;
+
+
+    public Sprite SkillIcon => _skillIcon;
+    public Sprite SkillTypeIcon => _skillTypeIcon;
+    public Sprite SkillRangeImage => _skillRangeImage;
     public Animation TestAnimation => _testAnimation;
-    public Image ActiveImage => _activeImage;
-    public Image InactiveImage => _inactiveImage;
+    public Sprite ActiveImage => _activeImage;
+    public Sprite InactiveImage => _inactiveImage;
 
 
     #endregion

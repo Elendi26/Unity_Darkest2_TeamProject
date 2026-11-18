@@ -1,8 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using static UnityEngine.GraphicsBuffer;
@@ -23,7 +23,7 @@ public class HeroPopup_UI : MonoBehaviour
 
     #region 인스펙터
     [Header("영웅 목록")]
-    [SerializeField] private List<HeroDataSO> _heroes = new List<HeroDataSO>();
+    [SerializeField] private List<CEntityBasicDataSO> _heroes = new List<CEntityBasicDataSO>();
 
     [Header("직업 이름이 들어갈 텍스트")]
     [SerializeField] private TextMeshProUGUI _jopTitle;
@@ -47,11 +47,8 @@ public class HeroPopup_UI : MonoBehaviour
     [Header("팝업 스킬 슬롯 참조")]
     [SerializeField] private PopupSkillSlot_UI[] _skillSlots;
 
-    [Header("3D 모델 생성 위치")]
-    [SerializeField] private Transform _modelSpawnPoint;
-
-    [Header("모델을 출력할 출력용 카메라")]
-    [SerializeField] private Camera _modelCamera;
+    [Header("모델링 뷰어 참조")]
+    [SerializeField] private ModelingViewer_UI _modelingViewer;
 
     // 저항력 수치 들어갈 텍스트
     [Header("출혈")]
@@ -84,20 +81,25 @@ public class HeroPopup_UI : MonoBehaviour
     // 내부 변수
 
     private int _currentHeroIndex;
-        
-    private GameObject _currentModel;
 
     private HeroSaveData _currentHeroSaveData;
 
     private UserProfileData _currentProfileData;
 
-    private HeroDataSO _currentHeroDataSO;
+    private CEntityBasicDataSO _currentHeroDataSO;
+
+    // 프로퍼티
+
+    public CEntityBasicDataSO CurrentHeroDataSO => _currentHeroDataSO;
 
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
+
+            DontDestroyOnLoad(gameObject);
+
         }
 
         else
@@ -105,21 +107,16 @@ public class HeroPopup_UI : MonoBehaviour
             Destroy(gameObject);
         }
 
-        DontDestroyOnLoad(this);
+    }
 
+    private void OnEnable()
+    {
         for(int i = 0; i < _skillSlots.Length; i++)
         {
             _skillSlots[i].OnPopupSkillSlotClicked += SetCombatSkills;
         }
     }
 
-    void Start()
-    {
-        if(_modelCamera != null)
-        {
-            _modelCamera.enabled = true;
-        }
-    }
 
     private void OnDisable()
     {
@@ -129,7 +126,7 @@ public class HeroPopup_UI : MonoBehaviour
         }
     }
 
-    public void OpenPopup(List<HeroDataSO> list, int startIndex)
+    public void OpenPopup(List<CEntityBasicDataSO> list, int startIndex)
     {
         _currentHeroIndex = startIndex;
         _heroes = list;
@@ -140,18 +137,11 @@ public class HeroPopup_UI : MonoBehaviour
     /// 특정 영웅의 정보 불러오기
     /// </summary>
     /// <param name="data"></param>
-    public void HeroDataUpdate(HeroDataSO data)
+    public void HeroDataUpdate(CEntityBasicDataSO data)
     {
         if(data == null)
         {
             return;
-        }
-
-        // 기존의 모델 존재하면 파괴 후 비우기
-        if (_currentModel != null)
-        {
-            Destroy(_currentModel);
-            _currentModel = null;
         }
 
         _currentHeroSaveData = null;
@@ -161,39 +151,25 @@ public class HeroPopup_UI : MonoBehaviour
         // 기본으로 출력할 탭은 전투 기술 탭
         SelectTab(PopupTab.CombatSkills);
 
-        // 새로운 모델 생성한 후, 캐싱하기
-        _currentModel = Instantiate(data.HeroModel, _modelSpawnPoint);
-        
-        // 위치, 로테이션 값 초기화
-        _currentModel.transform.localPosition = Vector3.zero;
-        _currentModel.transform.localRotation = Quaternion.Euler(0, 180f, 0);
-        _currentModel.transform.localScale = Vector3.one;
-
-        foreach (Transform child in _currentModel.GetComponentsInChildren<Transform>(true))
+        if(_modelingViewer != null)
         {
-            child.gameObject.layer = _modelSpawnPoint.gameObject.layer;
-        }
-
-        // 카메라 렌더링 켜기 
-        if (_modelCamera != null)
-        {
-            _modelCamera.enabled = true;
+            _modelingViewer.ShowModeling(data.HeroModel);
         }
 
         _jopTitle.text = data.JobTitle;
-        _heroName.text = data.HeroName;
-        _heroName2.text = data.HeroName;
-        _bleedingValue.text = data.ResBleeding.ToString();
-        _poisoningValue.text = data.ResPoisoning.ToString();
-        _burnValue.text = data.ResBurn.ToString();
-        _stunValue.text = data.ResStun.ToString();
-        _moveValue.text = data.ResMove.ToString();
-        _weakeningValue.text = data.ResWeakening.ToString();
-        _diseaseValue.text = data.ResDisease.ToString();
-        _deathblowValue.text = data.ResDeathBlow.ToString();
-        _stressValue.text = data.HeroStressValue.ToString();
-        _heroHP.text = data.HeroHP.ToString();
-        _speed.text = data.HeroSpeed.ToString();
+        _heroName.text = data.Name;
+        _heroName2.text = data.Name;
+        _bleedingValue.text = data.BleedRes.ToString();
+        _poisoningValue.text = data.BlightRes.ToString();
+        _burnValue.text = data.BurnRes.ToString();
+        _stunValue.text = data.StunRes.ToString();
+        _moveValue.text = data.MoveRes.ToString();
+        _weakeningValue.text = data.DebuffRes.ToString();
+        _diseaseValue.text = data.DiseaseRes.ToString();
+        _deathblowValue.text = data.DeathblowRes.ToString();
+        _stressValue.text = data.CurrentStress.ToString();
+        _heroHP.text = data.MaxHP.ToString();
+        _speed.text = data.Speed.ToString();
 
         // 세이브 파일 불러오고
         if(DataSaveManager.Instance != null)
@@ -347,14 +323,5 @@ public class HeroPopup_UI : MonoBehaviour
       
     }
 
-    /// <summary>
-    /// 팝업창이 꺼질 때, 카메라도 함께 사용을 중단해야 하므로 호출할 함수
-    /// </summary>
-    public void OffModelCamera()
-    {
-        if(_modelCamera != null)
-        {
-            _modelCamera.enabled = false;
-        }
-    }
+
 }

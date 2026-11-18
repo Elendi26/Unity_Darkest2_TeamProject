@@ -24,7 +24,7 @@ public class CSkillQuickSlotSO : ScriptableObject
                 continue;
             }
 
-            _slots[i] = skillData[i].UI;
+            //_slots[i] = skillData[i].UI;
         }
     }
 

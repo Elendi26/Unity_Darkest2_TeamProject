@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3bf3fda9b2387046b060585d3b5d713, type: 3}
+  m_Name: Grave_Robber
+  m_EditorClassIdentifier: 
+  _heroID: Grave_Robber
+  _name: "\uC624\uB4DC\uB9AC"
+  _jobTitle: "\uB3C4\uAD74\uAFBC"
+  _heroSmallTalk: "\"\uBBFC\uCCA9\uD558\uACE0 \uC6B0\uC544\uD558\uC9C0\uB9CC \uC720\uB09C\uD788
+    \uC740\uBC00\uD55C \uC219\uB140\uB77C\""
+  _heroSpecs:
+  - "+ \uBAA8\uB4E0 \uC704\uCE58"
+  - "+ \uC740\uC2E0"
+  - "+ \uD68C\uD53C"
+  - "+ \uB192\uC740 \uCE58\uBA85\uD0C0\uC728"
+  _maxHP: 29
+  _currentHP: 0
+  _maxStress: 10
+  _speed: 5
+  _bleedRes: 30
+  _blightRes: 30
+  _burnRes: 30
+  _diseaseRes: 30
+  _stunRes: 20
+  _moveRes: 20
+  _debuffRes: 30
+  _deathblowRes: 66
+  _currentStress: 0
+  _movement: 1
+  _heroSkills:
+  - {fileID: 11400000, guid: d53e32ee2fb83994eaadcee1820fa791, type: 2}
+  - {fileID: 11400000, guid: 0184e292d3da7ae4e85ddfd97e8e9306, type: 2}
+  - {fileID: 11400000, guid: a3db640eb0883aa48be05405bfaf371f, type: 2}
+  - {fileID: 11400000, guid: e1e75889e528eb54f9450301682be47e, type: 2}
+  - {fileID: 11400000, guid: d10e6258f65336d4fa322f05ec11e8fa, type: 2}
+  _heroModel: {fileID: 1709254077376921, guid: 111203539c4c4e144af2aae64aa2996c, type: 3}
+  _heroPortrait: {fileID: 21300000, guid: e741487b58e004740bca34e2c24a376b, type: 2}
+  _heroRank: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}

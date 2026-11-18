@@ -51,9 +51,9 @@ public class AlterDataSO : ScriptableObject
 			sumMaxCost = 0;
 		}
 
-		for(int i = 0; i < _nodeCost.Length - -1; i++)
+		for(int i = 0; i < _nodeCost.Length -1; i++)
 		{
-			_nodeCost[i] += sumMaxCost;
+			sumMaxCost += _nodeCost[i];
 		}
 
 		return sumMaxCost;
@@ -76,14 +76,38 @@ public class AlterDataSO : ScriptableObject
 		int maxIndex = Mathf.Min(index, _nodeCost.Length - 1);
 
 		// <=인 이유는 클릭하고 있는 노드를 포함하여 촛불 개수를 더해야하기 때문이다.
-		for(int i = 0; i <= maxIndex; i++)
+		for (int i = 0; i <= maxIndex; i++)
 		{
-
+			sumSpeCost += _nodeCost[i];
 		}
-
 
 		return sumSpeCost;
     }
 
+	/// <summary>
+	/// 개별 노드마다 필요한 촛불 개수를 카운팅하여 확인하는 함수
+	/// </summary>
+	/// <param name="index"></param>
+	/// <returns></returns>
+	public int NeedNodeCostIndi(int index)
+	{
+		if(_nodeCost == null)
+		{
+			return 0;
+		}
+
+		// 노드 단계가 0단계 이상, 최대단계 이하일 때만
+		if(index >= 0 && index < _nodeCost.Length)
+		{
+			return _nodeCost[index];
+		}
+
+		// 해금 불가능할 때
+		else
+		{
+			return -1;
+		}
+
+	}
 
 }

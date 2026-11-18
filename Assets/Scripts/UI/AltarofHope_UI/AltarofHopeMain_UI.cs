@@ -46,5 +46,4 @@ public class AltarofHopeMain_UI : MonoBehaviour, IPointerClickHandler
         }
     }
 
-
 }
