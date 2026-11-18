@@ -41,6 +41,8 @@ public class CEntityBasicDataSO : ScriptableObject
 	[SerializeField, Min(0)] private float _deathblowRes;
     [SerializeField, Min(0)] private float _currentStress;
 
+    [Header("영웅/적 여부")]
+    [SerializeField] private bool _hero;
 
     [Header("이동 가능 거리 / 적일 경우 사이즈")]
 	[SerializeField, Min(0)] private int _movement;
