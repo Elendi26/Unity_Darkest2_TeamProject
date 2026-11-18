@@ -8,15 +8,17 @@ public class CCombatStateManager : MonoBehaviour
 {
     public static CCombatStateManager Instance;
 
-    [SerializeField] private List<CEntityRuntimeData> _onCombatEntities = new List<CEntityRuntimeData>();
+    #region ¿ŒΩ∫∆Â≈Õ
 
+    [SerializeField] private List<CEntityRuntimeData> _onCombatEntities = new List<CEntityRuntimeData>();
     [SerializeField] private CTeamData<CEntityRuntimeData> _testEnemies;
+    [SerializeField] private CCombatCurrentTurn _currentTurn;
+
+    #endregion
 
     private List<CEntityRuntimeData> _orderedTurn = new List<CEntityRuntimeData>();
 
     private CCombatState _currentState;
-
-    private CCombatCurrentTurn _currentTurn;
 
     private bool _roundOver = false;
 
@@ -82,7 +84,6 @@ public class CCombatStateManager : MonoBehaviour
 public abstract class CCombatState
 {
     protected CCombatStateManager _manager;
-
     public CCombatState(CCombatStateManager manager)
     {
         _manager = manager;
