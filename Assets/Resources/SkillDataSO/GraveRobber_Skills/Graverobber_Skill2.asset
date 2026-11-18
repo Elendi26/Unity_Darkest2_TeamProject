@@ -26,7 +26,8 @@ MonoBehaviour:
   _critical: 15
   _cooldown: -1
   _charges: -1
-  _skillEffect: []
+  _skillEffect:
+  - rid: 6238335816173092865
   _skillSelfEffect: 0
   _skillEffectForSelf: []
   _skillIcon: {fileID: 21300000, guid: 52ed5f8e61e392d45affea1dbe880fd1, type: 2}
@@ -37,4 +38,10 @@ MonoBehaviour:
   _inactiveImage: {fileID: 0}
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 6238335816173092865
+      type: {class: CSkillDamage, ns: , asm: Assembly-CSharp}
+      data:
+        _minDamage: 3
+        _maxDamage: 6
+        _combo: 0

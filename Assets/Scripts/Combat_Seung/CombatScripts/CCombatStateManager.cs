@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-// ÀüÅõ ÃÑ°ı ¸Å´ÏÀú
+// ì „íˆ¬ ì´ê´„ ë§¤ë‹ˆì €
 public class CCombatStateManager : MonoBehaviour
 {
     public static CCombatStateManager Instance;
 
-    #region ÀÎ½ºÆåÅÍ
+    #region ì¸ìŠ¤í™í„°
 
     [SerializeField] private List<CEntityRuntimeData> _onCombatEntities = new List<CEntityRuntimeData>();
     [SerializeField] private CTeamData<CEntityRuntimeData> _testEnemies;
@@ -22,7 +22,7 @@ public class CCombatStateManager : MonoBehaviour
 
     private bool _roundOver = false;
 
-    #region ÇÁ·ÎÆÛÆ¼
+    #region í”„ë¡œí¼í‹°
 
     public List<CEntityRuntimeData> OnCombatEntities => _onCombatEntities;
     public List<CEntityRuntimeData> OrderedTurn
@@ -37,7 +37,7 @@ public class CCombatStateManager : MonoBehaviour
 
     private void Awake()
     {
-        // Ã¹ ½ÃÀÛ ½Ã ¶ó¿îµå ½ÃÀÛ »óÅÂ·Î ÁøÀÔ
+        // ì²« ì‹œì‘ ì‹œ ë¼ìš´ë“œ ì‹œì‘ ìƒíƒœë¡œ ì§„ì…
         ChangeState(new CCombatState_RoundStart(this));
     }
 
@@ -80,7 +80,7 @@ public class CCombatStateManager : MonoBehaviour
 }
 
 
-// »óÅÂ ÆĞÅÏÀÇ ºÎ¸ğ°¡ µÉ Ãß»ó Å¬·¡½º
+// ìƒíƒœ íŒ¨í„´ì˜ ë¶€ëª¨ê°€ ë  ì¶”ìƒ í´ë˜ìŠ¤
 public abstract class CCombatState
 {
     protected CCombatStateManager _manager;
@@ -94,10 +94,10 @@ public abstract class CCombatState
 }
 
 
-// ¶ó¿îµå ½ÃÀÛ
+// ë¼ìš´ë“œ ì‹œì‘
 public class CCombatState_RoundStart : CCombatState
 {
-    // ºÎ¸ğ »ı¼ºÀÚ È£Ãâ ÇÊ¼ö
+    // ë¶€ëª¨ ìƒì„±ì í˜¸ì¶œ í•„ìˆ˜
     public CCombatState_RoundStart(CCombatStateManager manager) : base(manager) { }
 
     public override void Enter()
@@ -141,7 +141,7 @@ public class CCombatState_RoundStart : CCombatState
 }
 
 
-// ÅÏ ½ÃÀÛ »óÅÂ
+// í„´ ì‹œì‘ ìƒíƒœ
 public class CCombatState_TurnStart : CCombatState
 {
     public CCombatState_TurnStart(CCombatStateManager manager) : base(manager) { }
@@ -158,7 +158,7 @@ public class CCombatState_TurnStart : CCombatState
     }
 }
 
-// ÅÏ ³¡ »óÅÂ
+// í„´ ë ìƒíƒœ
 public class CCombatState_TurnEnd : CCombatState
 {
     public CCombatState_TurnEnd(CCombatStateManager manager) : base(manager) { }
