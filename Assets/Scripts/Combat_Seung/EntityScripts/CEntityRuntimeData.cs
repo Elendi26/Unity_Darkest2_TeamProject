@@ -25,7 +25,8 @@ public enum EEntityStat
     DebuffRes,
     DeathblowRes,
     ExtraCritical,
-    Hero
+    Hero,
+    Dead
 }
 
 public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
@@ -60,6 +61,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     public CTokenStatus _tokenStatus = new CTokenStatus();
     public List<SDamageoverTime> _damageoverTime = new List<SDamageoverTime>();
 
+    private bool _dead = false;
     private bool _hero = true;
     private float _extraCritical = 0f;
 
@@ -148,6 +150,9 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             case EEntityStat.DebuffRes: _debuffRes += amount; break;
             case EEntityStat.DeathblowRes: _deathblowRes += amount; break;
             case EEntityStat.ExtraCritical: _extraCritical += amount; break;
+            case EEntityStat.Dead:
+                Debug.Log("죽음은 EntityDead로 변경");
+                break;
             case EEntityStat.Hero:
                 Debug.Log("Hero 여부는 변경할 수 없습니다");
                 break;
@@ -262,6 +267,16 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         return _hero;
     }
 
+    public void EntityDead()
+    {
+        _dead = true;
+    }
+
+    public bool IsDead()
+    {
+        return _dead;
+    }
+
     private void OnDeathblow()
     {
         Debug.Log($"{_name}이(가) 쓰러졌습니다!");
@@ -271,3 +286,4 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     {
         Debug.Log($"{_name}이(가) 붕괴(Meltdown) 상태가 되었습니다!");
     }
+}

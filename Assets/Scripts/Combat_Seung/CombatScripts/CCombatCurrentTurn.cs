@@ -87,6 +87,4 @@ public class CCombatCurrentTurn : MonoBehaviour
             _seletedSkill.InputSelectedSkill(_entity, skillData);
         }
     }
-
-
 }

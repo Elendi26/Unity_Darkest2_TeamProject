@@ -79,6 +79,14 @@ public class CCombatRank : MonoBehaviour
         _entityRuntimeData = entity;
     }
 
+    public void ChangeEntityToCorpse()
+    {
+        if (!_entityRuntimeData.IsHero())
+        {
+            // 시체로 바꾸기
+        }
+    }
+
     public void CheckRank(ERank rank, ESkillType type)
     {
         int skillRank = (int)rank;

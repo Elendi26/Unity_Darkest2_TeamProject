@@ -181,3 +181,23 @@ public class CCombatState_TurnEnd : CCombatState
 
     }
 }
+
+public class CCombatState_CombatEnd : CCombatState
+{
+    public CCombatState_CombatEnd(CCombatStateManager manager) : base(manager) { }
+
+    public override void Enter()
+    {
+
+    }
+
+    public void TurnEndToken()
+    {
+
+    }
+
+    public override void Exit()
+    {
+
+    }
+}
