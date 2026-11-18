@@ -40,7 +40,7 @@ public class HeroStatus_UI : MonoBehaviour
 	/// <summary>
 	/// 히어로 SO 파일 데이터를 참조하여 매니저에게 전달받은 SO데이터를 각 함수를 불러와 화면을 동기화시키는 함수
 	/// </summary>
-	public void UpdateStatus(HeroDataSO data)
+	public void UpdateStatus(CEntityBasicDataSO data)
 	{
 		if(data == null)
 		{
@@ -82,10 +82,10 @@ public class HeroStatus_UI : MonoBehaviour
 	/// 텍스트 연결해서 텍스트 갱신하기
 	/// </summary>
 	/// <param name="data"></param>
-	private void TextUpdate(HeroDataSO data)
+	private void TextUpdate(CEntityBasicDataSO data)
 	{
 		_jobTitle.text = data.JobTitle;
-		_heroName.text = data.HeroName;
+		_heroName.text = data.Name;
 		_heroSmalltalk.text = data.HeroSmallTalk;
 		_indicator.sprite = data.HeroRank;
 	}
@@ -95,7 +95,7 @@ public class HeroStatus_UI : MonoBehaviour
 	/// 
 	/// </summary>
 	/// <param name="data"></param>
-	private void TraitsUpdate(HeroDataSO data)
+	private void TraitsUpdate(CEntityBasicDataSO data)
 	{
 		for(int i = 0; i < _heroSpec.transform.childCount; i++)
 		{

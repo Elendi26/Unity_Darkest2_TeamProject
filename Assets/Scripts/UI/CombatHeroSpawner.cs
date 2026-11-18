@@ -6,7 +6,7 @@ public class CombatHeroSpawner : MonoBehaviour
 {
     #region 인스펙터
     [Header("존재하는 영웅 SO 모두 넣기")]
-    [SerializeField] private HeroDataSO[] _heroes;
+    [SerializeField] private CEntityBasicDataSO[] _heroes;
 
     [Header("영웅 4명 스폰 포인트")]
     [SerializeField] private Transform[] _spawnPoints;
@@ -22,7 +22,7 @@ public class CombatHeroSpawner : MonoBehaviour
     // 내부 변수
 
     // 데이터를 찾아볼 수 있게 메모리에 딕셔너리 구축하기
-    Dictionary<string, HeroDataSO> _heroDataDict = new Dictionary<string, HeroDataSO>();
+    Dictionary<string, CEntityBasicDataSO> _heroDataDict = new Dictionary<string, CEntityBasicDataSO>();
 
     // 나중에 확장을 위해 해당 슬롯에 위치한 영웅의 정보를 쉽게 찾을 수 있도록 하는 변수
     private GameObject[] _heroesinParty = new GameObject[4];
@@ -66,7 +66,7 @@ public class CombatHeroSpawner : MonoBehaviour
                     int slotIndex = userData.PartyHeroes[i].PartySlotIndex;
 
                     // 원본 SO파일을 꺼낸 뒤에
-                    if (_heroDataDict.TryGetValue(userData.PartyHeroes[i].HeroID, out HeroDataSO data))
+                    if (_heroDataDict.TryGetValue(userData.PartyHeroes[i].HeroID, out CEntityBasicDataSO data))
                     {
                         // 해당 파티 슬롯에 해당 영웅 모델을 스폰시킨다.
                         HeroModelSpawn(data, slotIndex);
@@ -83,7 +83,7 @@ public class CombatHeroSpawner : MonoBehaviour
     /// </summary>
     /// <param name="heroData"></param>
     /// <param name="slotIndex"></param>
-    private void HeroModelSpawn(HeroDataSO heroData, int slotIndex)
+    private void HeroModelSpawn(CEntityBasicDataSO heroData, int slotIndex)
     {
         if(heroData == null || heroData.HeroModel == null)
         {

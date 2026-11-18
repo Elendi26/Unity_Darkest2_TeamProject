@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3bf3fda9b2387046b060585d3b5d713, type: 3}
+  m_Name: Plague_Doctor
+  m_EditorClassIdentifier: 
+  _heroID: Plague_Doctor
+  _name: "\uD30C\uB77C\uCF08\uC218\uC2A4"
+  _jobTitle: "\uC5ED\uBCD1 \uC758\uC0AC"
+  _heroSmallTalk: "\"\uC758\uC0AC\uB77C\uBA74 \uC751\uB2F9 \uC2E0\uCCB4\uC758 \uC1E0\uB77D\uC744
+    \uBC30\uC6E0\uC9C0 \uC54A\uC558\uACA0\uB290\uB0D0?\""
+  _heroSpecs:
+  - "+ \uD6C4\uBC29"
+  - "+ \uC911\uB3C5"
+  - "+ \uC2E4\uBA85"
+  - "+ \uCE58\uC720\uC0AC"
+  _maxHP: 30
+  _currentHP: 0
+  _maxStress: 10
+  _speed: 4
+  _bleedRes: 30
+  _blightRes: 40
+  _burnRes: 30
+  _diseaseRes: 40
+  _stunRes: 10
+  _moveRes: 0
+  _debuffRes: 0
+  _deathblowRes: 66
+  _currentStress: 0
+  _movement: 1
+  _heroSkills:
+  - {fileID: 11400000, guid: 55ee4de7d03e35d44bb93de2fc19e9b4, type: 2}
+  - {fileID: 11400000, guid: ccbf4342c6b9ba34083f4642ef99b314, type: 2}
+  - {fileID: 11400000, guid: 2d95cbe80b43cee4293197b0ac03f8b2, type: 2}
+  - {fileID: 11400000, guid: 6e0b68fea5e05034ca09ece3ab2ed277, type: 2}
+  - {fileID: 11400000, guid: dc3c82ada7288ad4fb449837a5d6e28d, type: 2}
+  _heroModel: {fileID: 1709254077376921, guid: e213685fcbbb30a4e99e4f436d966919, type: 3}
+  _heroPortrait: {fileID: 21300000, guid: 25be4477ed1f6b543997264e2b7da908, type: 2}
+  _heroRank: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}

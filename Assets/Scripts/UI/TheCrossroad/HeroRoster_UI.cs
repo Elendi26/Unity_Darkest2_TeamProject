@@ -9,7 +9,7 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
 {
     #region 인스펙터
     [Header("영웅 데이터 SO 참조")]
-    [SerializeField] private HeroDataSO _heroData;
+    [SerializeField] private CEntityBasicDataSO _heroData;
 
     [Header("영웅 로스터 슬롯 인덱스")]
     [SerializeField] private int _slotIndex; 
@@ -34,9 +34,9 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
 
     // 이벤트
 
-    public event Action<HeroDataSO> HeroRosterRightClicked;
-    public event Action<int, HeroDataSO> HeroRosterLeftClicked;
-    public event Action<HeroDataSO> HeroRosterDoubleClicked;
+    public event Action<CEntityBasicDataSO> HeroRosterRightClicked;
+    public event Action<int, CEntityBasicDataSO> HeroRosterLeftClicked;
+    public event Action<CEntityBasicDataSO> HeroRosterDoubleClicked;
 
 
     // 내부 변수
@@ -46,7 +46,7 @@ public class HeroRoster_UI : MonoBehaviour, IPointerClickHandler
     public bool inParty = false;
 
     // 프로퍼티
-    public HeroDataSO HeroData => _heroData;
+    public CEntityBasicDataSO HeroData => _heroData;
     public GameObject Portrait => _portrait;
    
 

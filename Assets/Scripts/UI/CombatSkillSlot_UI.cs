@@ -32,7 +32,7 @@ public class CombatSkillSlot_UI : MonoBehaviour, IPointerClickHandler, IPointerE
     [SerializeField] private Image _turnPassGauge;
 
     [Header("스킬 데이터")]
-    [SerializeField] private DummySkillDataSO _skillData;
+    [SerializeField] private CSkillDataSO _skillData;
 
 
     #endregion
@@ -60,7 +60,7 @@ public class CombatSkillSlot_UI : MonoBehaviour, IPointerClickHandler, IPointerE
 
     public int SlotNum => _slotNum;
 
-        public DummySkillDataSO SkillData => _skillData;
+        public CSkillDataSO SkillData => _skillData;
 
     #endregion
 
@@ -75,7 +75,7 @@ public class CombatSkillSlot_UI : MonoBehaviour, IPointerClickHandler, IPointerE
     /// 스킬 아이콘 동기화
     /// </summary>
     /// <param name="data"></param>
-    public void SetIconImage(DummySkillDataSO data)
+    public void SetIconImage(CSkillDataSO data)
     {
         _skillData = data;
 

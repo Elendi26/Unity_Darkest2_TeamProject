@@ -12,8 +12,8 @@ public class CombatSkillbar_UI : MonoBehaviour
     [Header("툴팁 캔버스 그룹 등록")]
     [SerializeField] private CanvasGroup _skillTooltipPanel;
 
-    [Header("테스트용 더미 스킬 데이터")]
-    [SerializeField] private List<DummySkillDataSO> _dummyDatas = new List<DummySkillDataSO>();
+    [Header("영웅별 스킬 데이터")]
+    [SerializeField] private List<CSkillDataSO> _skillDatas = new List<CSkillDataSO>();
 
     #endregion
 
@@ -40,20 +40,22 @@ public class CombatSkillbar_UI : MonoBehaviour
     private void Start()
     {
         
-        /* 테스트 용 더미 스킬 데이터
-        for (int i = 0; i < _skillSlot.Count; i++)
+        for(int i = 0;  i < _skillSlot.Count; i++)
         {
-            if (_skillSlot[i] == null) continue;
+            if( _skillSlot[i] == null )
+            {
+                continue;
+            }
 
             if (_skillSlot[i].SlotType == SlotTypes.Skill)
             {
-                if (i < _dummyDatas.Count && _dummyDatas[i] != null)
+                if (i < _skillDatas.Count && _skillDatas[i] != null)
                 {
-                    _skillSlot[i].SetIconImage(_dummyDatas[i]);
+                    _skillSlot[i].SetIconImage(_skillDatas[i]);
                 }
             }
+
         }
-        */
         
     }
 

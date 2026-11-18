@@ -16,7 +16,7 @@ public class TheCrossroadManager : MonoBehaviour
     [SerializeField] private HeroRoster_UI[] _heroRoster;
 
     [Header("영웅 데이터 SO 참조")]
-    [SerializeField] private HeroDataSO[] _heroDatas;
+    [SerializeField] private CEntityBasicDataSO[] _heroDatas;
 
     [Header("영웅 정보 UI 참조")]
     [SerializeField] private HeroStatus_UI _heroStatus;
@@ -38,6 +38,9 @@ public class TheCrossroadManager : MonoBehaviour
 
     [Header("파티 출정 버튼 홀딩 스크립트")]
     [SerializeField] private HoldButton _holdButton;
+
+    [Header("모델링 뷰어 참조")]
+    [SerializeField] private ModelingViewer_UI _modelingViewer;
 
 
 
@@ -98,7 +101,7 @@ public class TheCrossroadManager : MonoBehaviour
         // 기본 시작할 때 영웅 정보 띄워놓기
         if (_heroRoster[3].HeroData != null)
         {
-            HeroDataSO data = _heroRoster[3].HeroData;
+            CEntityBasicDataSO data = _heroRoster[3].HeroData;
             _heroStatus.UpdateStatus(data);
             HeroPopup_UI.instance.HeroDataUpdate(data);
         }
@@ -111,7 +114,7 @@ public class TheCrossroadManager : MonoBehaviour
             _departureButton.blocksRaycasts = false;
         }
 
-
+        _heroDatas = new CEntityBasicDataSO[_partySlots.Length];
     }
 
     private void Update()
@@ -146,6 +149,9 @@ public class TheCrossroadManager : MonoBehaviour
         _clickHandler.ClickEmptySpace -= HighlightReset;
 
         _holdButton.HoldingFullGauge -= OnFullHoldingDepartureButton;
+
+        _modelingViewer.OffModelCamera();
+
     }
 
     /// <summary>
@@ -153,10 +159,10 @@ public class TheCrossroadManager : MonoBehaviour
     /// </summary>
     /// <param name="partySlotIndex"></param>
     /// <param name="data"></param>
-    private void DropHerotoParty(int partySlotIndex, HeroDataSO data)
+    private void DropHerotoParty(int partySlotIndex, CEntityBasicDataSO data)
     {
         // 기존 슬롯에 들어있는 데이터를 일단 변수로 저장 데이터 없으면 null
-        HeroDataSO inSlotData = _heroDatas[partySlotIndex];
+        CEntityBasicDataSO inSlotData = _heroDatas[partySlotIndex];
 
         // 파티 데이터를 동기화한다.
         _heroDatas[partySlotIndex] = data;
@@ -204,7 +210,7 @@ public class TheCrossroadManager : MonoBehaviour
     /// 파티 슬롯을 더블클릭 했을 경우
     /// </summary>
     /// <param name="data"></param>
-    private void PartySlotDoubleClicked(HeroDataSO data)
+    private void PartySlotDoubleClicked(CEntityBasicDataSO data)
     {
         if(data != null)
         {
@@ -241,7 +247,7 @@ public class TheCrossroadManager : MonoBehaviour
     /// 영웅 로스터의 영웅 초상화를 더블클릭 했을 경우
     /// </summary>
     /// <param name="data"></param>
-    private void HeroRosterDoubleClicked(HeroDataSO data)
+    private void HeroRosterDoubleClicked(CEntityBasicDataSO data)
     {
         int targetindex = -1;
 
@@ -305,11 +311,11 @@ public class TheCrossroadManager : MonoBehaviour
     /// 영웅 초상화 우클릭했을 경우 팝업 ui 켜기
     /// </summary>
     /// <param name="data"></param>
-    private void HeroPortraitRightClicked(HeroDataSO data)
+    private void HeroPortraitRightClicked(CEntityBasicDataSO data)
     {
         HeroPopup_UI.instance.HeroDataUpdate(data);
 
-        List<HeroDataSO> heroes = new List<HeroDataSO>();
+        List<CEntityBasicDataSO> heroes = new List<CEntityBasicDataSO>();
 
         for (int i = 0; i < _heroRoster.Length; i++)
         {
@@ -340,7 +346,7 @@ public class TheCrossroadManager : MonoBehaviour
     /// 파티슬롯 단일 클릭시 하이라이트 켜고 끄기
     /// </summary>
     /// <param name="slotIndex"></param>
-    private void PartySlotClicked(int slotIndex)
+    private void PartySlotClicked(int slotIndex, CEntityBasicDataSO data)
     {
         for(int i = 0; i < _partySlots.Length; i++)
         {
@@ -354,19 +360,20 @@ public class TheCrossroadManager : MonoBehaviour
                 _partySlots[i].SlotHighlight(false);
             }
         }
+
+        if(data != null)
+        {
+            HeroInfoUpdate(data);
+        }
     }
 
     /// <summary>
     /// 영웅 로스터 슬롯 단일 클릭시 하이라이트 켜고 끄기
     /// </summary>
     /// <param name="data"></param>
-    private void HeroRosterClicked(int slotIndex, HeroDataSO data)
+    private void HeroRosterClicked(int slotIndex, CEntityBasicDataSO data)
     {
-        if(data != null)
-        {
-            _heroStatus.UpdateStatus(data);
-            HeroPopup_UI.instance.HeroDataUpdate(data);
-        }
+        HeroInfoUpdate(data);
 
         for (int i = 0; i < _heroRoster.Length; i++)
         {
@@ -381,6 +388,21 @@ public class TheCrossroadManager : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// 초상화 클릭하면 화면 정보 업데이트하는 함수
+    /// </summary>
+    /// <param name="data"></param>
+    public void HeroInfoUpdate(CEntityBasicDataSO data)
+    {
+        if (data != null)
+        {
+            _heroStatus.UpdateStatus(data);
+            HeroPopup_UI.instance.HeroDataUpdate(data);
+        }
+    }
+
+
 
     /// <summary>
     /// 출정버튼이 활성화 되는 함수
@@ -438,7 +460,7 @@ public class TheCrossroadManager : MonoBehaviour
             HeroSaveData targetHero = null;
 
             // 원본 SO 데이터 참조
-            HeroDataSO originData = _partySlots[i].HeroData;
+            CEntityBasicDataSO originData = _partySlots[i].HeroData;
 
             for(int j = 0; j < currentRunData.PartyHeroes.Count; j++)
             {
@@ -452,7 +474,7 @@ public class TheCrossroadManager : MonoBehaviour
             {
                 // 변화하는 수치, 고정된 수치의 초기값 불러오기
                 targetHero.HeroID = originData.HeroID;
-                targetHero.CurrentHP = originData.HeroHP;
+                targetHero.CurrentHP = originData.CurrentHP;
                 targetHero.CurrentStress = 0;
                 targetHero.PartySlotIndex = i;
 
@@ -497,7 +519,7 @@ public class TheCrossroadManager : MonoBehaviour
         {
 
             // 원본 SO 데이터 참조
-            HeroDataSO originData = _heroRoster[i].HeroData;
+            CEntityBasicDataSO originData = _heroRoster[i].HeroData;
 
             if(originData == null)
             {
@@ -555,7 +577,7 @@ public class TheCrossroadManager : MonoBehaviour
 
 
     /// <summary>
-    /// 팝업 창 닫기
+    /// 팝업 창 닫고 닫기 전 마지막으로 띄워놓은 영웅 데이터로 리셋
     /// </summary>
     public void ExitPopup()
     {
@@ -565,6 +587,13 @@ public class TheCrossroadManager : MonoBehaviour
             _heroPopupCanvas.alpha = 0f;
             _heroPopupCanvas.blocksRaycasts = false;
             _heroPopupCanvas.interactable = false;
+        }
+
+        CEntityBasicDataSO currentHero = HeroPopup_UI.instance.CurrentHeroDataSO;
+
+        if(currentHero != null)
+        {
+            _heroStatus.UpdateStatus(currentHero);
         }
     }
 

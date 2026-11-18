@@ -70,7 +70,7 @@ public class SkillUITooltipManager : MonoBehaviour
     /// <summary>
     /// 스킬 데이터 SO 받아서 정리
     /// </summary>
-    public void SetSkillData(DummySkillDataSO    data)
+    public void SetSkillData(CSkillDataSO data)
     {
         if (data == null)
         {
