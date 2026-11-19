@@ -102,7 +102,7 @@ public class CCombatInputHandler : MonoBehaviour
     {
         if (1f == entityData.GetStat(EEntityStat.Hero))
         {
-            HeroPopup_UI.instance.OpenPopup(entityData); // 일단 만들어만둠
+            //HeroPopup_UI.instance.OpenPopup(entityData); // 일단 만들어만둠
         }
     }
 }

@@ -271,3 +271,4 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     {
         Debug.Log($"{_name}이(가) 붕괴(Meltdown) 상태가 되었습니다!");
     }
+}

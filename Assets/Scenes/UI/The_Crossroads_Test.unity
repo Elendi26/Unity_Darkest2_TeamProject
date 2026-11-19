@@ -13084,6 +13084,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _modelSpawnPoint: {fileID: 1956677885}
   _modelCamera: {fileID: 1732446012}
+  _modelRotation: 90
 --- !u!1 &1282329136
 GameObject:
   m_ObjectHideFlags: 0
@@ -16987,7 +16988,7 @@ Transform:
   m_GameObject: {fileID: 1732446009}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 125, z: -157}
+  m_LocalPosition: {x: 0, y: 100, z: -150}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -18,8 +18,9 @@ public class CCombatCurrentTurn : MonoBehaviour
     [SerializeField] private CCombatSelectedSkill _seletedSkill;
     [SerializeField] private CombatSkillbar_UI _combatSkillbar;
     
-    private List<(bool, CSkillDataSO)> _skillData;
-    private List<CCombatSkillSlot> _skillSlots;
+    //
+    private List<(EUsableSkillState, int, CSkillDataSO)> _skillData;
+    private List<CombatSkillSlot_UI> _skillSlots;
 
     private ECombatSelectType _selectType = ECombatSelectType.None;
 
@@ -57,10 +58,11 @@ public class CCombatCurrentTurn : MonoBehaviour
 
     public void SetSkillData()
     {
-        _skillData = _entity._skillData.OutputSkillDataChecked(_entity.GetRank());
+        //_skillData = _entity._skillData.OutputSkillDataChecked(_entity.GetRank());
     }
 
-    public List<(bool, CSkillDataSO)> GetCurrentTurnSkillData()
+    //
+    public List<(EUsableSkillState, int, CSkillDataSO)> GetCurrentTurnSkillData()
     {
         return _skillData;
     }
