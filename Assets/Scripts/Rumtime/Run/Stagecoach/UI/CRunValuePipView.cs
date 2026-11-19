@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 바퀴·장갑처럼 최대치가 작은 값을 칸(pip)으로 보여준다
 public class CRunValuePipView : MonoBehaviour
 {
 	#region 인스펙터
 	[SerializeField] private RectTransform _pipRoot;
 	[SerializeField] private Image _pipTemplate;
-	// 칸마다 쓸 아이콘 (바퀴·방패 등, 비우면 템플릿 그림 그대로)
 	[SerializeField] private Sprite _pipSprite;
 	[SerializeField] private Text _countText;
 	[SerializeField] private Color _fullColor = new Color(0.95f, 0.8f, 0.45f);

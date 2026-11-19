@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ba0a89beb8576258e1c7e67e7444235, type: 3}
   m_Name: Node Event_Store
   m_EditorClassIdentifier: 
-  _title: 상점
+  _title: 고물상
   _body: 떠돌이 상인이 물건을 펼쳐 놓았다.
   _leaveLabel: 떠나기
   _options:

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Combat
   m_EditorClassIdentifier: 
   _type: 2
+  _displayName: 전투
   _icon: {fileID: 21300000, guid: d224c90d2b1ba7d4fbc8f78a6c7f8eaa, type: 2}
   _weight: 3
   _maxPerBiome: 99

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9abf9e1d327dc022e33c931d7bf476af, type: 3}
+  m_Name: Combat_Firebomb
+  m_EditorClassIdentifier: 
+  _id: 
+  _displayName: 화염병
+  _description: 던지면 적 전체에 불이 붙는다.
+  _icon: {fileID: 21300000, guid: 0646c39046e403345933496661df31da, type: 3}
+  _category: 1
+  _rarity: 1
+  _maxStack: 2
+  _buyPrice: 20
+  _sellPrice: 12
+  _target: 4
+  _usableOutOfCombat: 0

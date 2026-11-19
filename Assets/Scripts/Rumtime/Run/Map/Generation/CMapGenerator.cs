@@ -50,8 +50,48 @@ public class CMapGenerator
         LinkRows(graph);
         AssignNodeTypes(graph);
         AssignRoutes(graph);
+        RollScouting(graph);
 
         return graph;
+    }
+
+    // 지역 진입 정찰
+    private void RollScouting(CMapGraph graph)
+    {
+        int lastRow = graph.RowCount - 1;
+        int scoutedNodes = 0;
+        int scoutedRoutes = 0;
+
+        for (int i = 0; i < graph.Nodes.Count; i++)
+        {
+            CNodeInstance node = graph.Nodes[i];
+
+            // 출발·교차로·성채·여관 같은 확정 칸은 이미 공개돼 있다
+            if (node.IsRevealed)
+            {
+                continue;
+            }
+
+            if ((node.TypeData != null && node.TypeData.AlwaysRevealed) || _random.NextDouble() < _config.NodeScoutChance)
+            {
+                node.IsRevealed = true;
+                scoutedNodes++;
+            }
+        }
+
+        for (int i = 0; i < graph.Links.Count; i++)
+        {
+            CNodeLink link = graph.Links[i];
+
+            // 고정 길(출발→교차로, 성채→여관)은 늘 같은 길이라 처음부터 보인다
+            if (IsFixedEdgeLink(link, lastRow) || _random.NextDouble() < _config.RouteScoutChance)
+            {
+                link.IsRevealed = true;
+                scoutedRoutes++;
+            }
+        }
+
+        CPrint.Log($"CMapGenerator : 정찰 결과 지점 {scoutedNodes}곳 · 경로 {scoutedRoutes}/{graph.Links.Count}개 공개");
     }
 
     private void BuildRows(CMapGraph graph)
@@ -216,7 +256,6 @@ public class CMapGenerator
     }
 
     // 출발 바로 다음 확정 노드(교차로)를 넣는 행인지
-    //  ㄴ 마지막 행·여관 직전 행과 겹치면 넣지 않는다
     private bool IsPreStartRow(int row, int lastRow)
     {
         return _config.PreStartNode != null && row == 1 && row < lastRow && !IsPreEndRow(row, lastRow);

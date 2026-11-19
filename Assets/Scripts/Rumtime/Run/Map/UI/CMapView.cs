@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class CMapView : MonoBehaviour
@@ -24,10 +25,13 @@ public class CMapView : MonoBehaviour
     [Header("표시")]
     [SerializeField] private Sprite _unknownIcon;
     [SerializeField] private CMapRouteStyle[] _routeStyles;
-    [SerializeField] private bool _revealNext = true;
+    [SerializeField] private bool _revealNext = false;
+    [SerializeField] private Color _unknownRouteColor = new Color(0.55f, 0.55f, 0.55f, 1f);
     [SerializeField] private bool _revealAll = false;
     [SerializeField] private bool _autoScroll = true;
     [SerializeField] private float _scrollDuration = 0.35f;
+    [SerializeField] private float _wheelStep = 60f;
+    [SerializeField] private float _wheelDuration = 0.12f;
     [SerializeField] private bool _clickToSelect = false;
     [SerializeField] private bool _logInput = true;
     #endregion
@@ -37,10 +41,47 @@ public class CMapView : MonoBehaviour
     private float _appliedLaneSpacing;
     private bool IsVertical => _layout == EMapLayout.BottomToTop;
     private Coroutine _scrollRoutine;
+    private float _scrollTarget;
     private bool _isFirstScroll;
     private readonly Dictionary<CNodeInstance, CMapNodeView> _nodeViews = new Dictionary<CNodeInstance, CMapNodeView>();
     private readonly List<CMapLinkView> _linkViews = new List<CMapLinkView>();
     #endregion
+
+    private void Awake()
+    {
+        EnsureScrollHitArea();
+    }
+
+    // 빈 곳에서도 마우스 휠·드래그가 먹게 Viewport 에 투명 판을 깐다
+    private void EnsureScrollHitArea()
+    {
+        if (_scroll == null)
+        {
+            return;
+        }
+
+        RectTransform viewport = _scroll.viewport != null ? _scroll.viewport : (RectTransform)_scroll.transform;
+
+        // 휠은 ScrollRect 대신 직접 받는다 → 한 칸씩 정해진 거리만 움직이게
+        CMapWheelReceiver wheel = viewport.GetComponent<CMapWheelReceiver>();
+
+        if (wheel == null)
+        {
+            wheel = viewport.gameObject.AddComponent<CMapWheelReceiver>();
+        }
+
+        wheel.OnWheel = HandleWheel;
+
+        if (viewport.GetComponent<Graphic>() != null)
+        {
+            return;
+        }
+
+        Image hitArea = viewport.gameObject.AddComponent<Image>();
+
+        hitArea.color = Color.clear;
+        hitArea.raycastTarget = true;
+    }
 
     private void OnEnable()
     {
@@ -82,6 +123,7 @@ public class CMapView : MonoBehaviour
 
         _runner = runner;
         _runner.OnStateChanged += HandleStateChanged;
+        _runner.OnRevealed += RefreshAll;
 
         Build(_runner.Graph);
         RefreshAll();
@@ -92,6 +134,7 @@ public class CMapView : MonoBehaviour
         if (_runner != null)
         {
             _runner.OnStateChanged -= HandleStateChanged;
+            _runner.OnRevealed -= RefreshAll;
         }
 
         _runner = null;
@@ -281,8 +324,16 @@ public class CMapView : MonoBehaviour
         for (int i = 0; i < _linkViews.Count; i++)
         {
             CMapLinkView view = _linkViews[i];
-            CMapRouteStyle style = GetRouteStyle(view.Link);
             bool isSelectable = canSelect && view.Link.From == current;
+
+            // 정찰 못 한 경로 → 어떤 길인지 모르니 회색 선만
+            if (!_revealAll && !view.Link.IsRevealed)
+            {
+                view.Refresh(_unknownRouteColor, null, isSelectable);
+                continue;
+            }
+
+            CMapRouteStyle style = GetRouteStyle(view.Link);
 
             view.Refresh(style != null ? style.Color : Color.white, style != null ? style.Icon : null, isSelectable);
         }
@@ -291,7 +342,7 @@ public class CMapView : MonoBehaviour
     private Sprite GetIcon(CNodeInstance node, bool isSelectable)
     {
         // 공개 안 된 노드는 ? 아이콘. 단, 지금 갈 수 있는 노드는 보여준다
-        bool isRevealed = _revealAll || node.IsRevealed || (_revealNext && isSelectable);
+        bool isRevealed = IsRevealed(node) || (_revealNext && isSelectable);
 
         if (!isRevealed)
         {
@@ -304,6 +355,11 @@ public class CMapView : MonoBehaviour
         }
 
         return node.TypeData.Icon;
+    }
+
+    private bool IsRevealed(CNodeInstance node)
+    {
+        return _revealAll || node.IsRevealed;
     }
 
     private CMapRouteStyle GetRouteStyle(CNodeLink link)
@@ -377,23 +433,57 @@ public class CMapView : MonoBehaviour
         float position = IsVertical ? view.Rect.anchoredPosition.y : view.Rect.anchoredPosition.x;
         float normalized = Mathf.Clamp01((position - viewportSize / 3f) / scrollable);
 
-        StartScroll(normalized);
+        StartScroll(normalized, _scrollDuration);
+    }
+
+    // 휠 한 칸 → 정해진 거리만큼만 부드럽게 움직인다 (빠르게 굴리면 목표가 쌓인다)
+    private void HandleWheel(PointerEventData eventData)
+    {
+        if (_scroll == null || _content == null)
+        {
+            return;
+        }
+
+        float delta = eventData.scrollDelta.y;
+
+        if (Mathf.Approximately(delta, 0f))
+        {
+            return;
+        }
+
+        RectTransform viewport = _scroll.viewport != null ? _scroll.viewport : (RectTransform)_scroll.transform;
+        float contentSize = IsVertical ? _content.rect.height : _content.rect.width;
+        float viewportSize = IsVertical ? viewport.rect.height : viewport.rect.width;
+        float scrollable = contentSize - viewportSize;
+
+        if (scrollable <= 0f)
+        {
+            return;
+        }
+
+        // 세로 : 휠 위 → 위로 / 가로 : 휠 아래 → 오른쪽(앞으로)
+        float direction = IsVertical ? Mathf.Sign(delta) : -Mathf.Sign(delta);
+        float from = _scrollRoutine != null ? _scrollTarget : GetScrollPosition();
+        float target = Mathf.Clamp01(from + direction * _wheelStep / scrollable);
+
+        StartScroll(target, _wheelDuration);
     }
 
     // 목표 위치까지 부드럽게 스크롤한다. 이미 움직이는 중이면 새 목표로 바꾼다
-    private void StartScroll(float target)
+    private void StartScroll(float target, float duration)
     {
         StopScroll();
 
         // 처음 그릴 때·시간 0·비활성 상태 → 바로 이동 (비활성이면 코루틴을 시작할 수 없다)
-        if (_isFirstScroll || _scrollDuration <= 0f || !isActiveAndEnabled)
+        if (_isFirstScroll || duration <= 0f || !isActiveAndEnabled)
         {
             _isFirstScroll = false;
             SetScrollPosition(target);
             return;
         }
 
-        _scrollRoutine = StartCoroutine(CoScroll(target));
+        _scrollTarget = target;
+        _scrollRoutine = StartCoroutine(CoScroll(target, duration));
     }
 
     private void StopScroll()
@@ -407,18 +497,18 @@ public class CMapView : MonoBehaviour
         _scrollRoutine = null;
     }
 
-    private IEnumerator CoScroll(float target)
+    private IEnumerator CoScroll(float target, float duration)
     {
         float start = GetScrollPosition();
         float elapsed = 0f;
 
-        while (elapsed < _scrollDuration)
+        while (elapsed < duration)
         {
             // 일시정지(timeScale 0) 중에도 맵 UI 는 움직이게
             elapsed += Time.unscaledDeltaTime;
 
             // 끝으로 갈수록 천천히 멈춘다
-            float t = Mathf.SmoothStep(0f, 1f, elapsed / _scrollDuration);
+            float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
 
             // 드래그 관성이 남아 있으면 스크롤과 싸운다 → 매 프레임 지운다
             _scroll.velocity = Vector2.zero;

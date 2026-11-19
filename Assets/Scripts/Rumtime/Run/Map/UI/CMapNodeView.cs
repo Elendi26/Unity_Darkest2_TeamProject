@@ -20,7 +20,6 @@ public class CMapNodeView : MonoBehaviour
     private Action<CNodeInstance> _onClicked;
     #endregion
 
-    // 이 뷰가 보여주는 노드
     public CNodeInstance Node => _node;
 
     public RectTransform Rect => (RectTransform)transform;

@@ -13,10 +13,7 @@ MonoBehaviour:
   m_Name: Combat
   m_EditorClassIdentifier: 
   _type: 2
+  _displayName: 위험한 길
   _weight: 1
   _minRoadEvents: 0
   _maxRadEvents: 1
-  _travelEffects: []
-  references:
-    version: 2
-    RefIds: []

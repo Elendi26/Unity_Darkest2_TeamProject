@@ -21,6 +21,11 @@ MonoBehaviour:
   - LabelKey: 조심히 지나간다
     Effects:
     - rid: 1000
+  _showPopup: 0
+  _roadPropPrefab: {fileID: 1000000000000000001, guid: 16c04d0cc09137942a031b371340e55e, type: 3}
+  _bumpCount: 4
+  _combatWhenEmpty: 4
+  _combatId: roadcombat_roughpatch
   references:
     version: 2
     RefIds:

@@ -16,11 +16,17 @@ MonoBehaviour:
   _category: 1
   _weight: 0
   _title: 위태로운 길
-  _body: 날아든 돌에 마차 장갑이 깎여 나갔다.
+  _body: 숲속에서 화살이 쏟아져 마차 장갑이 깎여 나갔다.
   _options:
   - LabelKey: 버티며 지나간다
     Effects:
     - rid: 1000
+  _showPopup: 0
+  _roadPropPrefab: {fileID: 0}
+  _bumpCount: 0
+  _combatWhenEmpty: 5
+  _combatId: roadcombat_dangerpath
+  _hazard: 1
   references:
     version: 2
     RefIds:

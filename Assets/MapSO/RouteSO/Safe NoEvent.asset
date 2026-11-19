@@ -13,11 +13,8 @@ MonoBehaviour:
   m_Name: Safe NoEvent
   m_EditorClassIdentifier: 
   _type: 1
+  _displayName: 안전한 길
   _weight: 1
   _minRoadEvents: 0
   _maxRadEvents: 0
   _straightOnly: 1
-  _travelEffects: []
-  references:
-    version: 2
-    RefIds: []

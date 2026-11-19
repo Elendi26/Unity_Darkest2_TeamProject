@@ -11,8 +11,10 @@ public class CStagecoachController : MonoBehaviour, IRoadTravelProvider, IRunCon
     [SerializeField] private int _maxTorch = 100;
     [SerializeField] private int _seed = 0;
     [SerializeField] private MonoBehaviour _eventResolverSource;
+    // 도로 이벤트에서 전투로 넘어갈 때 부를 전투 쪽 컴포넌트 (IRoadCombatStarter 구현, 비우면 전투 없이 지나감)
+    [SerializeField] private MonoBehaviour _combatStarterSource;
     // 시작할 때 짐칸에 넣어 둘 아이템 (같은 걸 여러 번 넣으면 여러 개)
-    [SerializeField] private CItemData[] _startItems;
+    [SerializeField] private CItemDataBase[] _startItems;
     #endregion
 
     #region 내부 변수
@@ -55,7 +57,7 @@ public class CStagecoachController : MonoBehaviour, IRoadTravelProvider, IRunCon
         };
 
         // 런 데이터(CRunContext)는 역마차를 모른다 → 역마차는 주행에 따로 넘긴다
-        _travel = new CRoadTravel(_config, _stagecoach, _ctx, GetEventResolver());
+        _travel = new CRoadTravel(_config, _stagecoach, _ctx, GetEventResolver(), _combatStarterSource as IRoadCombatStarter);
     }
 
     private void AddStartItems()
@@ -81,6 +83,11 @@ public class CStagecoachController : MonoBehaviour, IRoadTravelProvider, IRunCon
         if (_eventResolverSource != null && !(_eventResolverSource is IRoadEventResolver))
         {
             CPrint.Warn($"CStagecoachController : {_eventResolverSource.name} 는 IRoadEventResolver 가 아닙니다.");
+        }
+
+        if (_combatStarterSource != null && !(_combatStarterSource is IRoadCombatStarter))
+        {
+            CPrint.Warn($"CStagecoachController : {_combatStarterSource.name} 는 IRoadCombatStarter 가 아닙니다.");
         }
     }
 

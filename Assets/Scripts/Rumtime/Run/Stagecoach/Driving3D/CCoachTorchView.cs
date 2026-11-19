@@ -1,34 +1,24 @@
 ﻿using UnityEngine;
 
-// 마차 지붕 횃불 → 횃불 수치(0~1)에 맞춰 불빛·빛무리·가로 빛줄기 밝기를 바꾼다
-//  ㄴ 수치가 줄면 빛이 약해지고 비추는 거리도 줄어든다
-//  ㄴ 조금씩 일렁이게(Perlin) 해서 불처럼 보이게 한다
 [RequireComponent(typeof(Light))]
 public class CCoachTorchView : MonoBehaviour
 {
 	#region 인스펙터
-	// 마차 모델 안에서 횃불이 붙은 자리 이름 → 찾으면 그 자리로 옮긴다
 	[SerializeField] private string _anchorName = "Torch_VFX_Anchor";
 	[SerializeField] private Vector3 _anchorOffset = new Vector3(0f, 0.25f, 0f);
-	// 이 거리 안의 물체는 그림자를 만들지 않는다 (횃불 틀이 빛을 가리지 않게)
 	[SerializeField] private float _shadowNearPlane = 1f;
 	// 횃불 0 → 가득 일 때 불빛 세기·거리
 	[SerializeField] private Vector2 _intensity = new Vector2(0.6f, 5f);
 	[SerializeField] private Vector2 _range = new Vector2(8f, 24f);
 	[SerializeField] private Color _lightColor = new Color(1f, 0.6f, 0.3f, 1f);
-	// 빛무리(동그란 번짐) 크기
 	[SerializeField] private Vector2 _glowSize = new Vector2(0.5f, 2.4f);
-	// 가로 빛줄기 길이·두께
 	[SerializeField] private Vector2 _streakLength = new Vector2(1.5f, 14f);
 	[SerializeField] private float _streakThickness = 0.22f;
 	[SerializeField] private Color _glowColor = new Color(1f, 0.55f, 0.2f, 1f);
 	[SerializeField] private float _streakAlpha = 0.8f;
-	// 일렁임
 	[SerializeField, Range(0f, 0.5f)] private float _flickerAmount = 0.12f;
 	[SerializeField] private float _flickerSpeed = 7f;
-	// 수치가 바뀔 때 따라가는 속도
 	[SerializeField] private float _levelSmooth = 3f;
-	// 비우면 Hidden/CoachTorchGlow 를 찾아 쓴다 (빌드에 넣으려면 여기 넣어 둔다)
 	[SerializeField] private Shader _glowShader;
 	[SerializeField] private bool _logState = true;
 	#endregion
@@ -42,6 +32,7 @@ public class CCoachTorchView : MonoBehaviour
 	private Material _glowMaterial;
 	private Material _streakMaterial;
 	private Texture2D _glowTexture;
+	private Mesh _quadMesh;
 	private float _level = 1f;
 	private float _targetLevel = 1f;
 	private float _seed;
@@ -57,7 +48,6 @@ public class CCoachTorchView : MonoBehaviour
 	{
 		MoveToAnchor();
 
-		// 횃불 틀(등) 메시가 바로 옆이라 그림자에 빛이 막힌다 → 가까운 그림자는 무시
 		if (_light != null)
 		{
 			_light.shadowNearPlane = Mathf.Max(_light.shadowNearPlane, _shadowNearPlane);
@@ -82,6 +72,11 @@ public class CCoachTorchView : MonoBehaviour
 		if (_glowTexture != null)
 		{
 			Destroy(_glowTexture);
+		}
+
+		if (_quadMesh != null)
+		{
+			Destroy(_quadMesh);
 		}
 	}
 
@@ -143,7 +138,6 @@ public class CCoachTorchView : MonoBehaviour
 		}
 	}
 
-	// 빛무리·빛줄기는 늘 카메라를 본다 → 빛줄기는 화면에서 가로로 보인다
 	private void FaceCamera()
 	{
 		Camera camera = CChaseCamera.CurrentCamera;
@@ -181,8 +175,6 @@ public class CCoachTorchView : MonoBehaviour
 			return;
 		}
 
-		// 횃불 자리 오브젝트는 꺼져 있다 → 그 밑에 넣으면 불도 같이 꺼진다
-		//  ㄴ 같은 부모 밑, 같은 자리로만 옮긴다
 		transform.SetParent(anchor.parent, false);
 		transform.localPosition = anchor.localPosition + anchor.localRotation * _anchorOffset;
 		transform.localRotation = Quaternion.identity;
@@ -232,11 +224,16 @@ public class CCoachTorchView : MonoBehaviour
 
 	private Transform CreateQuad(string name, Material material)
 	{
-		GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+		if (_quadMesh == null)
+		{
+			_quadMesh = CreateQuadMesh();
+		}
 
-		quad.name = name;
-		Destroy(quad.GetComponent<Collider>());
+		GameObject quad = new GameObject(name, typeof(MeshFilter), typeof(MeshRenderer));
+
+		quad.layer = gameObject.layer;
 		quad.transform.SetParent(transform, false);
+		quad.GetComponent<MeshFilter>().sharedMesh = _quadMesh;
 
 		MeshRenderer meshRenderer = quad.GetComponent<MeshRenderer>();
 
@@ -245,6 +242,25 @@ public class CCoachTorchView : MonoBehaviour
 		meshRenderer.receiveShadows = false;
 
 		return quad.transform;
+	}
+
+	// 가운데 기준 1x1 사각형
+	private static Mesh CreateQuadMesh()
+	{
+		Mesh mesh = new Mesh { name = "CoachTorchQuad" };
+
+		mesh.vertices = new[]
+		{
+			new Vector3(-0.5f, -0.5f, 0f),
+			new Vector3(0.5f, -0.5f, 0f),
+			new Vector3(-0.5f, 0.5f, 0f),
+			new Vector3(0.5f, 0.5f, 0f),
+		};
+		mesh.uv = new[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f) };
+		mesh.triangles = new[] { 0, 2, 1, 2, 3, 1 };
+		mesh.RecalculateBounds();
+
+		return mesh;
 	}
 
 	// 가운데가 밝고 가장자리로 부드럽게 사라지는 동그라미

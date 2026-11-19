@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9abf9e1d327dc022e33c931d7bf476af, type: 3}
+  m_Name: Combat_Bandage
+  m_EditorClassIdentifier: 
+  _id: 
+  _displayName: 붕대
+  _description: 아군 하나의 체력을 조금 회복하고 출혈을 멈춘다.
+  _icon: {fileID: 21300000, guid: 586bf395ec682aa45b15b62d8c5fd8bc, type: 3}
+  _category: 1
+  _rarity: 0
+  _maxStack: 4
+  _buyPrice: 10
+  _sellPrice: 5
+  _target: 1
+  _usableOutOfCombat: 1

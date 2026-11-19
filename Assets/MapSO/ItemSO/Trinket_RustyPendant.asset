@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4354b4f8882039e4d1846f2253f47454, type: 3}
+  m_Name: Trinket_RustyPendant
+  m_EditorClassIdentifier: 
+  _id: 
+  _displayName: 녹슨 펜던트
+  _description: 독과 상처에 강해지지만 몸이 무겁다.
+  _icon: {fileID: 21300000, guid: 3689dec756e18f44ebaa99c3ce9be196, type: 3}
+  _category: 3
+  _rarity: 1
+  _maxStack: 1
+  _buyPrice: 35
+  _sellPrice: 20
+  _statModifiers:
+  - Stat: 6
+    Value: 20
+    IsPercent: 0
+  - Stat: 7
+    Value: 20
+    IsPercent: 0
+  - Stat: 4
+    Value: -1
+    IsPercent: 0
+  _allowDuplicate: 0
