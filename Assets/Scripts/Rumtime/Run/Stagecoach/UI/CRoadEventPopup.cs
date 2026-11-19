@@ -18,13 +18,12 @@ public class CRoadEventPopup : MonoBehaviour, IRoadEventResolver
 
 	#region 내부 변수
 	private readonly List<Button> _buttons = new List<Button>();
-	private CRoadEventData _event;
-	private CRunContext _ctx;
-	private Action _onDone;
+	private readonly List<string> _labels = new List<string>();
+	private Action<int> _onChoose;
 	#endregion
 
 	// 팝업이 열려 있는지
-	public bool IsOpen => _event != null;
+	public bool IsOpen => _onChoose != null;
 
 	private void Awake()
 	{
@@ -39,52 +38,81 @@ public class CRoadEventPopup : MonoBehaviour, IRoadEventResolver
 			return;
 		}
 
-		if (IsOpen)
-		{
-			CPrint.Warn($"CRoadEventPopup : {_event.Id} 가 아직 열려 있어 {roadEvent.Id} 로 교체합니다.");
-		}
-
-		_event = roadEvent;
-		_ctx = ctx;
-		_onDone = onDone;
-
-		if (_titleText != null)
-		{
-			_titleText.text = roadEvent.Id;
-		}
-
-		if (_bodyText != null)
-		{
-			_bodyText.text = GetCategoryLabel(roadEvent.Category);
-		}
-
-		BuildOptions(roadEvent.Options);
-		SetVisible(true);
-	}
-
-	private void BuildOptions(IReadOnlyList<CRoadEventOption> options)
-	{
+		IReadOnlyList<CRoadEventOption> options = roadEvent.Options;
 		int count = options != null ? options.Count : 0;
+
+		_labels.Clear();
+
+		for (int i = 0; i < count; i++)
+		{
+			_labels.Add(options[i] != null ? options[i].LabelKey : "-");
+		}
 
 		// 선택지가 없으면 "계속" 버튼 하나만
 		if (count == 0)
 		{
-			SetupButton(0, _continueLabel, -1);
-			HideButtonsFrom(1);
-			return;
+			_labels.Add(_continueLabel);
 		}
+
+		string title = string.IsNullOrEmpty(roadEvent.Title) ? roadEvent.Id : roadEvent.Title;
+		string body = string.IsNullOrEmpty(roadEvent.Body) ? GetCategoryLabel(roadEvent.Category) : roadEvent.Body;
+
+		Show(title, body, _labels, null, index =>
+		{
+			if (index < count && options[index] != null)
+			{
+				if (_logInput)
+				{
+					CPrint.Log($"도로 이벤트 {roadEvent.Id} → {options[index].LabelKey}");
+				}
+
+				CRunEffectUtil.ApplyAll(options[index].Effects, ctx);
+			}
+
+			Close();
+			onDone?.Invoke();
+		});
+	}
+
+	public void Show(string title, string body, IReadOnlyList<string> labels, IReadOnlyList<bool> interactable, Action<int> onChoose)
+	{
+		if (IsOpen && _onChoose != onChoose)
+		{
+			CPrint.Warn($"CRoadEventPopup : 열려 있는 팝업을 {title} 로 교체합니다.");
+		}
+
+		_onChoose = onChoose;
+
+		if (_titleText != null)
+		{
+			_titleText.text = title;
+		}
+
+		if (_bodyText != null)
+		{
+			_bodyText.text = body;
+		}
+
+		int count = labels != null ? labels.Count : 0;
 
 		for (int i = 0; i < count; i++)
 		{
-			string label = options[i] != null ? options[i].LabelKey : "-";
+			bool canChoose = interactable == null || i >= interactable.Count || interactable[i];
 
-			SetupButton(i, label, i);
+			SetupButton(i, labels[i], canChoose);
 		}
 
 		HideButtonsFrom(count);
+		SetVisible(true);
 	}
 
-	private void SetupButton(int slot, string label, int optionIndex)
+	public void Close()
+	{
+		_onChoose = null;
+		SetVisible(false);
+	}
+
+	private void SetupButton(int slot, string label, bool interactable)
 	{
 		if (_optionRoot == null || _optionTemplate == null)
 		{
@@ -109,7 +137,8 @@ public class CRoadEventPopup : MonoBehaviour, IRoadEventResolver
 		}
 
 		button.onClick.RemoveAllListeners();
-		button.onClick.AddListener(() => Choose(optionIndex));
+		button.onClick.AddListener(() => Choose(slot));
+		button.interactable = interactable;
 		button.gameObject.SetActive(true);
 	}
 
@@ -121,52 +150,14 @@ public class CRoadEventPopup : MonoBehaviour, IRoadEventResolver
 		}
 	}
 
-	private void Choose(int optionIndex)
+	private void Choose(int index)
 	{
 		if (!IsOpen)
 		{
 			return;
 		}
 
-		if (optionIndex >= 0 && optionIndex < _event.Options.Count)
-		{
-			CRoadEventOption option = _event.Options[optionIndex];
-
-			if (_logInput)
-			{
-				CPrint.Log($"도로 이벤트 {_event.Id} → {option.LabelKey}");
-			}
-
-			ApplyEffects(option.Effects);
-		}
-
-		// 콜백 전에 비운다
-		Action onDone = _onDone;
-
-		_event = null;
-		_ctx = null;
-		_onDone = null;
-
-		SetVisible(false);
-		onDone?.Invoke();
-	}
-
-	private void ApplyEffects(List<IRunEffect> effects)
-	{
-		if (effects == null)
-		{
-			return;
-		}
-
-		for (int i = 0; i < effects.Count; i++)
-		{
-			if (effects[i] == null)
-			{
-				continue;
-			}
-
-			effects[i].Apply(_ctx);
-		}
+		_onChoose(index);
 	}
 
 	private void SetVisible(bool isVisible)

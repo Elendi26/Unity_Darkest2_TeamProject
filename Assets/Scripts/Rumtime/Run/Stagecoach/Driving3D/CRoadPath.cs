@@ -14,6 +14,7 @@ public class CRoadPath : MonoBehaviour
 	[SerializeField, Range(0f, 1f)] private float _turnChance = 0.35f;
 	[SerializeField, Range(1, 2)] private int _maxTurnSteps = 1;
 	[SerializeField] private int _decorRadius = 3;
+	[SerializeField] private int _skirtDepth = 3;
 	[SerializeField] private float _roadHalfWidth = 4.5f;
 	[SerializeField] private int _seed = 0;
 	[SerializeField] private bool _buildWalls = true;
@@ -24,13 +25,26 @@ public class CRoadPath : MonoBehaviour
 	[SerializeField, Range(0.05f, 1f)] private float _floorSmoothing = 0.3f;
 	[SerializeField] private float _floorLift = 0f;
 	[SerializeField] private float _floorSampleSide = 2f;
-	[SerializeField] private float _branchLength = 40f;
+	[SerializeField] private float _branchLength = 70f;
 	[SerializeField] private string[] _forkRoadMaterials = { "road" };
 	[SerializeField] private string[] _junctionHideMaterials = { "grass" };
 	[SerializeField] private float _forkFlatHeight = 0.15f;
 	[SerializeField] private string[] _forkRampMaterials = { "road", "trench", "tiling", "ground" };
 	[SerializeField] private bool _logState = false;
 	[SerializeField] private bool _logFork = true;
+
+	[Header("바닥판 (장식이 못 채운 칸이 허공으로 보이지 않게)")]
+	[SerializeField] private Material _groundUnderlayMaterial;
+	[SerializeField] private float _groundUnderlaySize = 400f;
+	[SerializeField] private float _groundUnderlayTile = 10f;
+	[SerializeField] private float _groundUnderlayDepth = 0.15f;
+
+	[Header("노드 장면과 겹친 길가 장식 지우기")]
+	// 장면 건물·나무가 칸의 이만큼 이상 덮어야 장식을 숨긴다 → 낮추면 작은 소품 하나에도 장식이 지워져 빈 땅이 생긴다
+	[SerializeField, Range(0f, 1f)] private float _sceneObjectRatio = 0.25f;
+	[SerializeField, Range(0f, 1f)] private float _sceneGroundRatio = 0.5f;
+	// 장면 바닥이 길 타일을 이만큼 이상 덮어야 만든 길을 숨긴다 → 덜 덮이면 길을 남겨 끊기지 않게
+	[SerializeField, Range(0f, 1f)] private float _sceneRoadRatio = 0.95f;
 	#endregion
 
 	#region 이벤트
@@ -50,6 +64,7 @@ public class CRoadPath : MonoBehaviour
 	private const int FORK_OPEN_TILES = 2;
 	private const string RAMP_SUFFIX = "_ramp";
 	private const float FORK_LAYER_GAP = 0.01f;
+	private const int COVERAGE_SAMPLES = 4;
 
 	private static readonly Vector2Int[] DIRS =
 	{
@@ -70,8 +85,12 @@ public class CRoadPath : MonoBehaviour
 		public int EntryHeading;
 		public Vector2Int Main;
 		public GameObject Walls;
+		public bool DecorCleared;
 		public GameObject Floor;
 		public bool Decorated;
+		public int Branch = -1;
+		public bool Abandoned;
+		public bool RoadHidden;
 	}
 
 	private class CChain
@@ -103,13 +122,305 @@ public class CRoadPath : MonoBehaviour
 	private int _straightLeft;
 	private int _frontY;
 	private int _placedCount;
+	private int _placingBranch = -1;
 	private float _frontArc;
 	private float _followArc;
 	private PhysicMaterial _wallMaterial;
+	private Transform _underlay;
+	private Material _underlayMaterial;
+	private CRoadTileEntry _lastRoadTile;
+	private readonly HashSet<Vector2Int> _roadCells = new HashSet<Vector2Int>();
+	private readonly List<Vector2Int> _forkFronts = new List<Vector2Int>();
 	#endregion
 
 	public float RoadHalfWidth => _roadHalfWidth;
 	public bool HasFork => _forkCount >= 2 || _branches.Count > 0;
+	public float ForkArc => _branches.Count > 0 ? _forkStartArc : _forkArc;
+
+	// 이 지점에 길가 물건을 놓아도 되는지
+	public bool IsStableArc(float arc, float margin)
+	{
+		if (_branches.Count > 0)
+		{
+			return false;
+		}
+
+		if (_forkCount >= 2 && arc > _forkArc - margin)
+		{
+			return false;
+		}
+
+		return arc < _frontArc;
+	}
+
+	// 이 지점까지 길이 깔렸는지
+	public bool IsBuilt(float arc)
+	{
+		return arc < _frontArc;
+	}
+
+	// 길가 장식 타일의 땅 높이 (타일은 모두 길 오브젝트 높이 0 에 깔린다)
+	public float DecorGroundHeight => transform.position.y;
+	// 노드 장면이 덮은 자리를 잴 점 간격 (이 길 로컬 기준)
+	public float CoverageSampleSize => _tileSet.CellSize / COVERAGE_SAMPLES;
+
+	// 건축물 자리를 비운다 → 반경 안 길가 장식에서 나무·풀 같은 것만 숨기고 땅은 남긴다
+	public void ClearDecorAround(Vector3 center, float radius, Material hiddenMaterial, string[] groundKeywords)
+	{
+		if (hiddenMaterial == null)
+		{
+			return;
+		}
+
+		float sqrRadius = radius * radius;
+		Vector3 local = transform.InverseTransformPoint(center);
+		Vector2Int centerCell = new Vector2Int(Mathf.RoundToInt(local.x / _tileSet.CellSize), Mathf.RoundToInt(local.z / _tileSet.CellSize));
+
+		for (int i = 0; i < _decorPieces.Count; i++)
+		{
+			CPlaced piece = _decorPieces[i];
+
+			if (piece.Go == null || piece.DecorCleared)
+			{
+				continue;
+			}
+
+			// 건물이 선 칸을 차지한 타일 + 반경 안 칸 중심이 있는 타일만
+			if (!piece.Cells.Contains(centerCell) && (radius <= 0f || !IsNearCells(piece, center, sqrRadius)))
+			{
+				continue;
+			}
+
+			piece.DecorCleared = true;
+			HideNonGround(piece.Go, hiddenMaterial, groundKeywords);
+		}
+	}
+
+	public void HideRoadInBox(Vector3 center, Vector3 halfSize, Quaternion rotation)
+	{
+		Quaternion inverse = Quaternion.Inverse(rotation);
+		// 여유 없이 칸 가운데가 안에 든 길만 → 장면 길이 없는 곳까지 꺼서 빈 칸이 생기지 않게
+		float margin = 0f;
+
+		for (int i = 0; i < _roadPieces.Count; i++)
+		{
+			CPlaced piece = _roadPieces[i];
+
+			if (piece.Go == null || !IsAnyCellInBox(piece, center, halfSize, inverse, margin))
+			{
+				continue;
+			}
+
+			MeshRenderer[] renderers = piece.Go.GetComponentsInChildren<MeshRenderer>(true);
+
+			for (int r = 0; r < renderers.Length; r++)
+			{
+				renderers[r].enabled = false;
+			}
+		}
+	}
+
+	private bool IsAnyCellInBox(CPlaced piece, Vector3 center, Vector3 halfSize, Quaternion inverse, float margin)
+	{
+		// 칸 목록이 없는 조각은 자기 칸 하나로 본다
+		int count = piece.Cells.Count > 0 ? piece.Cells.Count : 1;
+
+		for (int c = 0; c < count; c++)
+		{
+			Vector2Int cell = piece.Cells.Count > 0 ? piece.Cells[c] : piece.Main;
+			Vector3 local = inverse * (transform.TransformPoint(CellToLocal(cell)) - center);
+
+			if (Mathf.Abs(local.x) <= halfSize.x + margin && Mathf.Abs(local.z) <= halfSize.z + margin)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public void ClearDecorInBox(Vector3 center, Vector3 halfSize, Quaternion rotation, bool keepGround, Material hiddenMaterial, string[] groundKeywords)
+	{
+		Quaternion inverse = Quaternion.Inverse(rotation);
+
+		// 칸 절반만큼 여유 → 상자 가장자리에 걸친 칸도 숨긴다
+		float margin = _tileSet.CellSize * 0.5f;
+
+		for (int i = 0; i < _decorPieces.Count; i++)
+		{
+			CPlaced piece = _decorPieces[i];
+
+			if (piece.Go == null || !piece.Go.activeSelf || (keepGround && piece.DecorCleared) || !IsAnyCellInBox(piece, center, halfSize, inverse, margin))
+			{
+				continue;
+			}
+
+			if (!keepGround)
+			{
+				piece.Go.SetActive(false);
+			}
+			else if (hiddenMaterial != null)
+			{
+				piece.DecorCleared = true;
+				HideNonGround(piece.Go, hiddenMaterial, groundKeywords);
+			}
+		}
+	}
+
+	public void ClearDecorByCoverage
+		(
+		HashSet<Vector2Int> sceneGround,
+		HashSet<Vector2Int> sceneObjects,
+		bool keepGround,
+		Material hiddenMaterial,
+		string[] groundKeywords
+		)
+	{
+		for (int i = 0; i < _decorPieces.Count; i++)
+		{
+			CPlaced piece = _decorPieces[i];
+
+			if (piece.Go == null || !piece.Go.activeSelf)
+			{
+				continue;
+			}
+
+			float objectRatio = GetCoveredRatio(piece, sceneObjects);
+
+			// 장면 바닥만 있는 칸은 그대로 둔다 → 장면 귀퉁이가 텅 빈 들판이 되지 않게
+			if (objectRatio < _sceneObjectRatio)
+			{
+				continue;
+			}
+
+			// 장면 바닥이 대부분 덮으면 장식 땅까지 통째로 → 장식 땅이 장면 바닥 위로 삐져나오지 않게
+			if (!keepGround && GetCoveredRatio(piece, sceneGround) >= _sceneGroundRatio)
+			{
+				piece.Go.SetActive(false);
+				continue;
+			}
+
+			// 장면 건물·나무와 겹치는 장식은 나무만 숨긴다
+			if (!piece.DecorCleared && hiddenMaterial != null)
+			{
+				piece.DecorCleared = true;
+				HideNonGround(piece.Go, hiddenMaterial, groundKeywords);
+			}
+		}
+	}
+
+	/// <summary>
+	/// 노드 장면 바닥이 거의 다 덮은 길 타일만 숨긴다 → 장면 길이 모자란 끝자락은 만든 길이 그대로 이어진다 / 경태
+	/// </summary>
+	public void HideRoadByCoverage(HashSet<Vector2Int> sceneGround)
+	{
+		for (int i = 0; i < _roadPieces.Count; i++)
+		{
+			CPlaced piece = _roadPieces[i];
+
+			if (piece.Go == null || piece.RoadHidden || GetCoveredRatio(piece, sceneGround) < _sceneRoadRatio)
+			{
+				continue;
+			}
+
+			piece.RoadHidden = true;
+
+			MeshRenderer[] renderers = piece.Go.GetComponentsInChildren<MeshRenderer>(true);
+
+			for (int r = 0; r < renderers.Length; r++)
+			{
+				renderers[r].enabled = false;
+			}
+		}
+	}
+
+	private float GetCoveredRatio(CPlaced piece, HashSet<Vector2Int> covered)
+	{
+		if (covered == null || covered.Count == 0)
+		{
+			return 0f;
+		}
+
+		int count = piece.Cells.Count > 0 ? piece.Cells.Count : 1;
+		int half = COVERAGE_SAMPLES / 2;
+		int hit = 0;
+
+		for (int c = 0; c < count; c++)
+		{
+			Vector2Int cell = piece.Cells.Count > 0 ? piece.Cells[c] : piece.Main;
+
+			for (int sx = 0; sx < COVERAGE_SAMPLES; sx++)
+			{
+				for (int sy = 0; sy < COVERAGE_SAMPLES; sy++)
+				{
+					Vector2Int point = new Vector2Int(cell.x * COVERAGE_SAMPLES - half + sx, cell.y * COVERAGE_SAMPLES - half + sy);
+
+					if (covered.Contains(point))
+					{
+						hit++;
+					}
+				}
+			}
+		}
+
+		return (float)hit / (count * COVERAGE_SAMPLES * COVERAGE_SAMPLES);
+	}
+
+	// 타일이 차지한 칸 중심 하나라도 반경 안이면 가깝다
+	private bool IsNearCells(CPlaced piece, Vector3 center, float sqrRadius)
+	{
+		for (int i = 0; i < piece.Cells.Count; i++)
+		{
+			Vector3 delta = transform.TransformPoint(CellToLocal(piece.Cells[i])) - center;
+
+			delta.y = 0f;
+
+			if (delta.sqrMagnitude <= sqrRadius)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static void HideNonGround(GameObject go, Material hiddenMaterial, string[] groundKeywords)
+	{
+		MeshRenderer[] renderers = go.GetComponentsInChildren<MeshRenderer>(true);
+
+		for (int i = 0; i < renderers.Length; i++)
+		{
+			Material[] materials = renderers[i].sharedMaterials;
+
+			for (int j = 0; j < materials.Length; j++)
+			{
+				if (!IsGroundMaterial(materials[j], groundKeywords))
+				{
+					materials[j] = hiddenMaterial;
+				}
+			}
+
+			renderers[i].sharedMaterials = materials;
+		}
+	}
+
+	private static bool IsGroundMaterial(Material material, string[] groundKeywords)
+	{
+		if (material == null || groundKeywords == null)
+		{
+			return false;
+		}
+
+		for (int i = 0; i < groundKeywords.Length; i++)
+		{
+			if (!string.IsNullOrEmpty(groundKeywords[i]) && material.name.Contains(groundKeywords[i]))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	public void SetFollow(Transform target)
 	{
@@ -284,6 +595,28 @@ public class CRoadPath : MonoBehaviour
 		return GetPointOn(_branches[branch].Points, _branches[branch].Arcs, _forkStartArc + distance, out position, out _);
 	}
 
+	public bool TryGetBranchFollowPoint(int branch, Vector3 worldPosition, float lookAhead, out Vector3 position)
+	{
+		position = transform.position;
+
+		if (branch < 0 || branch >= _branches.Count)
+		{
+			return false;
+		}
+
+		CChain chain = _branches[branch];
+
+		if (!ProjectOn(chain.Points, chain.Arcs, worldPosition, out float arc, out _, out _, out _))
+		{
+			return false;
+		}
+
+		// 갈림길 앞에서는 갈래 시작점으로 잡힌다 → 갈래 시작부터 앞을 본다
+		arc = Mathf.Max(arc, _forkStartArc);
+
+		return GetPointOn(chain.Points, chain.Arcs, arc + lookAhead, out position, out _);
+	}
+
 	private bool GetPointOn(List<Vector3> points, List<float> arcs, float arc, out Vector3 position, out Vector3 forward)
 	{
 		position = transform.position;
@@ -334,6 +667,61 @@ public class CRoadPath : MonoBehaviour
 		}
 
 		Physics.SyncTransforms();
+		CreateGroundUnderlay();
+	}
+
+	private void CreateGroundUnderlay()
+	{
+		if (_groundUnderlayMaterial == null)
+		{
+			return;
+		}
+
+		GameObject go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+
+		go.name = "GroundUnderlay";
+		Destroy(go.GetComponent<Collider>());
+
+		_underlay = go.transform;
+		_underlay.SetParent(transform, false);
+		_underlay.localRotation = Quaternion.Euler(90f, 0f, 0f);
+		_underlay.localScale = new Vector3(_groundUnderlaySize, _groundUnderlaySize, 1f);
+
+		_underlayMaterial = new Material(_groundUnderlayMaterial) { name = $"{_groundUnderlayMaterial.name} (Underlay)" };
+
+		float repeat = _groundUnderlaySize / Mathf.Max(0.1f, _groundUnderlayTile);
+
+		_underlayMaterial.mainTextureScale = new Vector2(repeat, repeat);
+
+		MeshRenderer renderer = go.GetComponent<MeshRenderer>();
+
+		renderer.sharedMaterial = _underlayMaterial;
+		renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+		MoveGroundUnderlay();
+	}
+
+	// 마차 아래로 옮기고, 텍스처는 월드에 고정된 것처럼 보이게 오프셋을 맞춘다
+	private void MoveGroundUnderlay()
+	{
+		if (_underlay == null || _follow == null)
+		{
+			return;
+		}
+
+		Vector3 local = transform.InverseTransformPoint(_follow.position);
+		float tile = Mathf.Max(0.1f, _groundUnderlayTile);
+
+		// 텍스처 한 장 단위로 맞춰 옮긴다 → 오프셋이 작게 유지된다
+		local.x = Mathf.Round(local.x / tile) * tile;
+		local.z = Mathf.Round(local.z / tile) * tile;
+
+		_underlay.localPosition = new Vector3(local.x, -_groundUnderlayDepth, local.z);
+	}
+
+	private void LateUpdate()
+	{
+		MoveGroundUnderlay();
 	}
 
 	private void Update()
@@ -434,6 +822,7 @@ public class CRoadPath : MonoBehaviour
 			}
 
 			go = Spawn(tile, _cell, rotation, mirror, "Road");
+			_lastRoadTile = tile;
 			AddColliders(go);
 			cells = GetCells(tile, _cell, rotation, mirror);
 
@@ -461,10 +850,12 @@ public class CRoadPath : MonoBehaviour
 			Cells = cells,
 			Main = _cell,
 			StartArc = _frontArc,
-			EntryHeading = _heading
+			EntryHeading = _heading,
+			Branch = _placingBranch
 		};
 
 		Occupy(placed.Cells);
+		_roadCells.UnionWith(placed.Cells);
 
 		int wallFrom = Mathf.Max(0, _points.Count - 1);
 
@@ -501,6 +892,143 @@ public class CRoadPath : MonoBehaviour
 			piece.Decorated = true;
 			FillDecor(piece.Main, piece.Arc);
 		}
+	}
+
+	// 갈래 길 주변도 갈림길을 놓을 때 바로 채운다 → 고르기 전에 갈래 쪽이 텅 비어 보이지 않게
+	private void DecorateBranches()
+	{
+		for (int i = 0; i < _roadPieces.Count; i++)
+		{
+			CPlaced piece = _roadPieces[i];
+
+			if (piece.Decorated || piece.Branch < 0)
+			{
+				continue;
+			}
+
+			piece.Decorated = true;
+			FillDecor(piece.Main, piece.Arc);
+		}
+	}
+
+	private void FillForkGap(int forkY)
+	{
+		if (_branches.Count < 2)
+		{
+			return;
+		}
+
+		int frontY = int.MaxValue;
+
+		for (int i = 0; i < _branches.Count; i++)
+		{
+			frontY = Mathf.Min(frontY, _branches[i].Cell.y);
+		}
+
+		int limitY = frontY - 1;
+		int filled = 0;
+
+		for (int y = forkY + 1; y <= limitY; y++)
+		{
+			int minX = int.MaxValue;
+			int maxX = int.MinValue;
+
+			for (int i = 0; i < _roadPieces.Count; i++)
+			{
+				CPlaced piece = _roadPieces[i];
+
+				if (piece.Branch < 0)
+				{
+					continue;
+				}
+
+				for (int c = 0; c < piece.Cells.Count; c++)
+				{
+					if (piece.Cells[c].y != y)
+					{
+						continue;
+					}
+
+					minX = Mathf.Min(minX, piece.Cells[c].x);
+					maxX = Mathf.Max(maxX, piece.Cells[c].x);
+				}
+			}
+
+			if (maxX - minX < 2)
+			{
+				continue;
+			}
+
+			float arc = _forkStartArc + (y - forkY) * _tileSet.CellSize;
+
+			for (int x = minX + 1; x < maxX; x++)
+			{
+				Vector2Int cell = new Vector2Int(x, y);
+
+				if (_roadCells.Contains(cell))
+				{
+					continue;
+				}
+
+				if (IsOccupied(cell))
+				{
+					continue;
+				}
+
+				bool farFromRoad = !IsNextToRoad(cell);
+				CRoadTileEntry[] list = farFromRoad && _tileSet.Skirt != null && _tileSet.Skirt.Length > 0 ? _tileSet.Skirt : _tileSet.Decor;
+
+				if (list == null || list.Length == 0)
+				{
+					continue;
+				}
+
+				TryPlaceDecor(cell, limitY, cell, arc, list, 2);
+
+				if (IsOccupied(cell))
+				{
+					filled++;
+				}
+			}
+		}
+
+		if (_logFork && filled > 0)
+		{
+			CPrint.Log($"CRoadPath : 갈래 사이 빈 땅 {filled}칸을 숲으로 채움");
+		}
+	}
+
+	// 아직 고르지 않은 갈래가 이어질 자리인지 (갈래 맨 앞 칸에서 앞쪽, 좌우 1칸)
+	private bool IsForkFront(Vector2Int cell)
+	{
+		for (int i = 0; i < _forkFronts.Count; i++)
+		{
+			Vector2Int front = _forkFronts[i];
+
+			if (cell.y >= front.y && Mathf.Abs(cell.x - front.x) <= 1)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	// 주변 8칸 중에 길 칸이 있는지
+	private bool IsNextToRoad(Vector2Int cell)
+	{
+		for (int dx = -1; dx <= 1; dx++)
+		{
+			for (int dy = -1; dy <= 1; dy++)
+			{
+				if (_roadCells.Contains(new Vector2Int(cell.x + dx, cell.y + dy)))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private void DecorateBeforeFork()
@@ -611,42 +1139,25 @@ public class CRoadPath : MonoBehaviour
 		bool hasFallback = false;
 		int start = _random.Next(list.Length);
 
-		for (int i = 0; i < list.Length; i++)
+		for (int pass = 0; pass < 2; pass++)
 		{
-			CRoadTileEntry candidate = list[(start + i) % list.Length];
-
-			if (candidate == null || candidate.Prefab == null)
+			for (int i = 0; i < list.Length; i++)
 			{
-				continue;
-			}
+				CRoadTileEntry candidate = list[(start + i) % list.Length];
 
-			for (int m = 0; m < 2; m++)
-			{
-				for (int r = 0; r < 4; r++)
+				if (candidate == null || candidate.Prefab == null)
 				{
-					int ma = MapDir(a, r, m == 1);
-					int mb = MapDir(b, r, m == 1);
+					continue;
+				}
 
-					if (!((ma == entry && mb == exit) || (ma == exit && mb == entry)))
-					{
-						continue;
-					}
+				if (pass == 0 && candidate == _lastRoadTile)
+				{
+					continue;
+				}
 
-					if (Covers(candidate, r, m == 1, required))
-					{
-						tile = candidate;
-						rotation = r;
-						mirror = m == 1;
-						return true;
-					}
-
-					if (!hasFallback)
-					{
-						tile = candidate;
-						rotation = r;
-						mirror = m == 1;
-						hasFallback = true;
-					}
+				if (TryFitCandidate(candidate, a, b, entry, exit, required, ref tile, ref rotation, ref mirror, ref hasFallback))
+				{
+					return true;
 				}
 			}
 		}
@@ -657,6 +1168,43 @@ public class CRoadPath : MonoBehaviour
 		}
 
 		return hasFallback;
+	}
+
+	// 후보 하나를 회전·반전해 보며 진입·진출 방향이 맞는지 본다 → 칸까지 덮으면 true, 방향만 맞으면 대체 후보로 기억
+	private bool TryFitCandidate(CRoadTileEntry candidate, int a, int b, int entry, int exit, List<Vector2Int> required,
+		ref CRoadTileEntry tile, ref int rotation, ref bool mirror, ref bool hasFallback)
+	{
+		for (int m = 0; m < 2; m++)
+		{
+			for (int r = 0; r < 4; r++)
+			{
+				int ma = MapDir(a, r, m == 1);
+				int mb = MapDir(b, r, m == 1);
+
+				if (!((ma == entry && mb == exit) || (ma == exit && mb == entry)))
+				{
+					continue;
+				}
+
+				if (Covers(candidate, r, m == 1, required))
+				{
+					tile = candidate;
+					rotation = r;
+					mirror = m == 1;
+					return true;
+				}
+
+				if (!hasFallback)
+				{
+					tile = candidate;
+					rotation = r;
+					mirror = m == 1;
+					hasFallback = true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private static bool Covers(CRoadTileEntry tile, int rotation, bool mirror, List<Vector2Int> required)
@@ -761,6 +1309,7 @@ public class CRoadPath : MonoBehaviour
 			};
 
 			LoadChain(branch);
+			_placingBranch = i;
 
 			for (int n = 0; n < FORK_OPEN_TILES; n++)
 			{
@@ -788,10 +1337,21 @@ public class CRoadPath : MonoBehaviour
 			_branches.Add(SaveChain(branch));
 		}
 
+		_placingBranch = -1;
 		LoadChain(main);
 		_forkCount = 0;
 
+		// 갈래 주변 장식이 다른 갈래 맨 앞보다 앞줄까지 깔릴 수 있다
+		_forkFronts.Clear();
+
+		for (int i = 0; i < _branches.Count; i++)
+		{
+			_forkFronts.Add(_branches[i].Cell);
+		}
+
 		DecorateBeforeFork();
+		DecorateBranches();
+		FillForkGap(main.Cell.y);
 
 		if (junction != null)
 		{
@@ -841,6 +1401,7 @@ public class CRoadPath : MonoBehaviour
 			};
 
 			Occupy(placed.Cells);
+			_roadCells.UnionWith(placed.Cells);
 			_roadPieces.Add(placed);
 
 			return placed;
@@ -1052,6 +1613,17 @@ public class CRoadPath : MonoBehaviour
 		}
 
 		_filteredMeshes.Clear();
+
+		// 코드로 만든 바닥판·흙바닥 판 재질과 메시
+		DestroyCreated(_underlayMaterial);
+	}
+
+	private static void DestroyCreated(Object created)
+	{
+		if (created != null)
+		{
+			Destroy(created);
+		}
 	}
 
 	private void TryChooseBranch()
@@ -1066,6 +1638,8 @@ public class CRoadPath : MonoBehaviour
 		LoadChain(_branches[best]);
 		_straightLeft = _minStraightRun;
 		_branches.Clear();
+		_forkFronts.Clear();
+		AbandonOtherBranches(best);
 
 		if (_logFork)
 		{
@@ -1073,6 +1647,23 @@ public class CRoadPath : MonoBehaviour
 		}
 
 		OnBranchChosen?.Invoke(best);
+	}
+
+	// 고르지 않은 갈래는 뒤에서 지워질 때까지 보이게 두되, 다시 깔기에서는 뺀다
+	private void AbandonOtherBranches(int chosen)
+	{
+		for (int i = 0; i < _roadPieces.Count; i++)
+		{
+			CPlaced piece = _roadPieces[i];
+
+			if (piece.Branch < 0)
+			{
+				continue;
+			}
+
+			piece.Abandoned = piece.Branch != chosen;
+			piece.Branch = -1;
+		}
 	}
 
 	private CChain SaveChain(CChain chain)
@@ -1103,7 +1694,7 @@ public class CRoadPath : MonoBehaviour
 			return false;
 		}
 
-		int cut = _roadPieces.FindIndex(p => p.StartArc >= arc);
+		int cut = _roadPieces.FindIndex(p => !p.Abandoned && p.StartArc >= arc);
 
 		if (cut < 0)
 		{
@@ -1114,6 +1705,11 @@ public class CRoadPath : MonoBehaviour
 
 		for (int i = _roadPieces.Count - 1; i >= cut; i--)
 		{
+			if (_roadPieces[i].Abandoned)
+			{
+				continue;
+			}
+
 			DestroyPiece(_roadPieces[i]);
 			_roadPieces.RemoveAt(i);
 		}
@@ -1183,19 +1779,62 @@ public class CRoadPath : MonoBehaviour
 			{
 				Vector2Int cell = new Vector2Int(around.x + dx, around.y + dy);
 
-				if (cell.y > limitY || IsOccupied(cell))
+				if (cell.y > limitY)
 				{
 					continue;
 				}
 
-				TryPlaceDecor(cell, limitY, around, arc);
+				if (IsOccupied(cell))
+				{
+					continue;
+				}
+
+				TryPlaceDecor(cell, limitY, around, arc, decor, _decorRadius + 1);
+			}
+		}
+
+		FillSkirt(around, arc, limitY);
+	}
+
+	// 장식 바깥 양옆에 가장자리 타일(빽빽한 나무 벽)을 두른다
+	private void FillSkirt(Vector2Int around, float arc, int limitY)
+	{
+		CRoadTileEntry[] skirt = _tileSet.Skirt;
+
+		if (skirt == null || skirt.Length == 0 || _skirtDepth <= 0)
+		{
+			return;
+		}
+
+		for (int dy = -1; dy <= 1; dy++)
+		{
+			for (int d = 1; d <= _skirtDepth; d++)
+			{
+				int offset = _decorRadius + d;
+
+				TryFillSkirtCell(new Vector2Int(around.x - offset, around.y + dy), limitY, around, arc, skirt);
+				TryFillSkirtCell(new Vector2Int(around.x + offset, around.y + dy), limitY, around, arc, skirt);
 			}
 		}
 	}
 
-	private void TryPlaceDecor(Vector2Int cell, int limitY, Vector2Int owner, float arc)
+	private void TryFillSkirtCell(Vector2Int cell, int limitY, Vector2Int owner, float arc, CRoadTileEntry[] skirt)
 	{
-		CRoadTileEntry[] decor = _tileSet.Decor;
+		if (cell.y > limitY)
+		{
+			return;
+		}
+
+		if (IsOccupied(cell))
+		{
+			return;
+		}
+
+		TryPlaceDecor(cell, limitY, owner, arc, skirt, _decorRadius + _skirtDepth + 1);
+	}
+
+	private void TryPlaceDecor(Vector2Int cell, int limitY, Vector2Int owner, float arc, CRoadTileEntry[] decor, int maxDx)
+	{
 		int start = _random.Next(decor.Length);
 
 		for (int i = 0; i < decor.Length; i++)
@@ -1210,7 +1849,7 @@ public class CRoadPath : MonoBehaviour
 			int rotation = _random.Next(4);
 			List<Vector2Int> cells = GetCells(tile, cell, rotation, false);
 
-			if (!CanUse(cells, limitY, owner))
+			if (!CanUse(cells, limitY, owner, maxDx))
 			{
 				continue;
 			}
@@ -1223,11 +1862,11 @@ public class CRoadPath : MonoBehaviour
 		}
 	}
 
-	private bool CanUse(List<Vector2Int> cells, int limitY, Vector2Int owner)
+	private bool CanUse(List<Vector2Int> cells, int limitY, Vector2Int owner, int maxDx)
 	{
 		for (int i = 0; i < cells.Count; i++)
 		{
-			if (cells[i].y > limitY || IsOccupied(cells[i]) || Mathf.Abs(cells[i].x - owner.x) > _decorRadius + 1)
+			if (cells[i].y > limitY || IsOccupied(cells[i]) || Mathf.Abs(cells[i].x - owner.x) > maxDx || IsForkFront(cells[i]))
 			{
 				return false;
 			}

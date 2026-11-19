@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcc86d1e6cbe77041ab6f66ee62de6f8, type: 3}
   m_Name: Road Event Data_Banter
   m_EditorClassIdentifier: 
-  _id: roadevent_forest_obstacle_01
+  _id: roadevent_banter_01
   _category: 4
   _weight: 1
   _options: []

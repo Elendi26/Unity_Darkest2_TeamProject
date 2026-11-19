@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: Rough Patch
   m_EditorClassIdentifier: 
   _type: 3
+  _displayName: 험한 길
   _weight: 1
   _minRoadEvents: 0
   _maxRadEvents: 1
-  _travelEffects: []
-  references:
-    version: 2
-    RefIds: []
+  _passEvent: {fileID: 11400000, guid: 6403ee177fc9fd73e9035fc3a9398300, type: 2}
+  _passEventPosition: 0.5

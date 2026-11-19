@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f643bcc95632e6944afb54db624c7da5, type: 3}
+  m_Name: TestSkillData 3
+  m_EditorClassIdentifier: 
+  _skillID: 
+  _skillName: "\uC601\uC6C51\uC2A4\uD0AC4"
+  _skillExplain: "\uC601\uC6C51\uC7584\uBC88\uC9F8\uC2A4\uD0AC\uC774\uB2E4"
+  _skillType: 4
+  _skillDetail: 4
+  _skillIcon: {fileID: 21300000, guid: 2227c0684d9312343bf9c8baee76ce79, type: 2}
+  _skillTypeIcon: {fileID: 21300000, guid: 86059fc909f958749bbce95bd8980e25, type: 2}
+  _skillRangeImage: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}

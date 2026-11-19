@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: Store
   m_EditorClassIdentifier: 
   _type: 3
+  _displayName: 고물상
   _icon: {fileID: 21300000, guid: 7222bf1414abe034e8493993195064de, type: 2}
   _weight: 1
   _maxPerBiome: 1
   _minRow: 2
   _allowConsecutive: 0
   _uniqueInRow: 1
+  _event: {fileID: 11400000, guid: 4e3f8a8bacb087bff55d62498c9f17be, type: 2}
+  _shop: {fileID: 11400000, guid: 3c6847c4b8e110bbdb274c2d2c2dc495, type: 2}
+  _landmarkPrefab: {fileID: 1000000000000000001, guid: c01f45f6d7abde5f9566b7fdf5f9a172, type: 3}

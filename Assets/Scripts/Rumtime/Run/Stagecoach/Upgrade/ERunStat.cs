@@ -6,4 +6,6 @@ public enum ERunStat
     InventorySlots,
     TorchDrainPercent,
     ScoutChance,
+    MaxWheels,
+    MaxArmor,
 }

@@ -13,8 +13,12 @@ MonoBehaviour:
   m_Name: Creature Den
   m_EditorClassIdentifier: 
   _type: 6
+  _displayName: 괴물 소굴
   _icon: {fileID: 21300000, guid: eb2287c3b1b553f48bb91cc96eb50604, type: 2}
   _weight: 1
   _maxPerBiome: 99
   _minRow: 1
   _allowConsecutive: 1
+  _landmarkPrefab: {fileID: 1000000000000000001, guid: c6744320e45aa7439a99df91af9574fc, type: 3}
+  _alwaysRevealed: 1
+  _scoutRange: 0

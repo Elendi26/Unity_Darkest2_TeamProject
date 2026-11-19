@@ -8,6 +8,7 @@ public class CRoadTravel : IRoadTravel
     public event Action<ETravelState, ETravelState> OnStateChanged;
     public event Action<float> OnProgress;
     public event Action<CRoadEventData> OnRoadEventStarted;
+    public event Action<CRoadEventData> OnRoadCombatStarted;
     #endregion
 
     #region 내부 변수
@@ -15,6 +16,7 @@ public class CRoadTravel : IRoadTravel
     private readonly CStagecoach _stagecoach;
     private readonly CRunContext _ctx;
     private readonly IRoadEventResolver _eventResolver;
+    private readonly IRoadCombatStarter _combatStarter;
     private readonly List<CScheduledEvent> _schedule = new List<CScheduledEvent>();
     private ETravelState _state = ETravelState.None;
     private CNodeLink _link;
@@ -48,12 +50,25 @@ public class CRoadTravel : IRoadTravel
         return _schedule[index].Position;
     }
 
-    public CRoadTravel(CStagecoachConfig config, CStagecoach stagecoach, CRunContext ctx, IRoadEventResolver eventResolver)
+    // 이번 경로 index 번째 도로 이벤트 (없으면 null)
+    public CRoadEventData GetEventData(int index)
+    {
+        if (index < 0 || index >= _schedule.Count)
+        {
+            return null;
+        }
+
+        return _schedule[index].Data;
+    }
+
+    public CRoadTravel(CStagecoachConfig config, CStagecoach stagecoach, CRunContext ctx, IRoadEventResolver eventResolver, IRoadCombatStarter combatStarter = null)
     {
         _config = config;
         _stagecoach = stagecoach;
         _ctx = ctx;
         _eventResolver = eventResolver;
+        // 전투 쪽이 연결되기 전에는 로그만 남기고 지나가는 임시 처리
+        _combatStarter = combatStarter ?? new CPendingRoadCombatStarter();
     }
 
     public void Travel(CNodeLink link, Action onArrived)
@@ -127,6 +142,15 @@ public class CRoadTravel : IRoadTravel
     private void ScheduleEvents(int count)
     {
         _schedule.Clear();
+
+        // 길 종류마다 정해진 이벤트 (험한 길 → 바퀴 손상 등)
+        CRouteTypeData route = _link.RouteData;
+
+        if (route != null && route.PassEvent != null)
+        {
+            _schedule.Add(new CScheduledEvent { Position = route.PassEventPosition, Data = route.PassEvent });
+            return;
+        }
 
         if (count > _config.EventPositions.Count)
         {
@@ -217,6 +241,21 @@ public class CRoadTravel : IRoadTravel
         SetState(ETravelState.RoadEvent);
         OnRoadEventStarted?.Invoke(data);
 
+        // 바퀴·장갑이 이미 0 → 효과 대신 전투 (끝나면 다시 달린다)
+        if (data != null && data.ShouldStartCombat(_ctx.RunData))
+        {
+            StartRoadCombat(data);
+            return;
+        }
+
+        // 팝업 없는 이벤트 → 첫 선택지 효과만 바로 적용하고 멈추지 않고 계속 달린다
+        if (data != null && !data.ShowPopup)
+        {
+            ResolveWithoutPopup(data);
+            FinishRoadEvent();
+            return;
+        }
+
         if (_eventResolver == null)
         {
             FinishRoadEvent();
@@ -224,6 +263,37 @@ public class CRoadTravel : IRoadTravel
         }
 
         _eventResolver.Resolve(data, _ctx, FinishRoadEvent);
+    }
+
+    private void StartRoadCombat(CRoadEventData data)
+    {
+        if (_logState)
+        {
+            string reason = data.AlwaysCombat ? "길을 막아" : $"{data.CombatWhenEmpty} 이(가) 0 이라";
+
+            CPrint.Log($"도로 이벤트 {data.Id} → {reason} 전투 '{data.CombatId}' 시작");
+        }
+
+        OnRoadCombatStarted?.Invoke(data);
+        _combatStarter.StartCombat(data, _ctx, FinishRoadEvent);
+    }
+
+    private void ResolveWithoutPopup(CRoadEventData data)
+    {
+        IReadOnlyList<CRoadEventOption> options = data.Options;
+        CRoadEventOption option = options != null && options.Count > 0 ? options[0] : null;
+
+        if (option != null)
+        {
+            ApplyEffects(option.Effects);
+        }
+
+        if (_logState)
+        {
+            string title = string.IsNullOrEmpty(data.Title) ? data.Id : data.Title;
+
+            CPrint.Log($"도로 이벤트 {title} → 팝업 없이 지나감{(option != null ? $" ({option.LabelKey})" : string.Empty)}");
+        }
     }
 
     private void FinishRoadEvent()

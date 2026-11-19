@@ -19,7 +19,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     [SerializeField] private Canvas _scaleFactor;
 
     [Header("영웅 데이터 SO 참조")]
-    [SerializeField] private HeroDataSO _heroData;
+    [SerializeField] private CEntityBasicDataSO _heroData;
 
     [Header("로스터 UI 참조")]
     [SerializeField] private HeroRoster_UI _heroRoster;
@@ -28,7 +28,12 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     #endregion
 
     // 프로퍼티 
-    public HeroDataSO HeroData => _heroData;
+    public CEntityBasicDataSO HeroData => _heroData;
+
+    private void Start()
+    {
+        _pointerImage.gameObject.SetActive(false);
+    }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -40,6 +45,8 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         var roster = GetComponent<HeroRoster_UI>();
 
         _heroData = roster.HeroData;
+
+        TheCrossroadManager.instance.HeroInfoUpdate(_heroData);
 
         _pointerImage.GetComponent<Image>().sprite = roster.HeroData.HeroPortrait;
 

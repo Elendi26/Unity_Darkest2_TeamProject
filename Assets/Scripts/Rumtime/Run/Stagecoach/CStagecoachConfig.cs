@@ -6,6 +6,9 @@ public class CStagecoachConfig : ScriptableObject
 {
     #region 인스펙터
     [Header("내구도")]
+    // 시작 최대치 → 업그레이드로 아래 상한까지 올린다
+    [SerializeField] private int _baseWheels = 2;
+    [SerializeField] private int _baseArmor = 2;
     [SerializeField] private int _maxWheels = 4;
     [SerializeField] private int _maxArmor = 4;
 
@@ -14,6 +17,10 @@ public class CStagecoachConfig : ScriptableObject
     [SerializeField] private int _trophySlots = 1;
     [SerializeField] private int _petSlots = 0;
     [SerializeField] private int _flameSlots = 1;
+
+    [Header("인벤토리")]
+    // 기본 짐칸 수 → 업그레이드(InventorySlots)로 늘어난다
+    [SerializeField] private int _inventorySlots = 8;
 
     [Header("주행")]
     [SerializeField] private float _travelDistance = 200f;
@@ -27,8 +34,16 @@ public class CStagecoachConfig : ScriptableObject
     [SerializeReference] private List<IRunEffect> _brokenWheelEffects = new List<IRunEffect>();
     #endregion
 
+    // 시작 바퀴 최대치
+    public int BaseWheels => _baseWheels;
+    // 시작 장갑 최대치
+    public int BaseArmor => _baseArmor;
+    // 업그레이드로 올릴 수 있는 바퀴 상한
     public int MaxWheels => _maxWheels;
+    // 업그레이드로 올릴 수 있는 장갑 상한
     public int MaxArmor => _maxArmor;
+    // 기본 짐칸 수
+    public int InventorySlots => _inventorySlots;
     public float TravelDistance => _travelDistance;
     public int TorchDrainPerTravel => _torchDrainPerTravel;
     public IReadOnlyList<float> EventPositions => _eventPositions;

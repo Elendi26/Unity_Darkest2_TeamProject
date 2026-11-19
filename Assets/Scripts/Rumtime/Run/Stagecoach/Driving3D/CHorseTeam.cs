@@ -8,12 +8,13 @@ public class CHorseTeam : MonoBehaviour
 	[SerializeField] private float _acceleration = 4.5f;
 	[SerializeField] private float _braking = 10f;
 	[SerializeField] private float _coastDeceleration = 1.2f;
-	[SerializeField] private float _turnRate = 95f;
+	[SerializeField] private float _turnRate = 85f;
 	[SerializeField] private float _highSpeedTurn = 0.95f;
 	[SerializeField] private float _throttleResponse = 2.5f;
 	[SerializeField] private float _throttleRelease = 2.5f;
-	[SerializeField] private float _steerResponse = 3f;
-	[SerializeField] private float _steerReturn = 2.2f;
+	[SerializeField] private float _steerResponse = 3.5f;
+	[SerializeField] private float _steerReturn = 2.5f;
+	[SerializeField] private float _yawResponse = 12f;
 	[SerializeField] private float _lateralGrip = 8f;
 	[SerializeField] private float _blockedSlack = 5f;
 	[SerializeField] private float _groundProbe = 3f;
@@ -45,6 +46,7 @@ public class CHorseTeam : MonoBehaviour
 	private bool _brake = true;
 	private float _smoothThrottle;
 	private float _smoothSteer;
+	private float _smoothYawRate;
 	private float _speed;
 	private bool _hasEdge;
 	private Vector3 _edgeRight;
@@ -113,6 +115,8 @@ public class CHorseTeam : MonoBehaviour
 		_rigidbody.velocity = Vector3.zero;
 		_rigidbody.angularVelocity = Vector3.zero;
 		_speed = 0f;
+		_smoothSteer = 0f;
+		_smoothYawRate = 0f;
 
 		if (TryFindGround(out float groundY))
 		{
@@ -221,7 +225,10 @@ public class CHorseTeam : MonoBehaviour
 		SmoothInput(deltaTime, GetSteerInput(forward));
 		TickSpeed(deltaTime);
 
-		float yawRate = GetSteerYawRate();
+		// 핸들로 정한 회전 속도를 바로 쓰지 않고 서서히 따라간다 → 꺾기 시작·끝이 부드럽다
+		_smoothYawRate = Mathf.Lerp(_smoothYawRate, GetSteerYawRate(), 1f - Mathf.Exp(-_yawResponse * deltaTime));
+
+		float yawRate = _smoothYawRate;
 		Vector3 velocity = GetHorizontalVelocity(forward, deltaTime);
 
 		LimitEdgeHeading(forward, ref yawRate);
@@ -376,7 +383,7 @@ public class CHorseTeam : MonoBehaviour
 		return Mathf.Abs(_edgeOffset) - (_edgeLimit - softZone);
 	}
 
-	// 가장자리에 가까울수록 바깥을 향할 수 있는 각도를 줄인다 → 벽에 비스듬히 박힌 채 끌려가지 않는다
+	// 가장자리에 가까울수록 바깥을 향할 수 있는 각도를 줄인다
 	private void LimitEdgeHeading(Vector3 forward, ref float yawRate)
 	{
 		if (!_hasEdge || ForwardSpeed <= 0f)

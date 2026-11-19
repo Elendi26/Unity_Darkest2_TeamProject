@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 [System.Serializable]
 public class UserProfileData
@@ -13,6 +14,9 @@ public class UserProfileData
 
     // 마지막 데이터 저장 시간
     public string LastSaveTime;
+
+    // 보유한 촛불 개수
+    public int CandleCount;
 
 
     // TODO : 맵 진행도, 노드 진행도, 역마차 상태, 영웅 데이터 변수 등 추가해야한다.
@@ -28,9 +32,21 @@ public class UserProfileData
     [System.Serializable]
     public class HeroSaveData
     {
+        public string HeroID;
+        public int CurrentHP;
+        public int CurrentStress;
+        public int PartySlotIndex;
+
+        // TODO : 영웅 간 호감도 수치 상대 영웅 ID와 수치를 받아서 Dictionary로 적용
+
+        // 영웅이 전투시 들고있는 스킬 데이터 ID 리스트 / 리스트의 들어간 순서대로 스킬창에 왼쪽부터 표시된다.
+        public List<string> HeroSkillIDs = new List<string>();
+
+
 
     }
 
-
+    // 파티원들hdata.PartyHeroes.Count의 동적 데이터를 담기 위한 리스트 변수
+    public List<HeroSaveData> PartyHeroes = new List<HeroSaveData>();
 
 }

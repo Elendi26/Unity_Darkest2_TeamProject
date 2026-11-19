@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f5120d1640e5f249bdb5a6e424e355e, type: 3}
   m_Name: Stagecoach Config
   m_EditorClassIdentifier: 
+  _baseWheels: 2
+  _baseArmor: 2
   _maxWheels: 4
   _maxArmor: 4
   _generalSlots: 1
@@ -25,10 +27,7 @@ MonoBehaviour:
   - 0.95
   _eventPositionJitter: 0.05
   _roadEventPool:
-  - {fileID: 11400000, guid: 56ced943f9e934b42b8cb458694a08eb, type: 2}
-  - {fileID: 11400000, guid: dc827c54b773a6d489ff227bb6db658c, type: 2}
   - {fileID: 11400000, guid: 430b366830c1e9e4dba5a0bfa44293c6, type: 2}
-  - {fileID: 11400000, guid: c8c64c3168aa6c24faaf2cf2489d7bee, type: 2}
   _routeEffects: []
   _brokenWheelEffects: []
   references:

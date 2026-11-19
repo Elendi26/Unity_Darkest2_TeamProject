@@ -21,7 +21,7 @@ public class CCombatCurrentTurn : MonoBehaviour
 
     private ECombatSelectType _selectType = ECombatSelectType.None;
 
-    #region ÇÁ·ÎÆÛÆ¼
+    #region Ã‡ÃÂ·ÃŽÃ†Ã›Ã†Â¼
     public ECombatSelectType SelectType => _selectType;
     public CCombatSelectedSkill SelectedSkill => _seletedSkill;
 
@@ -55,7 +55,7 @@ public class CCombatCurrentTurn : MonoBehaviour
 
     public void SetSkillData()
     {
-        _skillData = _entity._skillData.OutputSkillDataChecked(_entity.GetRank());
+        //_skillData = _entity._skillData.OutputSkillDataChecked(_entity.GetRank());
     }
 
     public List<(EUsableSkillState, int, CSkillDataSO)> GetCurrentTurnSkillData()

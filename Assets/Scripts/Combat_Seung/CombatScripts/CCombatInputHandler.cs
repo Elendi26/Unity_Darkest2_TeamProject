@@ -86,7 +86,7 @@ public class CCombatInputHandler : MonoBehaviour
         {
             case ECombatSelectType.None:
 
-                Debug.Log("µ¥ÀÌÅÍ¸¦ ¼±ÅÃÇÒ ¼ö ¾ø´Â »óÅÂÀÔ´Ï´Ù");
+                Debug.Log("ë°ì´í„°ë¥¼ ì„ íƒí•  ìˆ˜ ì—†ëŠ” ìƒíƒœì…ë‹ˆë‹¤");
 
                 break;
 
@@ -111,7 +111,7 @@ public class CCombatInputHandler : MonoBehaviour
     {
         if (entityData.IsHero())
         {
-            // HeroPopup_UI.instance.OpenPopup(entityData); // ÀÏ´Ü ¸¸µé¾î¸¸µÒ
+            // HeroPopup_UI.instance.OpenPopup(entityData); // ì¼ë‹¨ ë§Œë“¤ì–´ë§Œë‘ 
         }
     }
 }

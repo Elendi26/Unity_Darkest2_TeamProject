@@ -12,10 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcc86d1e6cbe77041ab6f66ee62de6f8, type: 3}
   m_Name: Road Event Data_Obstacle
   m_EditorClassIdentifier: 
-  _id: roadevent_forest_obstacle_01
+  _id: roadevent_obstacle_01
   _category: 1
   _weight: 1
+  _title: 방책
+  _body: 
   _options: []
+  _showPopup: 0
+  _roadPropPrefab: {fileID: 1000000000000000001, guid: a533f52212467ae0579a13fdd7b2aa71, type: 3}
+  _bumpCount: 0
+  _combatWhenEmpty: 0
+  _combatId: roadcombat_barricade
+  _alwaysCombat: 1
+  _blocksRoad: 1
   references:
     version: 2
     RefIds: []

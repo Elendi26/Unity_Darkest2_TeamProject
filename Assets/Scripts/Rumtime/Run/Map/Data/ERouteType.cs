@@ -6,4 +6,5 @@ public enum ERouteType
     Safe,
     Combat,
     RoughPatch,
+    DangerPath,
 }

@@ -12,7 +12,7 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: DefaultCompany
+  companyName: GM09_Zero100
   productName: Unity_Darkest2_TeamProject
   defaultCursor: {fileID: 2800000, guid: de1ba5d8802f8f2418e49c3c13ef4ec5, type: 3}
   cursorHotspot: {x: 0, y: 0}

@@ -15,7 +15,6 @@ public class CMapLinkView : MonoBehaviour
     private CNodeLink _link;
     #endregion
 
-    // 이 뷰가 보여주는 연결
     public CNodeLink Link => _link;
 
     public void Bind(CNodeLink link, Vector2 from, Vector2 to)

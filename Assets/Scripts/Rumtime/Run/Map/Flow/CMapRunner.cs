@@ -7,6 +7,7 @@ public class CMapRunner
     #region 이벤트
     public event Action<EMapState, EMapState> OnStateChanged;
     public event Action<CNodeInstance> OnNodeEntered;
+    public event Action OnRevealed;
     #endregion
 
     #region 내부 변수
@@ -15,7 +16,11 @@ public class CMapRunner
     private readonly Dictionary<ENodeType, INodeHandler> _handlers = new Dictionary<ENodeType, INodeHandler>();
     private EMapState _state = EMapState.None;
     private CNodeInstance _current;
+    private INodeArrivalPresenter _arrivalPresenter;
+    private CNodeInstance _enteredNode;
     private bool _logState = true;
+    private readonly List<CNodeInstance> _revealFrontier = new List<CNodeInstance>();
+    private readonly List<CNodeInstance> _revealNext = new List<CNodeInstance>();
     #endregion
 
     public EMapState State => _state;
@@ -25,6 +30,12 @@ public class CMapRunner
     {
         _graph = graph;
         _travel = travel;
+    }
+
+    // 도착 연출을 넣는다 (null 이면 바로 노드 이벤트)
+    public void SetArrivalPresenter(INodeArrivalPresenter presenter)
+    {
+        _arrivalPresenter = presenter;
     }
 
     public void RegisterHandler(INodeHandler handler)
@@ -72,6 +83,8 @@ public class CMapRunner
             return false;
         }
 
+        // 직접 달리는 길은 어떤 길인지 알게 된다
+        link.IsRevealed = true;
         SetState(EMapState.Traveling);
 
         if (_travel == null)
@@ -84,18 +97,175 @@ public class CMapRunner
         return true;
     }
 
+    public int RevealAhead(CNodeInstance from, int range)
+    {
+        if (from == null || range <= 0)
+        {
+            return 0;
+        }
+
+        int revealed = 0;
+
+        _revealFrontier.Clear();
+        _revealFrontier.Add(from);
+
+        for (int step = 0; step < range && _revealFrontier.Count > 0; step++)
+        {
+            _revealNext.Clear();
+
+            for (int i = 0; i < _revealFrontier.Count; i++)
+            {
+                IReadOnlyList<CNodeLink> links = _revealFrontier[i].OutLinks;
+
+                for (int j = 0; j < links.Count; j++)
+                {
+                    revealed += RevealLink(links[j]);
+                    revealed += RevealNode(links[j].To);
+
+                    if (!_revealNext.Contains(links[j].To))
+                    {
+                        _revealNext.Add(links[j].To);
+                    }
+                }
+            }
+
+            _revealFrontier.Clear();
+            _revealFrontier.AddRange(_revealNext);
+        }
+
+        if (_logState)
+        {
+            CPrint.Log($"CMapRunner : 감시 → 앞 {range}칸에서 {revealed}곳을 밝혔습니다.");
+        }
+
+        NotifyRevealed();
+        return revealed;
+    }
+
+    public int ScoutRandom(int count, System.Random random)
+    {
+        if (_graph == null || count <= 0)
+        {
+            return 0;
+        }
+
+        int fromRow = _current != null ? _current.Row : 0;
+        List<object> hidden = new List<object>();
+
+        for (int i = 0; i < _graph.Nodes.Count; i++)
+        {
+            CNodeInstance node = _graph.Nodes[i];
+
+            if (!node.IsRevealed && node.Row > fromRow)
+            {
+                hidden.Add(node);
+            }
+        }
+
+        for (int i = 0; i < _graph.Links.Count; i++)
+        {
+            CNodeLink link = _graph.Links[i];
+
+            if (!link.IsRevealed && link.From.Row >= fromRow)
+            {
+                hidden.Add(link);
+            }
+        }
+
+        random ??= new System.Random();
+
+        int revealed = 0;
+
+        while (revealed < count && hidden.Count > 0)
+        {
+            int index = random.Next(hidden.Count);
+
+            if (hidden[index] is CNodeInstance node)
+            {
+                revealed += RevealNode(node);
+            }
+            else if (hidden[index] is CNodeLink link)
+            {
+                revealed += RevealLink(link);
+            }
+
+            hidden.RemoveAt(index);
+        }
+
+        if (_logState)
+        {
+            CPrint.Log($"CMapRunner : 정찰 → {revealed}곳을 밝혔습니다.");
+        }
+
+        NotifyRevealed();
+        return revealed;
+    }
+
+    private static int RevealNode(CNodeInstance node)
+    {
+        if (node == null || node.IsRevealed)
+        {
+            return 0;
+        }
+
+        node.IsRevealed = true;
+        return 1;
+    }
+
+    private static int RevealLink(CNodeLink link)
+    {
+        if (link == null || link.IsRevealed)
+        {
+            return 0;
+        }
+
+        link.IsRevealed = true;
+        return 1;
+    }
+
+    private void NotifyRevealed()
+    {
+        OnRevealed?.Invoke();
+    }
+
     private void Arrive(CNodeInstance node)
     {
         _current = node;
         _current.IsVisited = true;
         _current.IsRevealed = true;
 
+        // 감시탑처럼 앞을 내다보는 지점이면 앞쪽을 밝힌다
+        if (node.TypeData != null && node.TypeData.ScoutRange > 0)
+        {
+            RevealAhead(node, node.TypeData.ScoutRange);
+        }
+
         SetState(EMapState.InNode);
+
+        // 도착 연출이 있으면 끝난 뒤에 노드 이벤트로
+        if (_arrivalPresenter != null)
+        {
+            _arrivalPresenter.Present(node, () => EnterArrivedNode(node));
+            return;
+        }
+
+        EnterCurrentNode();
+    }
+
+    // 연출이 끝났을 때 아직 그 노드에 있을 때만 들어간다
+    private void EnterArrivedNode(CNodeInstance node)
+    {
+        if (_state != EMapState.InNode || _current != node || _enteredNode == node)
+        {
+            return;
+        }
+
         EnterCurrentNode();
     }
 
     private void EnterCurrentNode()
     {
+        _enteredNode = _current;
         OnNodeEntered?.Invoke(_current);
 
         ENodeType type = _current.TypeData != null ? _current.TypeData.Type : ENodeType.None;
