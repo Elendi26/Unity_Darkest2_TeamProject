@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CombatHeroSpawner : MonoBehaviour
@@ -29,7 +30,13 @@ public class CombatHeroSpawner : MonoBehaviour
 
     // 나중에 확장을 위해 해당 슬롯에 위치한 영웅의 정보를 쉽게 찾을 수 있도록 하는 변수
     private GameObject[] _heroesinParty = new GameObject[4];
+    
+    // 소환한 영웅들의 대한 정보를 전달할 수 있도록 리스트로 만들어 추가하고 프로퍼티로 외부에서 확인할 수 있게 한다.
+    private List<CEntityRuntimeData> _spawnedHeroData = new List<CEntityRuntimeData>();
 
+    // 프로퍼티
+
+    public List<CEntityRuntimeData> SpawnedHeroData => _spawnedHeroData;
 
     private void Awake()
     {
@@ -108,6 +115,15 @@ public class CombatHeroSpawner : MonoBehaviour
 
         // 모델링 스폰포인트 자식으로 생성시키기
         GameObject spawnModel = Instantiate(heroData.HeroModel, _spawnPoints[slotIndex]);
+
+        //CEntityRuntimeData spawnHero = new CEntityRuntimeData();
+        
+
+        //if (spawnHero != null)
+        //{
+        //    _spawnedHeroData.Add(spawnHero);
+        //}
+
 
         CombatEntityHUD hudUI = Instantiate(_prefabHUD, _spawnPoints[slotIndex]);
 
