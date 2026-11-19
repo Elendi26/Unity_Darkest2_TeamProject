@@ -35,8 +35,17 @@ public class CEntitySkillData
 
         for (int i = 0; 0 < _skillData.Count; i++)
         {
-            data.Item1 = ((rank |= _skillData[i].GetRankBitmask()) != 0); // if 로 변경하고 true일 때 사용 가능 상태로 전환
-            data.Item2 = 0; // 뭘 넣어야 할까요?
+            if ((rank |= _skillData[i].GetRankBitmask()) != 0)
+            {
+                data.Item1 = EUsableSkillState.Usable;
+            }
+
+            else
+            {
+                data.Item1 = EUsableSkillState.InvalidRank;
+            }
+
+            data.Item2 = 0;
             data.Item3 = _skillData[i];
 
             checkedList[i] = data;
