@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public enum ECombatSelectType
 {
     None,
-    Skill,
     Entity,
     Entities
 }
@@ -18,13 +17,11 @@ public class CCombatCurrentTurn : MonoBehaviour
     [SerializeField] private CCombatSelectedSkill _seletedSkill;
     [SerializeField] private CombatSkillbar_UI _combatSkillbar;
     
-    //
     private List<(EUsableSkillState, int, CSkillDataSO)> _skillData;
-    private List<CombatSkillSlot_UI> _skillSlots;
 
     private ECombatSelectType _selectType = ECombatSelectType.None;
 
-    #region ÇÁ·ÎÆÛÆ¼
+    #region Ã‡ÃÂ·ÃŽÃ†Ã›Ã†Â¼
     public ECombatSelectType SelectType => _selectType;
     public CCombatSelectedSkill SelectedSkill => _seletedSkill;
 
@@ -41,7 +38,7 @@ public class CCombatCurrentTurn : MonoBehaviour
     {
         SetSkillData();
 
-        _combatSkillbar.HeroTurnSkillDataSet(_skillData);
+        // _combatSkillbar.HeroTurnSkillDataSet(_skillData);
 
         SkillSelect();
     }
@@ -61,7 +58,6 @@ public class CCombatCurrentTurn : MonoBehaviour
         //_skillData = _entity._skillData.OutputSkillDataChecked(_entity.GetRank());
     }
 
-    //
     public List<(EUsableSkillState, int, CSkillDataSO)> GetCurrentTurnSkillData()
     {
         return _skillData;

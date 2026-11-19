@@ -22,7 +22,7 @@ public class CCombatRank : MonoBehaviour
     private int _rank;
     private bool _targetable = false;
     private ICombatData _combatData;
-
+    
     #region 프로퍼티
     public ICombatData CombatData => _combatData;
     public bool Targetable => _targetable;

@@ -61,7 +61,10 @@ public class CCombatInputHandler : MonoBehaviour
 
     private void OnRightClick(InputAction.CallbackContext context)
     {
-        if (_mainCamera == null) return;
+        if (_mainCamera == null)
+        {
+            return;
+        }
 
         Vector2 mousePosition = Mouse.current.position.ReadValue();
         Ray ray = _mainCamera.ScreenPointToRay(mousePosition);
@@ -82,15 +85,21 @@ public class CCombatInputHandler : MonoBehaviour
         switch (_stateManager.CombatCurrentTurn.SelectType)
         {
             case ECombatSelectType.None:
-                Debug.Log("µ¥ÀÌÅÍ¸¦ ¼±ÅÃÇÒ ¼ö ¾ø´Â »óÅÂÀÔ´Ï´Ù");
+
+                Debug.Log("ë°ì´í„°ë¥¼ ì„ íƒí•  ìˆ˜ ì—†ëŠ” ìƒíƒœì…ë‹ˆë‹¤");
+
                 break;
 
             case ECombatSelectType.Entity:
+
                 _stateManager.CombatCurrentTurn.SelectedSkill.InputTargetData(entityData);
+
                 break;
 
             case ECombatSelectType.Entities:
+
                 _stateManager.CombatCurrentTurn.SelectedSkill.InputEveryTargetData();
+
                 break;
 
             default:
@@ -100,9 +109,9 @@ public class CCombatInputHandler : MonoBehaviour
 
     private void CheckRightClickCombatData(CEntityRuntimeData entityData)
     {
-        if (1f == entityData.GetStat(EEntityStat.Hero))
+        if (entityData.IsHero())
         {
-            //HeroPopup_UI.instance.OpenPopup(entityData); // ÀÏ´Ü ¸¸µé¾î¸¸µÒ
+            // HeroPopup_UI.instance.OpenPopup(entityData); // ì¼ë‹¨ ë§Œë“¤ì–´ë§Œë‘ 
         }
     }
 }

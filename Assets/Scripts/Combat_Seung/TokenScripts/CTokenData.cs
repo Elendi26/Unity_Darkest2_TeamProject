@@ -1,4 +1,5 @@
 using Unity.VisualScripting;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 public enum ETokenTriggerPoint
@@ -24,18 +25,17 @@ public interface ITokenInterface
 
 public struct STokenData
 {
-    private string _tokenName;
-    private int _tokenIndex;
+    [Header("토큰명은 비트마스크라 복수 선택 가능, 주의할 것 복수 선택 금지")]
+    private ETokenBitMask _tokenName;
     private ETokenTriggerPoint _tokenTriggerPoint;
     private int _tokenCurrentStack;
     private int _tokenMaxStack;
     private int _tokenDuration;
     private int _tokenRemainingTurn;
 
-    public STokenData(string tokenName, int tokenIndex, ETokenTriggerPoint tokenTriggerPoint, int tokenMaxStack, int tokenDuration)
+    public STokenData(ETokenBitMask tokenBitMask, ETokenTriggerPoint tokenTriggerPoint, int tokenMaxStack, int tokenDuration)
     {
-        _tokenName = tokenName;
-        _tokenIndex = tokenIndex;
+        _tokenName = tokenBitMask;
         _tokenTriggerPoint = tokenTriggerPoint;
         _tokenCurrentStack = 0;
         _tokenMaxStack = tokenMaxStack;
@@ -43,24 +43,38 @@ public struct STokenData
         _tokenRemainingTurn = 0;
     }
 
-    public void IncreaseStack()
+    public bool CheckTokenByBitMask(ETokenBitMask token)
+    {
+        if (_tokenName == token)
+        {
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
+    }
+
+
+    public void IncreaseStack(int increase = 1)
     {
         if (_tokenCurrentStack >= _tokenMaxStack)
         {
             return;
         }
 
-        _tokenCurrentStack++;
+        _tokenCurrentStack += increase;
     }
 
-    public bool ReduceStack()
+    public bool ReduceStack(int reduce = 1)
     {
         if (_tokenCurrentStack == 0)
         {
             return false;
         }
 
-        _tokenCurrentStack--;
+        _tokenCurrentStack -= reduce;
 
         if (_tokenCurrentStack == 0)
         {
@@ -86,16 +100,15 @@ public struct STokenData
 [System.Serializable]
 public class CTokenData : ITokenInterface
 {
-    [Header("토큰 정보")]
-    [SerializeField] private string _tokenName;
-    [SerializeField] private int _tokenIndex;
+    [Header("토큰 정보, 토큰 명은 복수 선택 금지")]
+    [SerializeField] private ETokenBitMask _tokenName;
     [SerializeField] private ETokenTriggerPoint _tokenTriggerPoint;
     [SerializeField] private int _tokenMaxStack;
     [SerializeField] private int _tokenDuration = -1; // -1 = None
 
     public STokenData MakeTokenInstance()
     {
-        STokenData tokenData = new STokenData(_tokenName, _tokenIndex, _tokenTriggerPoint, _tokenMaxStack, _tokenDuration);
+        STokenData tokenData = new STokenData(_tokenName, _tokenTriggerPoint, _tokenMaxStack, _tokenDuration);
 
         return tokenData;
     }
