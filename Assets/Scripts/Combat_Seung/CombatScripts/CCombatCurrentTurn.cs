@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public enum ECombatSelectType
 {
     None,
-    Skill,
     Entity,
     Entities
 }
@@ -19,7 +18,6 @@ public class CCombatCurrentTurn : MonoBehaviour
     [SerializeField] private CombatSkillbar_UI _combatSkillbar;
     
     private List<(EUsableSkillState, int, CSkillDataSO)> _skillData;
-    private List<CCombatSkillSlot> _skillSlots;
 
     private ECombatSelectType _selectType = ECombatSelectType.None;
 
