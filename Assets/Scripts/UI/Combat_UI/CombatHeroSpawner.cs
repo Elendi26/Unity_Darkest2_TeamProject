@@ -11,6 +11,9 @@ public class CombatHeroSpawner : MonoBehaviour
     [Header("영웅 4명 스폰 포인트")]
     [SerializeField] private Transform[] _spawnPoints;
 
+    [Header("영웅 전용 HUD 프리팹")]
+    [SerializeField] private CombatEntityHUD _prefabHUD;
+
     [Header("영웅 모델링 회전값")]
     [SerializeField] private float _rotationAngle = 45f;
 
@@ -97,8 +100,16 @@ public class CombatHeroSpawner : MonoBehaviour
             return;
         }
 
+        if(_spawnPoints == null || slotIndex < 0 || slotIndex >= _spawnPoints.Length || _spawnPoints[slotIndex] == null)
+        {
+            CPrint.Warn("인스펙터가 비어있다. 인스펙터 확인");
+            return;
+        }
+
         // 모델링 스폰포인트 자식으로 생성시키기
         GameObject spawnModel = Instantiate(heroData.HeroModel, _spawnPoints[slotIndex]);
+
+        CombatEntityHUD hudUI = Instantiate(_prefabHUD, _spawnPoints[slotIndex]);
 
         _heroesinParty[slotIndex] = spawnModel;
 
@@ -106,6 +117,8 @@ public class CombatHeroSpawner : MonoBehaviour
         spawnModel.transform.localPosition = Vector3.zero;
         spawnModel.transform.localRotation = Quaternion.Euler(0, _rotationAngle, 0);
         spawnModel.transform.localScale = spawnModel.transform.localScale * _scaleMulti;
+
+        hudUI.transform.localPosition = Vector3.zero;
 
     }
 

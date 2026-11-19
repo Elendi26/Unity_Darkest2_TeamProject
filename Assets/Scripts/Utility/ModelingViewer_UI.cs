@@ -12,6 +12,9 @@ public class ModelingViewer_UI : MonoBehaviour
     [Header("모델을 출력할 출력용 카메라")]
     [SerializeField] private Camera _modelCamera;
 
+    [Header("영웅 모델 회전값")]
+    [SerializeField] private float _modelRotation = 90f;
+
     #endregion
 
     // 내부 변수
@@ -47,7 +50,7 @@ public class ModelingViewer_UI : MonoBehaviour
 
         // 위치, 로테이션 값 초기화
         _currentModel.transform.localPosition = Vector3.zero;
-        _currentModel.transform.localRotation = Quaternion.Euler(0, 180f, 0);
+        _currentModel.transform.localRotation = Quaternion.Euler(0, _modelRotation, 0);
 
         foreach (Transform child in _currentModel.GetComponentsInChildren<Transform>(true))
         {
