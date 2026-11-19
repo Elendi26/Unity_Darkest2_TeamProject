@@ -61,7 +61,10 @@ public class CCombatInputHandler : MonoBehaviour
 
     private void OnRightClick(InputAction.CallbackContext context)
     {
-        if (_mainCamera == null) return;
+        if (_mainCamera == null)
+        {
+            return;
+        }
 
         Vector2 mousePosition = Mouse.current.position.ReadValue();
         Ray ray = _mainCamera.ScreenPointToRay(mousePosition);
@@ -82,15 +85,21 @@ public class CCombatInputHandler : MonoBehaviour
         switch (_stateManager.CombatCurrentTurn.SelectType)
         {
             case ECombatSelectType.None:
+
                 Debug.Log("데이터를 선택할 수 없는 상태입니다");
+
                 break;
 
             case ECombatSelectType.Entity:
+
                 _stateManager.CombatCurrentTurn.SelectedSkill.InputTargetData(entityData);
+
                 break;
 
             case ECombatSelectType.Entities:
+
                 _stateManager.CombatCurrentTurn.SelectedSkill.InputEveryTargetData();
+
                 break;
 
             default:
@@ -100,9 +109,9 @@ public class CCombatInputHandler : MonoBehaviour
 
     private void CheckRightClickCombatData(CEntityRuntimeData entityData)
     {
-        if (1f == entityData.GetStat(EEntityStat.Hero))
+        if (entityData.IsHero())
         {
-            HeroPopup_UI.instance.OpenPopup(entityData); // 일단 만들어만둠
+            // HeroPopup_UI.instance.OpenPopup(entityData); // 일단 만들어만둠
         }
     }
 }

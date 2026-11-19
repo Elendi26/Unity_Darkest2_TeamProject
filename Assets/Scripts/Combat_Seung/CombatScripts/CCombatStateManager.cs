@@ -34,7 +34,6 @@ public class CCombatStateManager : MonoBehaviour
 
     #endregion
 
-
     private void Awake()
     {
         // 첫 시작 시 라운드 시작 상태로 진입

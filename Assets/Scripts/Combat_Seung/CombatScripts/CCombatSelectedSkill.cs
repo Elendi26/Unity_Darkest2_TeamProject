@@ -61,4 +61,17 @@ public class CCombatSelectedSkill : MonoBehaviour
         CCombatStateManager.Instance.TurnOver();
     }
 
+
+    private bool CheckHit()
+    {
+        return true;
+    }
+
+    private bool CheckCritical()
+    {
+        return true;
+    }
+
+
+
 }

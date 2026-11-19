@@ -27,16 +27,17 @@ public class CEntitySkillData
         return _skillData;
     }
 
-    public List<(bool, CSkillDataSO)> OutputSkillDataChecked(ERank entityRank)
+    public List<(EUsableSkillState, int, CSkillDataSO)> OutputSkillDataChecked(ERank entityRank)
     {
-        List<(bool, CSkillDataSO)> checkedList = new List<(bool, CSkillDataSO)>();
-        (bool, CSkillDataSO) data;
+        List<(EUsableSkillState, int, CSkillDataSO)> checkedList = new List<(EUsableSkillState, int, CSkillDataSO)>();
+        (EUsableSkillState, int, CSkillDataSO) data;
         int rank = (int) entityRank;
 
         for (int i = 0; 0 < _skillData.Count; i++)
         {
-            data.Item1 = ((rank |= _skillData[i].GetRankBitmask()) != 0);
-            data.Item2 = _skillData[i];
+            data.Item1 = ((rank |= _skillData[i].GetRankBitmask()) != 0); // if 로 변경하고 true일 때 사용 가능 상태로 전환
+            data.Item2 = 0; // 뭘 넣어야 할까요?
+            data.Item3 = _skillData[i];
 
             checkedList[i] = data;
         }

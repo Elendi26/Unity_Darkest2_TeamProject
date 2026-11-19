@@ -58,9 +58,12 @@ public enum ETokenBitMask
     Immobilize = 1 << 17,
     // 턴 종료 시
     // 이동할 수 없음, 이동 배열에 포함되지 않음
-    Combo = 1 << 18
+    Combo = 1 << 18,
     // 연계를 소모하면 (보통 타겟팅됨)
     // 판정 : 연계를 소모하는 기술의 대상이 될 시
+    DeathsDoor = 1 << 19
+    // 체력이 0이 될 때 적용 됨
+    // 체력이 회복되거나 한 번 더 맞을 때 확률적으로 사망하며 소모됨
 }
 
 public class CTokenStatus : MonoBehaviour
@@ -90,6 +93,21 @@ public class CTokenStatus : MonoBehaviour
         }
     }
 
+    private STokenData TryGetTokenStruct (ETokenBitMask token)
+    {
+        foreach (STokenData tokenData in _tokenData)
+        {
+            if (tokenData.CheckTokenByBitMask(token))
+            {
+                return tokenData;
+            }
+        }
+
+        Debug.Log("일치하는 토큰을 찾지 못했습니다. 입력 확인 요망");
+
+        return default (STokenData);
+    }
+
     public void AddToken(params ETokenBitMask[] tokens)
     {
         foreach (var token in tokens)
@@ -104,6 +122,18 @@ public class CTokenStatus : MonoBehaviour
         {
             _tokenBitMask &= ~token;
         }
+    }
+
+    public bool CheckToken(ETokenBitMask token)
+    {
+        if ((_tokenBitMask & token) != 0)
+        {
+            
+
+
+        }
+
+        return true;
     }
 
 

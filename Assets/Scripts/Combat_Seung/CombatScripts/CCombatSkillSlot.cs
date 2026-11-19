@@ -7,27 +7,24 @@ public class CCombatSkillSlot : MonoBehaviour
 {
     [SerializeField] private Sprite _sprite;
 
-    private bool _active = false;
+    private EUsableSkillState usableSkillState;
+    private int _index;
     private CSkillDataSO _skillData;
 
-    public void InputSkillData((bool, CSkillDataSO) skillData)
+    public void InputSkillData((EUsableSkillState, int, CSkillDataSO) skillData)
     {
         _active = skillData.Item1;
-        _skillData = skillData.Item2;
+
+        _usableSkillState = skillData.Item1;
+        _index = skillData.Item2;
+        _skillData = skillData.Item3;
+
 
         SetSkillSlotUI();
     }
 
     private void SetSkillSlotUI()
     {
-        if (_active)
-        {
-            _sprite = _skillData.ActiveImage;
-        }
-
-        else
-        {
-            _sprite = _skillData.InactiveImage;
-        }
+        
     }
 }
