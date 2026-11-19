@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Danger Path
   m_EditorClassIdentifier: 
   _type: 4
+  _displayName: 위태로운 길
   _weight: 1
   _minRoadEvents: 0
   _maxRadEvents: 1

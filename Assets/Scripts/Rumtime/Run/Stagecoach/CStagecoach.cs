@@ -76,7 +76,6 @@ public class CStagecoach
     }
 
     // 슬롯 None 은 슬롯 제한이 없다 (바퀴·장갑 보강 등)
-    //  ㄴ 내구도 최대치를 올리는 업그레이드는 이미 상한이면 못 단다
     public bool CanEquip(CStagecoachUpgradeData upgrade)
     {
         if (upgrade == null)

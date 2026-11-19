@@ -21,7 +21,7 @@ public class CInventory
 		_getSlotCount = getSlotCount;
 	}
 
-	public int GetAddableCount(CItemData item)
+	public int GetAddableCount(CItemDataBase item)
 	{
 		if (item == null)
 		{
@@ -48,12 +48,12 @@ public class CInventory
 		return space;
 	}
 
-	public bool CanAdd(CItemData item, int count)
+	public bool CanAdd(CItemDataBase item, int count)
 	{
 		return count > 0 && GetAddableCount(item) >= count;
 	}
 
-	public int Add(CItemData item, int count)
+	public int Add(CItemDataBase item, int count)
 	{
 		if (item == null || count <= 0)
 		{
@@ -132,14 +132,9 @@ public class CInventory
 			return false;
 		}
 
-		CItemData item = _stacks[index].Item;
+		CItemDataBase item = _stacks[index].Item;
 
-		if (item == null || !item.IsUsable)
-		{
-			return false;
-		}
-
-		return !IsBlockedByFull(item, runData);
+		return item != null && item.CanUse(runData);
 	}
 
 	public bool TryUse(int index, CRunContext ctx)
@@ -149,25 +144,13 @@ public class CInventory
 			return false;
 		}
 
-		CItemData item = _stacks[index].Item;
+		CItemDataBase item = _stacks[index].Item;
 
-		CRunEffectUtil.ApplyAll(item.UseEffects, ctx);
+		item.Use(ctx);
 		Remove(index, 1);
 
 		CPrint.Log($"CInventory : {item.DisplayName} 사용");
 		return true;
-	}
-
-	public static bool IsBlockedByFull(CItemData item, CRunData runData)
-	{
-		if (item == null || item.BlockWhenFull == ERunValue.None || runData == null)
-		{
-			return false;
-		}
-
-		CRunValue value = runData.Get(item.BlockWhenFull);
-
-		return value != null && value.Max > 0 && value.Current >= value.Max;
 	}
 
 	public void NotifySlotsChanged()

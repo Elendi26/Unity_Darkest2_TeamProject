@@ -17,6 +17,7 @@ MonoBehaviour:
   _icon: {fileID: 21300000, guid: 719ce859d6c4bf4409d7cb9c8e68f843, type: 2}
   _category: 2
   _maxStack: 4
+  _buyPrice: 10
   _blockWhenFull: 3
   _useEffects:
   - rid: 1000

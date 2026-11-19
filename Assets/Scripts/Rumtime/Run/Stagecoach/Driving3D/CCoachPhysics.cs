@@ -21,7 +21,7 @@ public class CCoachPhysics : MonoBehaviour
 	[SerializeField] private float _wallStiffness = 8f;
 	[SerializeField] private float _wallDamping = 12f;
 	[SerializeField] private float _wallReturnSpeed = 0.3f;
-	[SerializeField] private float _maxTeamAngle = 35f;
+	[SerializeField] private float _maxTeamAngle = 50f;
 	[SerializeField] private float _centerOfMassOffset = 0f;
 	[SerializeField] private float _rearGrip = 2f;
 	[SerializeField] private float _teamAlign = 16f;
@@ -75,6 +75,35 @@ public class CCoachPhysics : MonoBehaviour
 		{
 			_team.Drive(throttle, steer, brake);
 		}
+	}
+
+	public void Jolt(float upSpeed, bool leftSide)
+	{
+		if (_rigidbody == null || _allWheels.Count == 0)
+		{
+			return;
+		}
+
+		// 그 쪽 바퀴들 평균 위치에 위로 속도를 준다 → 들썩이며 살짝 기운다
+		Vector3 sum = Vector3.zero;
+		int count = 0;
+
+		for (int i = 0; i < _allWheels.Count; i++)
+		{
+			Vector3 local = transform.InverseTransformPoint(_allWheels[i].transform.position);
+
+			if ((local.x < 0f) != leftSide)
+			{
+				continue;
+			}
+
+			sum += _allWheels[i].transform.position;
+			count++;
+		}
+
+		Vector3 point = count > 0 ? sum / count : _rigidbody.worldCenterOfMass;
+
+		_rigidbody.AddForceAtPosition(Vector3.up * (upSpeed * _rigidbody.mass), point, ForceMode.Impulse);
 	}
 
 	public void KeepInside(Vector3 right, float offset, float limit)
@@ -337,23 +366,18 @@ public class CCoachPhysics : MonoBehaviour
 
 		_view.SetSteerAngle(teamAngle);
 
-		// 뒷바퀴 축이 옆으로 가는 속도를 없애는 힘
 		Vector3 right = Flat(transform.right);
 		Vector3 rearAxle = GetAverage(_rearWheels);
 		float lateral = Vector3.Dot(_rigidbody.GetPointVelocity(rearAxle), right);
 
 		_rigidbody.AddForceAtPosition(-right * (lateral * _rigidbody.mass * _rearGrip), rearAxle, ForceMode.Force);
 
-		// 말보다 많이 꺾였으면 말 쪽으로 돌린다
 		float excess = Mathf.Abs(teamAngle) - _maxTeamAngle * _teamAlignStart;
 		float yawTorque = excess > 0f ? Mathf.Sign(teamAngle) * excess * Mathf.Deg2Rad * _teamAlign : 0f;
 
-		// 끌려가는 마차는 앞으로 갈수록 말 쪽으로 펴진다 → 꺾인 각도와 속도로 정한 회전 속도를 따라간다
-		//  ㄴ 말 회전 속도를 따라가면 말이 곧게 갈 때 꺾인 채로 굳는다
 		float wheelBase = Mathf.Max(1f, _hitchLocal.z - transform.InverseTransformPoint(rearAxle).z);
 		float followYawRate = ForwardSpeed / wheelBase * Mathf.Sin(teamAngle * Mathf.Deg2Rad);
 
-		// 가장자리에서 바깥을 보고 있으면 말을 기다리지 않고 길 방향으로 돌린다
 		float edgeYawRate = -_edgeRoadAngle * _edgeYawAlign * Mathf.Deg2Rad;
 
 		if (edgeYawRate != 0f && (edgeYawRate * followYawRate <= 0f || Mathf.Abs(edgeYawRate) > Mathf.Abs(followYawRate)))
@@ -361,7 +385,6 @@ public class CCoachPhysics : MonoBehaviour
 			followYawRate = edgeYawRate;
 		}
 
-		// 가장자리에 있는 동안은 더 세게 따라가게 한다
 		float follow = _isAtEdge ? _edgeYawFollow : _trailerFollow;
 
 		_isAtEdge = false;

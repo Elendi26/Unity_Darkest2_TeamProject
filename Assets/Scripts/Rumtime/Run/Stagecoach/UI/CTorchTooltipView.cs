@@ -3,7 +3,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // 마차 횃불에 마우스를 올리면 화면 위에서 작은 박스가 내려와 횃불 수치를 알려준다
-//  ㄴ 횃불에는 충돌체가 없다 → 횃불 위치를 화면 좌표로 바꿔 마우스와의 거리로 판단
 public class CTorchTooltipView : MonoBehaviour
 {
 	#region 인스펙터
@@ -13,11 +12,8 @@ public class CTorchTooltipView : MonoBehaviour
 	[SerializeField] private CanvasGroup _group;
 	[SerializeField] private Text _valueText;
 	[SerializeField] private Text _stateText;
-	// 수치 막대 (오른쪽 끝을 비율만큼 당겨 채운다)
 	[SerializeField] private RectTransform _fill;
-	// 횃불 화면 위치에서 이 픽셀 안이면 올린 것으로 본다
 	[SerializeField] private float _hoverRadius = 70f;
-	// 보일 때·숨을 때 패널 y 위치 (위쪽 기준)
 	[SerializeField] private float _shownY = -16f;
 	[SerializeField] private float _hiddenY = 140f;
 	[SerializeField] private float _slideSpeed = 10f;

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-// 상점에 진열되는 상품 하나
+// 상점 서비스 하나 (수리·업그레이드·교환 등) → 짐칸 아이템은 아이템 풀에서 따로 뽑는다
 [CreateAssetMenu(menuName = "Shop/Shop Item_")]
 public class CShopItemData : ScriptableObject
 {
@@ -19,9 +19,6 @@ public class CShopItemData : ScriptableObject
 	[SerializeField] private ERunValue _blockWhenFull = ERunValue.None;
 	// 사면 역마차에 다는 업그레이드 (비우면 없음)
 	[SerializeField] private CStagecoachUpgradeData _upgrade;
-	// 사면 짐칸에 넣는 아이템 (비우면 없음). 짐칸에 자리가 없으면 못 산다
-	[SerializeField] private CItemData _item;
-	[SerializeField] private int _itemCount = 1;
 	[SerializeReference] private List<IRunEffect> _effects = new List<IRunEffect>();
 	#endregion
 
@@ -43,10 +40,6 @@ public class CShopItemData : ScriptableObject
 	public ERunValue BlockWhenFull => _blockWhenFull;
 	// 사면 다는 업그레이드
 	public CStagecoachUpgradeData Upgrade => _upgrade;
-	// 사면 짐칸에 넣는 아이템
-	public CItemData Item => _item;
-	// 한 번 살 때 넣는 개수
-	public int ItemCount => Mathf.Max(1, _itemCount);
 	// 사면 적용하는 효과
 	public IReadOnlyList<IRunEffect> Effects => _effects;
 }

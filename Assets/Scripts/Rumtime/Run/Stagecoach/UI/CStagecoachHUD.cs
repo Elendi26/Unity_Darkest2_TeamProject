@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 
-// 왼쪽 위 마차 상태 (바퀴·장갑 칸)
-//  ㄴ 금화·파벌은 짐칸 패널 아래, 횃불은 마차 횃불 툴팁에서 보여준다
 public class CStagecoachHUD : MonoBehaviour
 {
 	#region 인스펙터

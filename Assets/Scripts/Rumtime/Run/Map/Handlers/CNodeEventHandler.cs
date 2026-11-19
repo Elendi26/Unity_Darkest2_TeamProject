@@ -53,7 +53,7 @@ public class CNodeEventHandler : INodeHandler
 				continue;
 			}
 
-			_labels.Add(option.Cost > 0 ? $"{option.Label} ({GetValueName(option.CostType)} {option.Cost})" : option.Label);
+			_labels.Add(option.Cost > 0 ? $"{option.Label} ({CRunValueTable.GetName(option.CostType)} {option.Cost})" : option.Label);
 			_interactable.Add(CanChoose(option));
 		}
 
@@ -128,22 +128,4 @@ public class CNodeEventHandler : INodeHandler
 		return option.Upgrade == null || (_stagecoach != null && _stagecoach.CanEquip(option.Upgrade));
 	}
 
-	private static string GetValueName(ERunValue type)
-	{
-		switch (type)
-		{
-			case ERunValue.Gold:
-				return "골드";
-			case ERunValue.Faction:
-				return "문장";
-			case ERunValue.Torch:
-				return "횃불";
-			case ERunValue.Wheels:
-				return "바퀴";
-			case ERunValue.Armor:
-				return "장갑";
-		}
-
-		return type.ToString();
-	}
 }

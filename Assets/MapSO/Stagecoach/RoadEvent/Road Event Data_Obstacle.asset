@@ -15,7 +15,16 @@ MonoBehaviour:
   _id: roadevent_obstacle_01
   _category: 1
   _weight: 1
+  _title: 방책
+  _body: 
   _options: []
+  _showPopup: 0
+  _roadPropPrefab: {fileID: 1000000000000000001, guid: a533f52212467ae0579a13fdd7b2aa71, type: 3}
+  _bumpCount: 0
+  _combatWhenEmpty: 0
+  _combatId: roadcombat_barricade
+  _alwaysCombat: 1
+  _blocksRoad: 1
   references:
     version: 2
     RefIds: []

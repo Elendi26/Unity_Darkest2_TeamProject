@@ -12,9 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf19261dd824c1142be7721269163954, type: 3}
   m_Name: Map Config
   m_EditorClassIdentifier: 
-  _id: 
-  _displayName: "\uAD50\uC678"
-  _rowCount: 7
+  _rowCount: 9
   _minNodePerRow: 2
   _maxNodePerRow: 3
   _branchChance: 0.6
@@ -29,6 +27,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ddb82394f6c0387469a59a89feb76d83, type: 2}
   - {fileID: 11400000, guid: f85e7e66606057643af6bfe9356db132, type: 2}
   - {fileID: 11400000, guid: 0b4ad38013a4d2f42942fef80bb7ff5e, type: 2}
+  - {fileID: 11400000, guid: ab0f7ffc912ee17211c4ffbf15d326ad, type: 2}
   _routePool:
   - {fileID: 11400000, guid: effe2e4bfd16de44d83c74eddf460f83, type: 2}
   - {fileID: 11400000, guid: 2560155fef3b1b94aab93e219a144b81, type: 2}

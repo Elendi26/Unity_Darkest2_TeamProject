@@ -19,6 +19,10 @@ public class CMapConfig : ScriptableObject
     [SerializeField] private CNodeTypeData[] _nodePool;
     [SerializeField] private CRouteTypeData[] _routePool;
     [SerializeField] private CRouteTypeData _fixedEdgeRoute;
+
+    [Header("정찰 (지역 진입 시 한 번만 판정)")]
+    [SerializeField, Range(0f, 1f)] private float _nodeScoutChance = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float _routeScoutChance = 0.5f;
     #endregion
 
     public int RowCount => _rowCount;
@@ -33,4 +37,6 @@ public class CMapConfig : ScriptableObject
     public IReadOnlyList<CNodeTypeData> NodePool => _nodePool;
     public IReadOnlyList<CRouteTypeData> RoutePool => _routePool;
     public CRouteTypeData FixedEdgeRoute => _fixedEdgeRoute;
+    public float NodeScoutChance => _nodeScoutChance;
+    public float RouteScoutChance => _routeScoutChance;
 }

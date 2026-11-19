@@ -159,7 +159,7 @@ public class DebugGizmo : MonoBehaviour
         }
 
         // 숨김 노드도 이름은 보여 준다 (숨김 여부는 회색 구로 구분)
-        string type = CForkSignView.GetNodeName(node.TypeData);
+        string type = node.TypeData != null ? node.TypeData.DisplayName : "???";
         string hidden = isHidden ? " (숨김)" : string.Empty;
 
         UnityEditor.Handles.Label(pos + Vector3.up * (_nodeRadius + 0.3f), $"{node.Id} {type}{hidden}");
@@ -201,6 +201,8 @@ public class DebugGizmo : MonoBehaviour
                 return new Color(0.55f, 0.1f, 0.15f);
             case ENodeType.Crossroad:
                 return new Color(0.85f, 0.75f, 0.55f);
+            case ENodeType.Watchtower:
+                return new Color(0.35f, 0.75f, 0.8f);
         }
 
         return Color.gray;

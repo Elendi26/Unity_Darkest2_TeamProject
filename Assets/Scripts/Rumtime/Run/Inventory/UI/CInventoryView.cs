@@ -9,16 +9,12 @@ public class CInventoryView : MonoBehaviour
 	#region 인스펙터
 	[SerializeField] private CStagecoachController _controller;
 	[SerializeField] private CanvasGroup _group;
-	// 지금 고른 탭 이름 (모든 아이템 / 전투 ...)
 	[SerializeField] private Text _titleText;
 	[SerializeField] private Text _slotCountText;
-	// 분류 탭 → 첫 칸이 기본 탭
 	[SerializeField] private CInventoryTab[] _tabs;
 	[SerializeField] private Color _tabOnColor = new Color(0.95f, 0.85f, 0.6f, 1f);
 	[SerializeField] private Color _tabOffColor = new Color(0.45f, 0.42f, 0.38f, 1f);
-	// 분류 탭에서 빈 칸을 채울 때 한 줄 칸 수
 	[SerializeField] private int _columns = 3;
-	// 패널 아래 자원 표시
 	[SerializeField] private CRunValueView _goldView;
 	[SerializeField] private CRunValueView _factionView;
 	[SerializeField] private RectTransform _slotRoot;
@@ -37,7 +33,6 @@ public class CInventoryView : MonoBehaviour
 
 	#region 내부 변수
 	private readonly List<CInventorySlotView> _slots = new List<CInventorySlotView>();
-	// 칸 번호 → 아이템 번호 (-1 이면 빈 칸)
 	private readonly List<int> _visible = new List<int>();
 	private int _tab;
 	private RectTransform _rect;
@@ -211,7 +206,6 @@ public class CInventoryView : MonoBehaviour
 	}
 
 	// 지금 탭에 보일 칸 목록을 만든다
-	//  ㄴ 전체 탭 → 짐칸 수만큼 (빈 칸 포함), 분류 탭 → 맞는 아이템 + 줄을 채울 빈 칸
 	private void BuildVisible(IReadOnlyList<CItemStack> stacks)
 	{
 		_visible.Clear();
@@ -221,7 +215,7 @@ public class CInventoryView : MonoBehaviour
 
 		for (int i = 0; i < stacks.Count; i++)
 		{
-			CItemData item = stacks[i] != null ? stacks[i].Item : null;
+			CItemDataBase item = stacks[i] != null ? stacks[i].Item : null;
 
 			if (showAll || (item != null && item.Category == tab.Category))
 			{
@@ -353,7 +347,7 @@ public class CInventoryView : MonoBehaviour
 	private void RefreshDetail()
 	{
 		CItemStack stack = _selected >= 0 ? _inventory.Stacks[_selected] : null;
-		CItemData item = stack != null ? stack.Item : null;
+		CItemDataBase item = stack != null ? stack.Item : null;
 
 		if (_detailNameText != null)
 		{
@@ -376,24 +370,17 @@ public class CInventoryView : MonoBehaviour
 		}
 	}
 
-	private string GetDetailText(CItemData item)
+	private string GetDetailText(CItemDataBase item)
 	{
 		if (item == null)
 		{
 			return "아이템을 고르세요.";
 		}
 
-		if (!item.IsUsable)
-		{
-			return $"{item.Description}\n\n(보관만 하는 아이템)";
-		}
+		// 종류별 안내 한 줄 (보관만 / 가득 차 못 씀 / 장신구 등) 은 아이템이 정한다
+		string note = item.GetDetailNote(_ctx != null ? _ctx.RunData : null);
 
-		if (_ctx != null && CInventory.IsBlockedByFull(item, _ctx.RunData))
-		{
-			return $"{item.Description}\n\n(가득 차 있어 지금은 쓸 수 없다)";
-		}
-
-		return item.Description;
+		return string.IsNullOrEmpty(note) ? item.Description : $"{item.Description}\n\n{note}";
 	}
 
 	private void Select(int index)
@@ -419,7 +406,7 @@ public class CInventoryView : MonoBehaviour
 			return;
 		}
 
-		CItemData item = _inventory.Stacks[_selected].Item;
+		CItemDataBase item = _inventory.Stacks[_selected].Item;
 
 		if (_inventory.Remove(_selected, 1) && _logState)
 		{

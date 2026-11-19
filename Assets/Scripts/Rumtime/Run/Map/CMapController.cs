@@ -48,6 +48,12 @@ public class CMapController : MonoBehaviour
 
         _runner = new CMapRunner(graph, GetTravel());
 
+        // 정찰 이벤트 효과가 지도를 밝힐 수 있게 런 데이터에 지도를 알려 둔다
+        if (_travelSource is IRunContextProvider contextProvider && contextProvider.Context != null)
+        {
+            contextProvider.Context.Map = _runner;
+        }
+
         RegisterSceneHandlers();
         RegisterEventHandlers();
         RegisterPassHandlers();

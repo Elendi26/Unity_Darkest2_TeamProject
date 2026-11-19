@@ -19,6 +19,7 @@ public class CRoadTileSet : ScriptableObject
 	[SerializeField] private CRoadTileEntry[] _decor;
 	[SerializeField] private CRoadTileEntry[] _fork2;
 	[SerializeField] private CRoadTileEntry[] _fork3;
+	[SerializeField] private CRoadTileEntry[] _skirt;
 	#endregion
 
 	// 격자 한 칸 크기 (m)
@@ -35,4 +36,6 @@ public class CRoadTileSet : ScriptableObject
 	public CRoadTileEntry[] Fork2 => _fork2;
 	// 3갈래 갈림길 타일들
 	public CRoadTileEntry[] Fork3 => _fork3;
+	// 가장자리 타일들
+	public CRoadTileEntry[] Skirt => _skirt;
 }
