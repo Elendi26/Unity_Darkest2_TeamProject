@@ -56,6 +56,11 @@ public struct STokenData
         }
     }
 
+    public void CheckTriggerPoint(ETokenTriggerPoint trigger)
+    {
+
+    }
+
 
     public void IncreaseStack(int increase = 1)
     {

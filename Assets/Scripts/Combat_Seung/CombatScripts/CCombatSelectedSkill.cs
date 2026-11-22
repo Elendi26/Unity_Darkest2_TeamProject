@@ -30,7 +30,7 @@ public class CCombatSelectedSkill : MonoBehaviour
 
         for (int i = 0;  i < _combatRanks.Count; i++)
         {
-            _combatRanks[i].CheckRank(_skillData.Rank, _skillData.Type);
+            _combatRanks[i].CheckTargetRank(targetBitmask, _skillData.Type);
         }
     }
 
@@ -39,8 +39,6 @@ public class CCombatSelectedSkill : MonoBehaviour
         if (combatData is CEntityRuntimeData target)
         {
             _skillData.UseSKill(_entity, target);
-
-            CCombatStateManager.Instance.TurnOver();
         }
     }
 
@@ -57,8 +55,6 @@ public class CCombatSelectedSkill : MonoBehaviour
         }
 
         _skillData.UseSKill(_entity, targets);
-
-        CCombatStateManager.Instance.TurnOver();
     }
 
 

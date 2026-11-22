@@ -31,10 +31,10 @@ public class CCombatCurrentTurn : MonoBehaviour
     {
         _entity = entity;
 
-        CurrentTurnMech();
+        CurrentTurnMechanism();
     }
     
-    public void CurrentTurnMech()
+    private void CurrentTurnMechanism()
     {
         SetSkillData();
 
@@ -53,7 +53,7 @@ public class CCombatCurrentTurn : MonoBehaviour
         return _entity.GetStat(status);
     }
 
-    public void SetSkillData()
+    private void SetSkillData()
     {
         _skillData = _entity._skillData.OutputSkillDataChecked(_entity.GetRank());
     }

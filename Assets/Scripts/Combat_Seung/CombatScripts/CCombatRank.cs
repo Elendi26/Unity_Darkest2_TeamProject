@@ -87,9 +87,8 @@ public class CCombatRank : MonoBehaviour
         }
     }
 
-    public void CheckRank(ERank rank, ESkillType type)
-    {
-        int skillRank = (int)rank;
+    public void CheckTargetRank(int skillTarget, ESkillType type)
+    { 
 
         switch (type)
         {
@@ -97,11 +96,9 @@ public class CCombatRank : MonoBehaviour
 
                 if (!_team)
                 {
-                    if ((skillRank & _rank) != 0)
+                    if ((skillTarget & _rank) != 0)
                     {
                         _targetable = true;
-
-                        
                     }
 
                     else
@@ -121,7 +118,7 @@ public class CCombatRank : MonoBehaviour
 
                 if (!_team)
                 {
-                    if ((skillRank & _rank) != 0)
+                    if ((skillTarget & _rank) != 0)
                     {
                         _targetable = true;
                     }
@@ -143,7 +140,7 @@ public class CCombatRank : MonoBehaviour
 
                 if (_team)
                 {
-                    if ((skillRank & _rank) != 0)
+                    if ((skillTarget & _rank) != 0)
                     {
                         _targetable = true;
                     }
@@ -165,7 +162,7 @@ public class CCombatRank : MonoBehaviour
 
                 if (_team)
                 {
-                    if ((skillRank & _rank) != 0)
+                    if ((skillTarget & _rank) != 0)
                     {
                         _targetable = true;
                     }
@@ -188,7 +185,6 @@ public class CCombatRank : MonoBehaviour
         }
 
         // UI Targetable дя╠Б
-        
 
     }
 

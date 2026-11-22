@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,7 +19,7 @@ public class CEntitySkillData
     {
         for (int i = 0; i < skillIndex.Count; i++)
         {
-            _skillData[i] = CSkillDataBase.Instance.GetSkillData(skillIndex[i].Item1, skillIndex[i].Item2);
+            _skillData.Add(CSkillDataBase.Instance.GetSkillData(skillIndex[i].Item1, skillIndex[i].Item2));
         }
     }
 

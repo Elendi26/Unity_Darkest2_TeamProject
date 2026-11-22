@@ -6,7 +6,7 @@ public class CCombatInputHandler : MonoBehaviour
 {
     [SerializeField] private InputActionReference _clickAction;
     [SerializeField] private InputActionReference _rightClickAction;
-    [SerializeField] private CCombatStateManager _stateManager;
+    [SerializeField] private CCombatManager _combatManager;
     [SerializeField] private Camera _mainCamera;
 
     private void Awake()
@@ -82,7 +82,7 @@ public class CCombatInputHandler : MonoBehaviour
 
     private void CheckCombatData(CEntityRuntimeData entityData)
     {
-        switch (_stateManager.CombatCurrentTurn.SelectType)
+        switch (_combatManager.CombatCurrentTurn.SelectType)
         {
             case ECombatSelectType.None:
 
@@ -92,13 +92,13 @@ public class CCombatInputHandler : MonoBehaviour
 
             case ECombatSelectType.Entity:
 
-                _stateManager.CombatCurrentTurn.SelectedSkill.InputTargetData(entityData);
+                _combatManager.CombatCurrentTurn.SelectedSkill.InputTargetData(entityData);
 
                 break;
 
             case ECombatSelectType.Entities:
 
-                _stateManager.CombatCurrentTurn.SelectedSkill.InputEveryTargetData();
+                _combatManager.CombatCurrentTurn.SelectedSkill.InputEveryTargetData();
 
                 break;
 
