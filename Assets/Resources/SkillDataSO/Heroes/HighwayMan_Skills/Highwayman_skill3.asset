@@ -10,26 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bce350e4230aa349ab9a623eb6f02f0, type: 3}
-  m_Name: Mamatarms_Skill3
+  m_Name: Highwayman_skill3
   m_EditorClassIdentifier: 
-  _heroName: Man_at_arms
+  _heroName: Highway_Man
   _skillID: 
-  _skillName: "\uC131\uCC44\uC758 \uC77C\uACA9"
+  _skillName: "\uACB0\uD22C\uAC00\uC758 \uC9C4\uACA9"
   _skillExplain: 
   _skillType: "\uADFC\uAC70\uB9AC"
   _skillDetail: "\uD53C\uD574: 3-5 \uCE58\uBA85\uD0C0: 5%"
   _index: 3
-  _rank: 7
-  _target: 3
+  _rank: 14
+  _target: 7
   _type: 0
   _areaOfEffect: 0
   _critical: 5
   _cooldown: -1
   _charges: -1
-  _skillEffect: []
+  _skillEffect:
+  - rid: 6238335957438038018
   _skillSelfEffect: 0
   _skillEffectForSelf: []
-  _skillIcon: {fileID: 21300000, guid: 11cd3d00ccf2182449533f68e103e934, type: 2}
+  _skillIcon: {fileID: 21300000, guid: 7f3ff4f0f15ce7b48ab9101649bbd1aa, type: 2}
   _skillTypeIcon: {fileID: 21300000, guid: 12db724a7b96e7a4cb88c320c66ff987, type: 2}
   _skillRangeImage: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
   _testAnimation: {fileID: 0}
@@ -37,4 +38,10 @@ MonoBehaviour:
   _inactiveImage: {fileID: 0}
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 6238335957438038018
+      type: {class: CSkillDamage, ns: , asm: Assembly-CSharp}
+      data:
+        _minDamage: 3
+        _maxDamage: 5
+        _combo: 0

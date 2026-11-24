@@ -16,10 +16,23 @@ public class CEntitySkillData
 
     public void InputSkillData(List<(string, int)> skillIndex)
     {
+        // 일단 안전하게 먼저 청소
+        _skillData.Clear();
+
         for (int i = 0; i < skillIndex.Count; i++)
         {
-            _skillData[i] = CSkillDataBase.Instance.GetSkillData(skillIndex[i].Item1, skillIndex[i].Item2);
+            _skillData.Add(CSkillDataBase.Instance.GetSkillData(skillIndex[i].Item1, skillIndex[i].Item2));
         }
+    }
+
+    public void InputSkillData(List<CSkillDataSO> skills)
+    {
+       if(skills == null)
+        {
+            return;
+        }
+
+        _skillData = new List<CSkillDataSO>(skills);
     }
 
     public List<CSkillDataSO> OutputSkillData()
@@ -33,9 +46,11 @@ public class CEntitySkillData
         (EUsableSkillState, int, CSkillDataSO) data;
         int rank = (int) entityRank;
 
-        for (int i = 0; 0 < _skillData.Count; i++)
+        // 0 < _skillData.Count -> i < _skillData.Count 로 수정
+        for (int i = 0; i < _skillData.Count; i++)
         {
-            if ((rank |= _skillData[i].GetRankBitmask()) != 0)
+            // |= 에서 &로 수정
+            if ((rank & _skillData[i].GetRankBitmask()) != 0)
             {
                 data.Item1 = EUsableSkillState.Usable;
             }
@@ -48,7 +63,8 @@ public class CEntitySkillData
             data.Item2 = 0;
             data.Item3 = _skillData[i];
 
-            checkedList[i] = data;
+            // checkedList[i] = data 에서 수정함
+            checkedList.Add(data);
         }
 
         return checkedList;

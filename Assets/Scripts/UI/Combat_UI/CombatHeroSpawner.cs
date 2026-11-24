@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UserProfileData;
 
 public class CombatHeroSpawner : MonoBehaviour
 {
@@ -21,6 +22,11 @@ public class CombatHeroSpawner : MonoBehaviour
     [Header("영웅 모델링 곱할 스케일값")]
     [SerializeField] private float _scaleMulti = 0.01f;
 
+    [Header("아군 영웅 랭크 4개")]
+    [SerializeField] CCombatRank[] _heroRanks;
+
+    
+
     #endregion
 
     // 내부 변수
@@ -34,9 +40,13 @@ public class CombatHeroSpawner : MonoBehaviour
     // 소환한 영웅들의 대한 정보를 전달할 수 있도록 리스트로 만들어 추가하고 프로퍼티로 외부에서 확인할 수 있게 한다.
     private List<CEntityRuntimeData> _spawnedHeroData = new List<CEntityRuntimeData>();
 
+    private bool _completeSpawned = false;
+
     // 프로퍼티
 
     public List<CEntityRuntimeData> SpawnedHeroData => _spawnedHeroData;
+
+    public bool CompleteSpawn => _completeSpawned;
 
     private void Awake()
     {
@@ -69,8 +79,8 @@ public class CombatHeroSpawner : MonoBehaviour
             // 파티 영웅 리스트 순회해서 각 영웅의 세이브 데이터에서 파티 슬롯 인덱스를 검사하고
             for(int i = 0; i < userData.PartyHeroes.Count; i++)
             {
-                // 파티에 포함되어 있는 영웅 데이터를 찾아서
-                if(userData.PartyHeroes[i].PartySlotIndex != -1)
+                // 파티에 포함되어 있으면서 살이있는 영웅 데이터를 찾아서
+                if(userData.PartyHeroes[i].PartySlotIndex != -1 && userData.PartyHeroes[i].CurrentHP > 0)
                 {
                     // 파티 슬롯 번호를 변수로 저장하고
                     int slotIndex = userData.PartyHeroes[i].PartySlotIndex;
@@ -79,12 +89,17 @@ public class CombatHeroSpawner : MonoBehaviour
                     if (_heroDataDict.TryGetValue(userData.PartyHeroes[i].HeroID, out CEntityBasicDataSO data))
                     {
                         // 해당 파티 슬롯에 해당 영웅 모델을 스폰시킨다.
-                        HeroModelSpawn(data, slotIndex);
+                        HeroModelSpawn(data, userData.PartyHeroes[i]);
                     }
 
                     else { CPrint.Warn($"딕셔너리 매칭 실패 ID: {userData.PartyHeroes[i].HeroID}"); }
                 }
             }
+
+            _completeSpawned = true;
+
+            CCombatManager.Instance?.StartCombat();
+
         }
 
         else
@@ -97,37 +112,81 @@ public class CombatHeroSpawner : MonoBehaviour
     /// <summary>
     /// 스폰 포인트에 영웅을 본인이 가지고있는 슬롯 정보에 맞춰 모델링을 스폰시키는 함수.
     /// </summary>
-    /// <param name="heroData"></param>
+    /// <param name="heroDataSO"></param>
     /// <param name="slotIndex"></param>
-    private void HeroModelSpawn(CEntityBasicDataSO heroData, int slotIndex)
+    private void HeroModelSpawn(CEntityBasicDataSO heroDataSO, UserProfileData.HeroSaveData heroSaveData)
     {
-        if(heroData == null || heroData.HeroModel == null)
+        if(heroDataSO == null || heroDataSO.HeroModel == null)
         {
             CPrint.Warn("영웅 데이터 혹은 영웅 모델링이 존재하지 않는다.");
             return;
         }
 
-        if(_spawnPoints == null || slotIndex < 0 || slotIndex >= _spawnPoints.Length || _spawnPoints[slotIndex] == null)
+        if(_spawnPoints == null || heroSaveData.PartySlotIndex < 0 || heroSaveData.PartySlotIndex >= _spawnPoints.Length || _spawnPoints[heroSaveData.PartySlotIndex] == null)
         {
             CPrint.Warn("인스펙터가 비어있다. 인스펙터 확인");
             return;
         }
 
         // 모델링 스폰포인트 자식으로 생성시키기
-        GameObject spawnModel = Instantiate(heroData.HeroModel, _spawnPoints[slotIndex]);
+        GameObject spawnModel = Instantiate(heroDataSO.HeroModel, _spawnPoints[heroSaveData.PartySlotIndex]);
+
+        // 꺼낸 모델에 부착된 런타임 데이터 가져오기
+        CEntityRuntimeData runtimeData = spawnModel.GetComponent<CEntityRuntimeData>();
+
+        // 랭크에 따른 부여기준 잡고
+        ERank rank = ERank.None;
+
+        // 각 번호를 ERank에 대입
+        switch (heroSaveData.PartySlotIndex)
+        {
+            case 0:
+                rank = ERank.One;
+                break;
+            case 1:
+                rank = ERank.Two;
+                break;
+            case 2:
+                rank = ERank.Three;
+                break;
+            case 3:
+                rank = ERank.Four;
+                break;
+        }
+
+        // 현재 랭크가 부여됐고, 데이터가 존재할 때 Init 함수 호출하여 원본 데이터와 세이브 수치 넣고
+        if(rank != ERank.None && runtimeData != null)
+        {
+            runtimeData.Init(heroDataSO, rank, heroSaveData.CurrentHP, heroSaveData.CurrentStress);
+        }
+
 
         //CEntityRuntimeData spawnHero = new CEntityRuntimeData();
-        
 
-        //if (spawnHero != null)
-        //{
-        //    _spawnedHeroData.Add(spawnHero);
-        //}
+        // 런타임 데이터에 데이터 추가하고
+        if (runtimeData != null)
+        {
+            _spawnedHeroData.Add(runtimeData);
+            
+            // 전투시작시 랭크와 영웅 데이터를 연결한다.
+            if(_heroRanks[heroSaveData.PartySlotIndex] != null)
+            {
+                _heroRanks[heroSaveData.PartySlotIndex].InputEntityData(runtimeData);
+            }
 
+            // 매니저에도 넣기
+            if (CCombatManager.Instance != null)
+            {
+                CCombatManager.Instance.OnCombatEntities.Add(runtimeData);
+            }
+        }
 
-        CombatEntityHUD hudUI = Instantiate(_prefabHUD, _spawnPoints[slotIndex]);
+        // HUD UI소환
+        CombatEntityHUD hudUI = Instantiate(_prefabHUD, _spawnPoints[heroSaveData.PartySlotIndex]);
 
-        _heroesinParty[slotIndex] = spawnModel;
+        hudUI.RenewHUD(runtimeData);
+
+        _heroesinParty[heroSaveData.PartySlotIndex] = spawnModel;
 
         // 위치, 회전, 스케일 값 고정
         spawnModel.transform.localPosition = Vector3.zero;
@@ -135,6 +194,8 @@ public class CombatHeroSpawner : MonoBehaviour
         spawnModel.transform.localScale = spawnModel.transform.localScale * _scaleMulti;
 
         hudUI.transform.localPosition = Vector3.zero;
+
+
 
     }
 

@@ -19,14 +19,15 @@ MonoBehaviour:
   _skillType: "\uCE58\uC720"
   _skillDetail: "\uD69F\uC218: 3"
   _index: 4
-  _rank: 3
+  _rank: 12
   _target: -1
   _type: 3
   _areaOfEffect: 0
   _critical: 0
   _cooldown: -1
   _charges: -1
-  _skillEffect: []
+  _skillEffect:
+  - rid: -2
   _skillSelfEffect: 1
   _skillEffectForSelf:
   - rid: 6238335795113492483
@@ -39,6 +40,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 6238335795113492483
       type: {class: CSkillHeal, ns: , asm: Assembly-CSharp}
       data:

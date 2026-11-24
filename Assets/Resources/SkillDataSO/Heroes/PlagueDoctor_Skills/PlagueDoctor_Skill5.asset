@@ -10,18 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bce350e4230aa349ab9a623eb6f02f0, type: 3}
-  m_Name: Mamatarms_Skill4
+  m_Name: PlagueDoctor_Skill5
   m_EditorClassIdentifier: 
-  _heroName: Man_at_arms
+  _heroName: Plague_Doctor
   _skillID: 
-  _skillName: "\uACE0\uC591"
-  _skillExplain: 
+  _skillName: "\uC608\uBC29 \uC870\uCE58"
+  _skillExplain: "3\uD134 \uB3D9\uC548 \uCD9C\uD608, \uC911\uB3C5, \uD654\uC0C1 \uC800\uD56D
+    +20% \uC9C8\uBCD1 \uC800\uD56D +15%"
   _skillType: 
-  _skillDetail: "\uC7AC\uC0AC\uC6A9 \uB300\uAE30 \uC2DC\uAC04: 1"
-  _index: 4
-  _rank: -1
-  _target: 0
-  _type: 0
+  _skillDetail: "\uC7AC\uC0AC\uC6A9 \uB300\uAE30 \uC2DC\uAC04: 3"
+  _index: 5
+  _rank: 14
+  _target: -1
+  _type: 2
   _areaOfEffect: 0
   _critical: 0
   _cooldown: -1
@@ -29,7 +30,7 @@ MonoBehaviour:
   _skillEffect: []
   _skillSelfEffect: 0
   _skillEffectForSelf: []
-  _skillIcon: {fileID: 21300000, guid: 5aca0d0d1526a544e8b031d5ed0d39e3, type: 2}
+  _skillIcon: {fileID: 21300000, guid: 88a902bdd202aff48a6bc1b8a8dbb646, type: 2}
   _skillTypeIcon: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
   _skillRangeImage: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
   _testAnimation: {fileID: 0}

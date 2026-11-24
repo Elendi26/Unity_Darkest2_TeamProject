@@ -219,7 +219,7 @@ public class TheCrossroadManager : MonoBehaviour
                 if (_partySlots[i].HeroData == data)
                 {
                     _partySlots[i].SlotClear();
-
+                    _heroDatas[i] = null;
                 }
             }
 
@@ -474,7 +474,7 @@ public class TheCrossroadManager : MonoBehaviour
             {
                 // 변화하는 수치, 고정된 수치의 초기값 불러오기
                 targetHero.HeroID = originData.HeroID;
-                targetHero.CurrentHP = originData.CurrentHP;
+                targetHero.CurrentHP = originData.MaxHP;
                 targetHero.CurrentStress = 0;
                 targetHero.PartySlotIndex = i;
 
