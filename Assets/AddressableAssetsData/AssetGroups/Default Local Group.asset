@@ -16,7 +16,12 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 59359ece1cd1c024981e96c900f499b2
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 6967341ba10979f4dbbbff48c1e1db04
+    m_Address: Assets/Prefabs/FadeCanvas.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 2d0b097c7a22eb0488ae9b822afbddf4, type: 2}
   m_SchemaSet:
