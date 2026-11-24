@@ -4,5 +4,18 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
-  m_configObjects: {}
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/UI/Title_test.unity
+    guid: f60691340daddae48af8d3d51660054d
+  - enabled: 1
+    path: Assets/Scenes/Node/NodeTestScene.unity
+    guid: c77b85936d3ebe844880e7d085e32739
+  - enabled: 1
+    path: Assets/Scenes/UI/The_Crossroads_Test.unity
+    guid: 7b9f711c390d87140b55350663f17ce5
+  - enabled: 1
+    path: Assets/Scenes/UI/Combat_test.unity
+    guid: b77d0dfb06c31b9438c0b3ab48448955
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: c85fba1d1b7ce0446b179bfacdd85a2d, type: 2}
