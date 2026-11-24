@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public enum ECombatSelectType
 {
@@ -27,6 +28,27 @@ public class CCombatCurrentTurn : MonoBehaviour
 
     #endregion
 
+    // 이벤트
+
+    // 현재 턴이 누구인지 이벤트를 보낸다. (영웅 턴일 때만)
+    public event Action<CEntityRuntimeData> ChangedEntityTurn;
+
+    private void OnEnable()
+    {
+        if(_combatSkillbar != null)
+        {
+            _combatSkillbar.OnSkillSelected += SkillSelect;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_combatSkillbar != null)
+        {
+            _combatSkillbar.OnSkillSelected -= SkillSelect;
+        }
+    }
+
     public void InputCurrentTurnEntity(CEntityRuntimeData entity)
     {
         _entity = entity;
@@ -36,11 +58,27 @@ public class CCombatCurrentTurn : MonoBehaviour
     
     public void CurrentTurnMech()
     {
-        SetSkillData();
+        if (_entity == null)
+        {
+            return;
+        }
 
-        _combatSkillbar.HeroTurnSkillDataSet(_skillData);
+        if (_entity.IsHero())
+        {
+            SetSkillData();
 
-        SkillSelect();
+            _combatSkillbar.HeroTurnSkillDataSet(_skillData);
+
+            ChangedEntityTurn?.Invoke(_entity);
+        }
+
+        else
+        {
+            CPrint.Log("적 몬스터 턴 진입");
+            // 임시로 일단 적군 턴은 넘기기
+            CCombatManager.Instance.TurnOver();
+            // 적 AI 행동패턴 추가
+        }
     }
 
     public CEntityRuntimeData GetCurrentTurnEntityInfo()
@@ -63,9 +101,12 @@ public class CCombatCurrentTurn : MonoBehaviour
         return _skillData;
     }
 
-    public void SkillSelect()
+    public void SkillSelect(CombatSkillSlot_UI slot)
     {
-
+        if(slot != null && slot.SlotType != ESlotTypes.TurnChange)
+        {
+            InputSelectedSkillData(slot.SkillData);
+        }
     }
 
     public void InputSelectedSkillData(CSkillDataSO skillData)
@@ -84,5 +125,10 @@ public class CCombatCurrentTurn : MonoBehaviour
 
             _seletedSkill.InputSelectedSkill(_entity, skillData);
         }
+    }
+
+    public void StateReset()
+    {
+        _selectType = ECombatSelectType.None;
     }
 }

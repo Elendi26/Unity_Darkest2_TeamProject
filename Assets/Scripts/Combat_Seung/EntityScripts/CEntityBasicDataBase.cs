@@ -31,17 +31,18 @@ public class CEntityDataBase : MonoBehaviour
         {
             if (entityData == null) continue;
 
-            string entityName = entityData.Name;
+            // entityData.name -> entityData.HeroID
+            string entityID = entityData.HeroID;
 
             // 중복 이름 체크
-            if (_entityDatabase.ContainsKey(entityName))
+            if (_entityDatabase.ContainsKey(entityID))
             {
-                Debug.LogWarning($"[EntityDataBase] 중복된 엔티티 이름 발견! 이름: {entityName}");
+                Debug.LogWarning($"[EntityDataBase] 중복된 엔티티 ID 발견! 이름: {entityID}");
                 continue;
             }
 
             // 딕셔너리에 이름과 엔티티 데이터 매핑
-            _entityDatabase[entityName] = entityData;
+            _entityDatabase[entityID] = entityData;
         }
 
         Debug.Log($"[EntityDataBase] 총 {_entityDatabase.Count}개의 엔티티 기본 데이터 로드 완료.");
@@ -49,15 +50,16 @@ public class CEntityDataBase : MonoBehaviour
 
     /// <summary>
     /// 엔티티 이름으로 기본 데이터(CEntityBasicDataSO)를 검색합니다.
+    /// entityName -> heroID
     /// </summary>
-    public CEntityBasicDataSO GetEntityData(string entityName)
+    public CEntityBasicDataSO GetEntityData(string heroID)
     {
-        if (_entityDatabase.TryGetValue(entityName, out var entityData))
+        if (_entityDatabase.TryGetValue(heroID, out var entityData))
         {
             return entityData;
         }
 
-        Debug.LogWarning($"[EntityDataBase] 등록되지 않은 엔티티 이름입니다: '{entityName}'");
+        Debug.LogWarning($"[EntityDataBase] 등록되지 않은 엔티티 이름입니다: '{heroID}'");
         return null;
     }
 }

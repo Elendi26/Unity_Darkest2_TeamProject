@@ -10,32 +10,34 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bce350e4230aa349ab9a623eb6f02f0, type: 3}
-  m_Name: PlagueDoctor_Skill1
+  m_Name: Mamatarms_Skill4
   m_EditorClassIdentifier: 
-  _heroName: Plague_Doctor
+  _heroName: Man_at_arms
   _skillID: 
-  _skillName: "\uC720\uB3C5\uAE30\uCCB4 \uD3ED\uBC1C"
-  _skillExplain: "3\uD134 \uB3D9\uC548 \uD53C\uD5744\uB97C \uC8FC\uB294 \uC911\uB3C5
-    \uD1A0\uD070\uC744 \uBD80\uC5EC\uD55C\uB2E4"
-  _skillType: "\uC6D0\uAC70\uB9AC"
-  _skillDetail: "\uD53C\uD574: 2-3 \uCE58\uBA85\uD0C0: 5%"
-  _index: 1
-  _rank: 14
-  _target: 3
-  _type: 1
+  _skillName: "\uACE0\uC591"
+  _skillExplain: 
+  _skillType: 
+  _skillDetail: "\uC7AC\uC0AC\uC6A9 \uB300\uAE30 \uC2DC\uAC04: 1"
+  _index: 4
+  _rank: -1
+  _target: 0
+  _type: 0
   _areaOfEffect: 0
-  _critical: 5
+  _critical: 0
   _cooldown: -1
   _charges: -1
-  _skillEffect: []
+  _skillEffect:
+  - rid: -2
   _skillSelfEffect: 0
   _skillEffectForSelf: []
-  _skillIcon: {fileID: 21300000, guid: 690d2160a3c99274cb0c20dc1c5cdc48, type: 2}
-  _skillTypeIcon: {fileID: 21300000, guid: 86059fc909f958749bbce95bd8980e25, type: 2}
+  _skillIcon: {fileID: 21300000, guid: 5aca0d0d1526a544e8b031d5ed0d39e3, type: 2}
+  _skillTypeIcon: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
   _skillRangeImage: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
   _testAnimation: {fileID: 0}
   _activeImage: {fileID: 0}
   _inactiveImage: {fileID: 0}
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

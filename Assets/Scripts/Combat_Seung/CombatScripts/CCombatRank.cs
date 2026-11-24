@@ -17,7 +17,17 @@ public class CCombatRank : MonoBehaviour
     [SerializeField] private bool _team;
     [SerializeField] private CEntityRuntimeData _entityRuntimeData; // 테스트용으로 열어둠, 원래는 SerializeField 없어도 됨
 
+    [Header("CCombatCurrentTurn 스크립트 참조")]
+    [SerializeField] private CCombatCurrentTurn _currentTurn;
+
     // 여기에 활성화/비활성화 시키고 싶은 것을 넣고
+    [Header("현재 턴 표시 UI")]
+    [SerializeField] private GameObject _currentTurnIndicator;
+
+    [Header("타겟 표시기")]
+    [SerializeField] private GameObject _targetIndicator;
+
+
 
     private int _rank;
     private bool _targetable = false;
@@ -29,9 +39,26 @@ public class CCombatRank : MonoBehaviour
 
     #endregion
 
+    private void Awake()
+    {
+        if(_currentTurnIndicator != null)
+        {
+            _currentTurnIndicator.SetActive(false);
+        }
+
+        if(_targetIndicator != null)
+        {
+            _targetIndicator.SetActive(false);
+        }
+    }
 
     private void OnEnable()
     {
+        if(_currentTurn != null)
+        {
+            _currentTurn.ChangedEntityTurn += OnOffIndicator;
+        }
+
         ERank rank = ERank.None;
 
         switch (_combatRank)
@@ -71,6 +98,12 @@ public class CCombatRank : MonoBehaviour
 
     private void OnDisable()
     {
+        if (_currentTurn != null)
+        {
+            _currentTurn.ChangedEntityTurn -= OnOffIndicator;
+        }
+
+
         _rank = (int)ERank.None;
     }
 
@@ -87,17 +120,16 @@ public class CCombatRank : MonoBehaviour
         }
     }
 
-    public void CheckRank(ERank rank, ESkillType type)
+    public void CheckTargetRank(int skillTarget, ESkillType type)
     {
-        int skillRank = (int)rank;
-
+        
         switch (type)
         {
             case ESkillType.Melee:
 
                 if (!_team)
                 {
-                    if ((skillRank & _rank) != 0)
+                    if ((skillTarget & _rank) != 0)
                     {
                         _targetable = true;
 
@@ -121,7 +153,7 @@ public class CCombatRank : MonoBehaviour
 
                 if (!_team)
                 {
-                    if ((skillRank & _rank) != 0)
+                    if ((skillTarget & _rank) != 0)
                     {
                         _targetable = true;
                     }
@@ -143,7 +175,7 @@ public class CCombatRank : MonoBehaviour
 
                 if (_team)
                 {
-                    if ((skillRank & _rank) != 0)
+                    if ((skillTarget & _rank) != 0)
                     {
                         _targetable = true;
                     }
@@ -165,7 +197,7 @@ public class CCombatRank : MonoBehaviour
 
                 if (_team)
                 {
-                    if ((skillRank & _rank) != 0)
+                    if ((skillTarget & _rank) != 0)
                     {
                         _targetable = true;
                     }
@@ -188,6 +220,11 @@ public class CCombatRank : MonoBehaviour
         }
 
         // UI Targetable 켜기
+
+        if(_targetIndicator != null)
+        {
+            _targetIndicator.SetActive(_targetable); 
+        }
         
 
     }
@@ -207,5 +244,26 @@ public class CCombatRank : MonoBehaviour
         return _entityRuntimeData.GetStat(status);
     }
 
+    private void OnOffIndicator(CEntityRuntimeData data)
+    {
+        if (_entityRuntimeData == data)
+        {
+            _currentTurnIndicator.SetActive(true);
+        }
+
+        else
+        {
+            _currentTurnIndicator.SetActive(false);
+        }
+    }
+
+    public void ResetTargetRank()
+    {
+        _targetable = false;
+        if(_targetIndicator != null)
+        {
+            _targetIndicator.SetActive(false);
+        }
+    }
 
 }

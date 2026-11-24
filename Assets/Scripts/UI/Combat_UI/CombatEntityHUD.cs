@@ -18,16 +18,29 @@ public class CombatEntityHUD : MonoBehaviour
     [Header("토큰 창")]
     [SerializeField] private GameObject _tokenBox;
 
+    [Header("CEntityRuntimeData 스크립트 참조")]
+    [SerializeField] private CEntityRuntimeData _eRuntimeData;
     #endregion
 
-    // 내부 변수
 
-
-
-    void Start()
+    private void OnEnable()
     {
-        
+        if( _eRuntimeData != null )
+        {
+            _eRuntimeData.ChangedHP += UpdateHPBar;
+        }
     }
+
+    private void OnDisable()
+    {
+        if (_eRuntimeData != null)
+        {
+            _eRuntimeData.ChangedHP -= UpdateHPBar;
+        }
+    }
+
+
+
 
     /// <summary>
     /// HUD 갱신 (체력, 스트레스, 턴 표시바, 토큰창 리셋 및 띄우기)
@@ -35,6 +48,21 @@ public class CombatEntityHUD : MonoBehaviour
     /// <param name="data"></param>
     public void RenewHUD(CEntityRuntimeData data)
     {
+        // 구독 해제 하고
+        if(_eRuntimeData != null)
+        {
+            _eRuntimeData.ChangedHP -= UpdateHPBar;
+        }
+
+        // 새로 데이터 넣고
+        _eRuntimeData = data;
+
+        // 새로 구독
+        if (_eRuntimeData != null)
+        {
+            _eRuntimeData.ChangedHP += UpdateHPBar;
+        }
+
         float hpGauge = data.GetStat(EEntityStat.HP) / data.GetStat(EEntityStat.MaxHP);
 
         if (hpGauge <= 0)
@@ -55,13 +83,6 @@ public class CombatEntityHUD : MonoBehaviour
                 }
             }
 
-            if(_tokenBox != null)
-            {
-                _tokenBox.SetActive(false);
-               
-            }
-
-            // 다 끄고 함수 종료하기
             return;
         }
 
@@ -70,21 +91,24 @@ public class CombatEntityHUD : MonoBehaviour
         int currentStress = Mathf.RoundToInt(stressValue);
 
         // 현재 스트레스 수치까지 반복문 돌려서 게이지 한칸씩 켜기
-        if(currentStress != 0)
+        for(int i = 0; i < _stressBar.Length; i++)
         {
-            for(int i = 0; i < _stressBar.Length; i++)
-            {
-               _stressBar[i].gameObject.SetActive(true);
-            }
+            bool result = i < currentStress;
+
+           _stressBar[i].gameObject.SetActive(result);
         }
+        
     }
 
     /// <summary>
     /// 피해를 당했을 때, 회복했을 때 등 체력에 관여하는 모든 이벤트 발생시 hp바를 갱신하는 함수 
     /// </summary>
-    public void RenewHp()
+    public void UpdateHPBar(float currentHP, float maxHP)
     {
-
+        if(maxHP > 0)
+        {
+            _hpBar.fillAmount = Mathf.Clamp01(currentHP / maxHP);
+        }
     }
 
 

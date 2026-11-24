@@ -1,0 +1,276 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
+using UnityEngine;
+
+public enum ECombatPhase
+{
+    None,
+    CombatStart,
+    RoundStart,
+    TurnStart,
+    TurnOver,
+    RoundOver,
+    CombatOver
+}
+
+// 전투 총괄 매니저
+public class CCombatManager : MonoBehaviour
+{
+    public static CCombatManager Instance { get; private set; }
+
+    #region 인스펙터
+
+    [SerializeField] private List<CEntityRuntimeData> _onCombatEntities = new List<CEntityRuntimeData>();
+    [SerializeField] private CTeamData<CEntityRuntimeData> _testEnemies;
+    [SerializeField] private CCombatCurrentTurn _currentTurn;
+
+    [Header("현재 턴 영웅 이름 텍스트")]
+    [SerializeField] private TextMeshProUGUI _heroNameText;
+
+    [Header("아군 영웅 스포너 참조")]
+    [SerializeField] private CombatHeroSpawner _heroSpawner;
+    [Header("적 스포너 참조")]
+    [SerializeField] private CombatEnemySpawner _enemyspawner;
+
+    #endregion
+
+    #region 내부변수
+
+    private List<CEntityRuntimeData> _orderedTurn = new List<CEntityRuntimeData>();
+
+    private ECombatPhase _currentPhase = ECombatPhase.CombatStart;
+
+    private bool _roundOver = false;
+
+    private bool _isStartCombat = false;
+
+    #endregion
+
+    #region 프로퍼티
+
+    public List<CEntityRuntimeData> OnCombatEntities => _onCombatEntities;
+    public List<CEntityRuntimeData> OrderedTurn
+    {
+        get => _orderedTurn;
+        set => _orderedTurn = value;
+    }
+    public CCombatCurrentTurn CombatCurrentTurn => _currentTurn;
+
+    #endregion
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+
+        else
+        {
+            Destroy(gameObject);
+        }
+
+        // 먼저 스포너가 영웅과 적을 스폰하게 하고, 매커니즘 함수를 호출하는 순서가 필요할 것 같아서 주석으로 처리하고 수정합니다.
+        //CombatMechanism();
+    }
+
+    private void OnEnable()
+    {
+        if(_currentTurn != null)
+        {
+            _currentTurn.ChangedEntityTurn += CurrentTurnHeroNameRenew;
+        }
+
+    }
+
+    private void OnDisable()
+    {
+        if (_currentTurn != null)
+        {
+            _currentTurn.ChangedEntityTurn -= CurrentTurnHeroNameRenew;
+        }
+
+    }
+
+    private void CombatMechanism()
+    {
+        switch (_currentPhase)
+        {
+            case ECombatPhase.None:
+
+                Debug.Log("컴뱃 페이즈가 비었음");
+
+                break;
+
+            case ECombatPhase.CombatStart:
+
+                CombatStart();
+
+                break;
+
+            case ECombatPhase.RoundStart:
+
+                RoundStart();
+
+                break;
+
+            case ECombatPhase.TurnStart:
+
+                TurnStart();
+
+                break;
+
+            case ECombatPhase.TurnOver:
+
+                TurnOver();
+
+                break;
+
+            case ECombatPhase.RoundOver:
+
+                break;
+
+            case ECombatPhase.CombatOver:
+
+                break;
+
+            default:
+
+                Debug.Log("컴뱃 페이즈 오류");
+
+                break;
+        }
+    }
+
+
+
+    public void ChangePhase(ECombatPhase nextPhase)
+    {
+        _currentPhase = nextPhase;
+
+        CombatMechanism();
+    }
+
+    private void CombatStart()
+    {
+        // 데이터 로딩
+        // -> 여기서 데이터 로드하는 것도 좋지만, 스포너 스크립트가 존재하기 때문에 따로 함수를 만들어서 먼저 스폰할거 스폰시키고 전투 시작하는게 나아 보입니다.
+
+        ChangePhase(ECombatPhase.RoundStart);
+    }
+
+
+    private void RoundStart()
+    {
+        // 정렬된 턴을 실제로 담아야 다음턴으로 넘어간다.
+        _orderedTurn = OrderTurn();
+
+        ChangePhase(ECombatPhase.TurnStart);
+    }
+
+    private List<CEntityRuntimeData> OrderTurn()
+    {
+        var entities = _onCombatEntities;
+        int[] extraSpeed = new int[entities.Count];
+
+        for (int i = 0; i < extraSpeed.Length; i++)
+        {
+            extraSpeed[i] = Random.Range(0, 6);
+        }
+
+        for (int i = 0; i < entities.Count; i++)
+        {
+            entities[i].ModifyStat(EEntityStat.CurrentSpeed, entities[i].GetStat(EEntityStat.Speed) + extraSpeed[i]);
+        }
+
+        List<CEntityRuntimeData> sortEntities = entities.OrderByDescending(x => x.GetStat(EEntityStat.CurrentSpeed)).ToList();
+
+        for (int i = 0; i < entities.Count; i++)
+        {
+            entities[i].ResetStatToDefault(EEntityStat.CurrentSpeed);
+        }
+
+        return sortEntities;
+    }
+
+
+    private void TurnStart()
+    {
+        InputToCurrentTurn();
+    }
+
+    private void InputToCurrentTurn()
+    {
+        if (_orderedTurn.Count <= 0)
+        {
+            _roundOver = true;
+            return;
+        }
+
+        else
+        {
+            _roundOver = false;
+        }
+
+        _currentTurn.InputCurrentTurnEntity(_orderedTurn.First());
+
+        _orderedTurn.RemoveAt(0);
+    }
+
+
+    public void TurnOver()
+    {
+        if (_orderedTurn.Count >= 1)
+        {
+            ChangePhase(ECombatPhase.TurnStart);
+        }
+
+        if (_orderedTurn.Count <= 0)
+        {
+            ChangePhase(ECombatPhase.RoundOver);
+        }
+    }
+
+    /// <summary>
+    /// 일단 스폰을 먼저 시키고, 전투에 진입할 수 있도록하는 함수
+    /// </summary>
+    public void StartCombat()
+    {
+        if(_isStartCombat == true)
+        {
+            return;
+        }
+
+        CheckAllSpawn();
+
+        if(_isStartCombat)
+        {
+            // 전투 시작하는 시작지점 호출
+            ChangePhase(ECombatPhase.CombatStart);
+        }
+
+    }
+
+    private void CheckAllSpawn()
+    {
+        if (_heroSpawner.CompleteSpawn == true && _enemyspawner.CompleteSpawn == true)
+        {
+            _isStartCombat = true;
+        }
+
+        else
+        {
+            _isStartCombat = false;
+        }
+
+    }
+
+    private void CurrentTurnHeroNameRenew(CEntityRuntimeData data)
+    {
+        _heroNameText.text = data.EntityName;
+    }
+}
+
+

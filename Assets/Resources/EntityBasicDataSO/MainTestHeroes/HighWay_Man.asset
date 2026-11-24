@@ -35,7 +35,7 @@ MonoBehaviour:
   _debuffRes: 20
   _deathblowRes: 66
   _currentStress: 0
-  _hero: 0
+  _hero: 1
   _movement: 1
   _heroSkills:
   - {fileID: 11400000, guid: 24e5a93882ef18d459d7e41f4d76bdbb, type: 2}
