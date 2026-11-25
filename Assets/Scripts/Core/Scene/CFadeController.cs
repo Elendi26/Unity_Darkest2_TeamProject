@@ -22,7 +22,6 @@ public class CFadeController : CManagerSingleton<CFadeController>
     private CanvasGroup _fadeCanvasGroup;
     private GameObject _fadeInstance;
     private AsyncOperationHandle<GameObject> _loadHandle;
-    private UniTask<bool> _preloadTask;
     private bool _isLoadingPrefab;
     private int _fadeVersion;
     #endregion
@@ -32,8 +31,7 @@ public class CFadeController : CManagerSingleton<CFadeController>
     protected override void Awake()
     {
         base.Awake();
-        _preloadTask = EnsureFadeUIAsync();
-        _preloadTask.Forget();
+        PreloadFadeUIAsync().Forget();
     }
 
     /// <summary>
@@ -41,18 +39,7 @@ public class CFadeController : CManagerSingleton<CFadeController>
     /// </summary>
     public async UniTask<bool> PreloadFadeUIAsync()
     {
-        if (_fadeCanvasGroup != null)
-        {
-            return true;
-        }
-
-        if (_isLoadingPrefab)
-        {
-            return await _preloadTask;
-        }
-
-        _preloadTask = EnsureFadeUIAsync();
-        return await _preloadTask;
+        return await EnsureFadeUIAsync();
     }
 
     /// <summary>
@@ -92,7 +79,20 @@ public class CFadeController : CManagerSingleton<CFadeController>
 
         if (_isLoadingPrefab)
         {
-            return await _preloadTask;
+            try
+            {
+                await UniTask.WaitUntil
+                (
+                    () => !_isLoadingPrefab,
+                    cancellationToken: this.GetCancellationTokenOnDestroy()
+                );
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+
+            return _fadeCanvasGroup != null;
         }
 
         _isLoadingPrefab = true;
