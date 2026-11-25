@@ -26,6 +26,7 @@ MonoBehaviour:
     Max: 16
   _pools:
   - Name: "전투 아이템"
+    Chance: 0.5
     Items:
     - {fileID: 11400000, guid: 9dfb31adc15a06d879c9cd68e441f50c, type: 2}
     - {fileID: 11400000, guid: 194a1647f7157658c28735de4a49ab0f, type: 2}
@@ -35,12 +36,14 @@ MonoBehaviour:
     MinCount: 1
     MaxCount: 2
   - Name: "여관 아이템"
+    Chance: 0.5
     Items: []
     MinKinds: 1
     MaxKinds: 2
     MinCount: 1
     MaxCount: 2
   - Name: "역마차 아이템"
+    Chance: 0.2
     Items:
     - {fileID: 11400000, guid: 837da9385a6a4468b52c467f973947e8, type: 2}
     - {fileID: 11400000, guid: 9081199bc31a4b27b4268b48538652b4, type: 2}
@@ -49,6 +52,7 @@ MonoBehaviour:
     MinCount: 1
     MaxCount: 1
   - Name: "장신구"
+    Chance: 0.25
     Items:
     - {fileID: 11400000, guid: 0e7ad33036a38ceedfa99110595fef75, type: 2}
     - {fileID: 11400000, guid: b5e677ea553c6453889cfaf4fcb4aa61, type: 2}

@@ -134,6 +134,12 @@ public class ProfileSelectPopup_UI : MonoBehaviour
         }
     }
 
+    public void SelectCreateProfile(int index)
+    {
+        DataSaveManager.Instance.SetCurrentSlot(index);
+        OnValidProfileSelect.Invoke(index);
+    }
+
     
 
 }
