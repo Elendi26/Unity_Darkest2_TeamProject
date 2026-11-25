@@ -11,9 +11,11 @@ public class CRoadLootSpawner : MonoBehaviour
 	[SerializeField] private CRoadLootBush[] _bushPrefabs;
 	[SerializeField] private CRoadLootEntry[] _entries =
 	{
-		new CRoadLootEntry { Label = "금화 조금", Weight = 6, Gold = new Vector2Int(3, 8) },
-		new CRoadLootEntry { Label = "금화 많이", Weight = 2, Gold = new Vector2Int(12, 20) },
+		new CRoadLootEntry { Label = "유물 조금", Weight = 6, Gold = new Vector2Int(3, 8) },
+		new CRoadLootEntry { Label = "유물 많이", Weight = 2, Gold = new Vector2Int(12, 20) },
 	};
+	// 아이템 목록에서 뽑을 때 희귀도별 비중 (흔함·드묾·희귀·전설 순)
+	[SerializeField] private float[] _rarityWeights = { 4f, 2f, 1f, 0.5f };
 	[SerializeField] private float _firstDistance = 40f;
 	[SerializeField] private Vector2 _spacing = new Vector2(30f, 70f);
 	[SerializeField] private float _spawnAhead = 70f;
@@ -283,6 +285,56 @@ public class CRoadLootSpawner : MonoBehaviour
 		return null;
 	}
 
+	// 아이템 목록에서 희귀도 비중으로 하나 (없으면 null)
+	private CItemDataBase PickFromPool(CItemRegistry pool)
+	{
+		IReadOnlyList<CItemDataBase> items = pool.Items;
+		float total = 0f;
+
+		for (int i = 0; i < items.Count; i++)
+		{
+			total += GetRarityWeight(items[i]);
+		}
+
+		if (total <= 0f)
+		{
+			return null;
+		}
+
+		float roll = Random.Range(0f, total);
+
+		for (int i = 0; i < items.Count; i++)
+		{
+			float weight = GetRarityWeight(items[i]);
+
+			if (weight <= 0f)
+			{
+				continue;
+			}
+
+			roll -= weight;
+
+			if (roll < 0f)
+			{
+				return items[i];
+			}
+		}
+
+		return null;
+	}
+
+	private float GetRarityWeight(CItemDataBase item)
+	{
+		if (item == null)
+		{
+			return 0f;
+		}
+
+		int index = (int)item.Rarity;
+
+		return _rarityWeights != null && index >= 0 && index < _rarityWeights.Length ? Mathf.Max(0f, _rarityWeights[index]) : 0f;
+	}
+
 	// 보상을 주고 띄울 글자를 돌려준다
 	private string Give(CRoadLootEntry entry, out bool isItem)
 	{
@@ -297,15 +349,17 @@ public class CRoadLootSpawner : MonoBehaviour
 		int gold = entry.Gold.y > 0 ? Random.Range(entry.Gold.x, Mathf.Max(entry.Gold.x, entry.Gold.y) + 1) : 0;
 		string itemText = null;
 
-		if (entry.Item != null && entry.ItemCount > 0)
+		CItemDataBase item = entry.ItemPool != null ? PickFromPool(entry.ItemPool) : entry.Item;
+
+		if (item != null && entry.ItemCount > 0)
 		{
 			CInventory inventory = _controller.Stagecoach != null ? _controller.Stagecoach.Inventory : null;
-			int added = inventory != null ? inventory.Add(entry.Item, entry.ItemCount) : 0;
+			int added = inventory != null ? inventory.Add(item, entry.ItemCount) : 0;
 
 			if (added > 0)
 			{
 				isItem = true;
-				itemText = added > 1 ? $"{entry.Item.DisplayName} x{added}" : entry.Item.DisplayName;
+				itemText = added > 1 ? $"{item.DisplayName} x{added}" : item.DisplayName;
 			}
 			else
 			{
@@ -316,7 +370,7 @@ public class CRoadLootSpawner : MonoBehaviour
 		}
 
 		int gained = gold > 0 ? _controller.RunData.Add(ERunValue.Gold, gold) : 0;
-		string goldText = gained > 0 ? $"금화 +{gained}" : null;
+		string goldText = gained > 0 ? $"유물 +{gained}" : null;
 
 		if (itemText != null && goldText != null)
 		{

@@ -17,8 +17,6 @@ public class CShopItemData : ScriptableObject
 	[SerializeField] private float _weight = 1f;
 	// 이 값이 가득 차 있으면 못 산다 (수리·기름 등). None 이면 검사 안 함
 	[SerializeField] private ERunValue _blockWhenFull = ERunValue.None;
-	// 사면 역마차에 다는 업그레이드 (비우면 없음)
-	[SerializeField] private CStagecoachUpgradeData _upgrade;
 	[SerializeReference] private List<IRunEffect> _effects = new List<IRunEffect>();
 	#endregion
 
@@ -38,8 +36,6 @@ public class CShopItemData : ScriptableObject
 	public float Weight => _weight;
 	// 가득 차면 못 사게 막을 값
 	public ERunValue BlockWhenFull => _blockWhenFull;
-	// 사면 다는 업그레이드
-	public CStagecoachUpgradeData Upgrade => _upgrade;
 	// 사면 적용하는 효과
 	public IReadOnlyList<IRunEffect> Effects => _effects;
 }

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57df0ffd19514849a988da564e0343f4, type: 3}
+  m_Name: Item_Relic
+  m_EditorClassIdentifier: 
+  _id: relic
+  _displayName: 유물
+  _description: 이제는 지나가 버린 시대의 기억과 감상들
+  _icon: {fileID: 21300000, guid: 4c33273186c3f544e9fa8f3b2d4103d6, type: 3}
+  _category: 0
+  _rarity: 0
+  _maxStack: 40
+  _buyPrice: 0
+  _sellPrice: 0
+  _iconSteps:
+  - Min: 0
+    Icon: {fileID: 21300000, guid: fe2b79c5286aa564f9cecae573eaeff5, type: 3}
+  - Min: 10
+    Icon: {fileID: 21300000, guid: 8c6ac59c2c921004aac935ba3260137e, type: 3}
+  - Min: 25
+    Icon: {fileID: 21300000, guid: 76d7176cf55d60c4a92a1ca67accbcfb, type: 3}
+  - Min: 40
+    Icon: {fileID: 21300000, guid: 4c33273186c3f544e9fa8f3b2d4103d6, type: 3}

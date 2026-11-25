@@ -14,18 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _title: 고물상
   _body: 떠돌이 상인이 물건을 펼쳐 놓았다.
-  _fixedItems:
-  - {fileID: 11400000, guid: 4b81562cee9bbb266e2ba42fae0e8c79, type: 2}
-  - {fileID: 11400000, guid: 5b2febf8b8f71f748d2a11aa3d850555, type: 2}
+  _fixedItems: []
   _pool:
   - {fileID: 11400000, guid: b0b59a16c35463d6907de5b41d321b65, type: 2}
-  - {fileID: 11400000, guid: 36605e55eb6efd445e18047cd5d474c2, type: 2}
-  - {fileID: 11400000, guid: 0f35f65df2ed43be69ef30cdcae12921, type: 2}
   - {fileID: 11400000, guid: 3d4d521138b52b8bc7350fbdafd760c7, type: 2}
   _randomCount: 1
   _itemPool: {fileID: 11400000, guid: b0875cabfe6ad60c029650995fa5ca2a, type: 2}
   _itemRandomCount: 3
   _itemStock: 1
+  _excludeCategories: []
   _rarityWeights:
   - 4
   - 2

@@ -14,8 +14,8 @@ public class CShopNodeHandler : INodeHandler
 		public string Name => Item != null ? Item.DisplayName : Service.DisplayName;
 		public string Description => Item != null ? Item.Description : Service.Description;
 		public UnityEngine.Sprite Icon => Item != null ? Item.Icon : Service.Icon;
-		// 아이템은 금화로만 산다
-		public ERunValue CostType => Item != null ? ERunValue.Gold : Service.CostType;
+		// 아이템은 아이템이 정한 재화로 산다 (기본 유물, 장신구·마차는 패물)
+		public ERunValue CostType => Item != null ? Item.BuyCurrency : Service.CostType;
 		public int Cost => Item != null ? Item.BuyPrice : Service.Cost;
 		// 분류 → 서비스는 횃불을 채우면 횃불, 나머지(수리·보강·교환)는 마차
 		public EItemCategory Category => Item != null ? Item.Category : (Service.BlockWhenFull == ERunValue.Torch ? EItemCategory.Torch : EItemCategory.Coach);
@@ -25,7 +25,7 @@ public class CShopNodeHandler : INodeHandler
 	#region 내부 변수
 	private readonly ENodeType _type;
 	private readonly CShopData _shop;
-	private readonly CShopView _view;
+	private readonly IShopView _view;
 	private readonly CRunContext _ctx;
 	private readonly CStagecoach _stagecoach;
 	private readonly List<CShopEntry> _entries = new List<CShopEntry>();
@@ -38,7 +38,7 @@ public class CShopNodeHandler : INodeHandler
 
 	public ENodeType Type => _type;
 
-	public CShopNodeHandler(ENodeType type, CShopData shop, CShopView view, CRunContext ctx, CStagecoach stagecoach)
+	public CShopNodeHandler(ENodeType type, CShopData shop, IShopView view, CRunContext ctx, CStagecoach stagecoach)
 	{
 		_type = type;
 		_shop = shop;
@@ -52,7 +52,10 @@ public class CShopNodeHandler : INodeHandler
 		_onComplete = onComplete;
 
 		RollEntries();
-		CPrint.Log($"{_type} 상점 : {_shop.Title} 상품 {_entries.Count}개 (ID {node.Id}, 행 {node.Row})");
+		// 여관 씬 단독 테스트에서는 노드가 없다
+		string where = node != null ? $"ID {node.Id}, 행 {node.Row}" : "노드 없음";
+
+		CPrint.Log($"{_type} 상점 : {_shop.Title} 상품 {_entries.Count}개 ({where})");
 
 		// 상점에 있는 동안 짐칸을 쓰거나 버리면 '가득 참' 상태가 바뀐다 → 다시 그린다
 		if (_stagecoach != null)
@@ -60,6 +63,24 @@ public class CShopNodeHandler : INodeHandler
 			_stagecoach.Inventory.OnChanged += Refresh;
 		}
 
+		_view.SetLook(_shop.Portrait, _shop.Crest, _shop.Banner);
+		_view.Open(_shop.Title, _shop.Body, Leave);
+		Refresh();
+	}
+
+	/// <summary>
+	/// 진열을 다시 뽑지 않고 상점 화면만 다시 연다 (여관처럼 한 번 들른 곳에서 여러 번 드나들 때) / 경태
+	/// </summary>
+	public void Reopen(Action onComplete)
+	{
+		_onComplete = onComplete;
+
+		if (_stagecoach != null)
+		{
+			_stagecoach.Inventory.OnChanged += Refresh;
+		}
+
+		_view.SetLook(_shop.Portrait, _shop.Crest, _shop.Banner);
 		_view.Open(_shop.Title, _shop.Body, Leave);
 		Refresh();
 	}
@@ -148,7 +169,7 @@ public class CShopNodeHandler : INodeHandler
 		{
 			CItemDataBase item = items[i];
 
-			if (item == null || item.BuyPrice <= 0 || _itemCandidates.Contains(item))
+			if (item == null || item.BuyPrice <= 0 || _itemCandidates.Contains(item) || _shop.IsExcluded(item.Category))
 			{
 				continue;
 			}
@@ -262,11 +283,6 @@ public class CShopNodeHandler : INodeHandler
 
 		if (entry.Service != null)
 		{
-			if (entry.Service.Upgrade != null)
-			{
-				_stagecoach.TryEquip(entry.Service.Upgrade);
-			}
-
 			CRunEffectUtil.ApplyAll(entry.Service.Effects, _ctx);
 		}
 
@@ -313,11 +329,6 @@ public class CShopNodeHandler : INodeHandler
 		{
 			CShopItemData service = entry.Service;
 
-			if (service.Upgrade != null && (_stagecoach == null || !_stagecoach.CanEquip(service.Upgrade)))
-			{
-				return EShopCardState.Maxed;
-			}
-
 			if (service.BlockWhenFull != ERunValue.None)
 			{
 				CRunValue value = _ctx.RunData.Get(service.BlockWhenFull);
@@ -341,7 +352,8 @@ public class CShopNodeHandler : INodeHandler
 	{
 		CRunData runData = _ctx.RunData;
 
-		return $"골드 {runData.GetCurrent(ERunValue.Gold)}    "
+		return $"{CRunValueTable.GetName(ERunValue.Gold)} {runData.GetCurrent(ERunValue.Gold)}    "
+			+ $"{CRunValueTable.GetName(ERunValue.Faction)} {runData.GetCurrent(ERunValue.Faction)}    "
 			+ $"바퀴 {GetPair(runData.Get(ERunValue.Wheels))}    "
 			+ $"장갑 {GetPair(runData.Get(ERunValue.Armor))}    "
 			+ $"횃불 {GetPair(runData.Get(ERunValue.Torch))}"

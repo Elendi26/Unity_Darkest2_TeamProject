@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Item Registry
   m_EditorClassIdentifier: 
   _items:
-  - {fileID: 11400000, guid: aee7561df486df7b3aced0f07f565735, type: 2}
-  - {fileID: 11400000, guid: 6843dd17a3b1df33735b6a02f138874d, type: 2}
   - {fileID: 11400000, guid: 37c44cbe7d2f0a951da48634c3936172, type: 2}
   - {fileID: 11400000, guid: 9dfb31adc15a06d879c9cd68e441f50c, type: 2}
   - {fileID: 11400000, guid: 1170b41c234d49d19dc15d2cc301990a, type: 2}
@@ -22,3 +20,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0e7ad33036a38ceedfa99110595fef75, type: 2}
   - {fileID: 11400000, guid: ce84ed6585e58743cddd14ebe08b8dad, type: 2}
   - {fileID: 11400000, guid: b5e677ea553c6453889cfaf4fcb4aa61, type: 2}
+  - {fileID: 11400000, guid: 837da9385a6a4468b52c467f973947e8, type: 2}
+  - {fileID: 11400000, guid: 9081199bc31a4b27b4268b48538652b4, type: 2}

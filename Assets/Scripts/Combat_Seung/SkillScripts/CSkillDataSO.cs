@@ -80,6 +80,11 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     [SerializeField] private Sprite _activeImage;
     [SerializeField] private Sprite _inactiveImage;
 
+    [Header("AI 스킬 선택 가중치")]
+    [SerializeField, Min(0f)] private float _baseWeight = 10f;
+    [SerializeField, Min(0f)] private float _lowHpWeight = 10f;
+
+
     #endregion
 
 
@@ -104,7 +109,8 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     public bool SkillSelfEffect => _skillSelfEffect;
     public List<ISkillEffect> SkillEffectForSelf => _skillEffectForSelf;
 
-
+    public float BaseWeight => _baseWeight;
+    public float LowHpWeight => _lowHpWeight;
 
     public Sprite SkillIcon => _skillIcon;
     public Sprite SkillTypeIcon => _skillTypeIcon;

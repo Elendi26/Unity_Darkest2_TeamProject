@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5100ecc095b403bbb73ca750f9c663d1, type: 3}
+  m_Name: Shop_Inn
+  m_EditorClassIdentifier: 
+  _title: 보급상
+  _body: 여관 주인이 쓸 만한 물건을 내놓았다.
+  _portrait: {fileID: 21300000, guid: 1bae38e233e8a1e419968223752c265c, type: 3}
+  _crest: {fileID: 0}
+  _banner: {fileID: 21300000, guid: 65f577fb4f6e8e9419f848e79b866b31, type: 3}
+  _fixedItems:
+  - {fileID: 11400000, guid: b0b59a16c35463d6907de5b41d321b65, type: 2}
+  _pool: []
+  _randomCount: 0
+  _itemPool: {fileID: 11400000, guid: b0875cabfe6ad60c029650995fa5ca2a, type: 2}
+  _itemRandomCount: 99
+  _itemStock: 2
+  _excludeCategories: []
+  _rarityWeights:
+  - 4
+  - 2
+  - 1
+  - 0.5

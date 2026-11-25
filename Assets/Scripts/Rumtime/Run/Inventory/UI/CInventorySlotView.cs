@@ -18,6 +18,7 @@ public class CInventorySlotView : MonoBehaviour
 
 	#region 내부 변수
 	private Action _onClick;
+	private bool _hasItem;
 	#endregion
 
 	private void Awake()
@@ -34,10 +35,12 @@ public class CInventorySlotView : MonoBehaviour
 
 		bool hasItem = stack != null && stack.Item != null;
 
+		_hasItem = hasItem;
+
 		if (_icon != null)
 		{
-			_icon.sprite = hasItem ? stack.Item.Icon : null;
-			_icon.enabled = hasItem && stack.Item.Icon != null;
+			_icon.sprite = hasItem ? stack.Item.GetIcon(stack.Count) : null;
+			_icon.enabled = _icon.sprite != null;
 		}
 
 		if (_countText != null)
@@ -55,14 +58,20 @@ public class CInventorySlotView : MonoBehaviour
 			_highlight.enabled = isSelected;
 		}
 
+		// 빈칸도 버튼을 켜 둔다 → 꺼 두면 비활성 색으로 흐려져 칸 테두리가 안 보인다 (누르는 건 Click 에서 막는다)
 		if (_button != null)
 		{
-			_button.interactable = hasItem;
+			_button.interactable = true;
 		}
 	}
 
 	private void Click()
 	{
+		if (!_hasItem)
+		{
+			return;
+		}
+
 		_onClick?.Invoke();
 	}
 }

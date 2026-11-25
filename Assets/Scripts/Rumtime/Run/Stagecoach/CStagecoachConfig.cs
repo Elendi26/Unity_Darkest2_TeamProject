@@ -13,14 +13,16 @@ public class CStagecoachConfig : ScriptableObject
     [SerializeField] private int _maxArmor = 4;
 
     [Header("슬롯")]
-    [SerializeField] private int _generalSlots = 1;
-    [SerializeField] private int _trophySlots = 1;
-    [SerializeField] private int _petSlots = 0;
-    [SerializeField] private int _flameSlots = 1;
+    // 마차 아이템을 다는 칸 → 종류 구분 없이 함께 쓴다
+    [SerializeField] private int _coachSlots = 4;
 
     [Header("인벤토리")]
     // 기본 짐칸 수 → 업그레이드(InventorySlots)로 늘어난다
     [SerializeField] private int _inventorySlots = 8;
+    // 짐칸을 차지하는 유물 아이템 (비우면 유물은 짐칸 없이 숫자로만 센다)
+    [SerializeField] private CRelicItemData _relicItem;
+    // 짐칸을 차지하는 패물 아이템 (비우면 패물은 짐칸 없이 숫자로만 센다)
+    [SerializeField] private CRelicItemData _factionItem;
 
     [Header("주행")]
     [SerializeField] private float _travelDistance = 200f;
@@ -42,8 +44,14 @@ public class CStagecoachConfig : ScriptableObject
     public int MaxWheels => _maxWheels;
     // 업그레이드로 올릴 수 있는 장갑 상한
     public int MaxArmor => _maxArmor;
+    // 기본 마차 칸 수
+    public int CoachSlots => _coachSlots;
     // 기본 짐칸 수
     public int InventorySlots => _inventorySlots;
+    // 짐칸을 차지하는 유물 아이템 (없으면 null)
+    public CRelicItemData RelicItem => _relicItem;
+    // 짐칸을 차지하는 패물 아이템 (없으면 null)
+    public CRelicItemData FactionItem => _factionItem;
     public float TravelDistance => _travelDistance;
     public int TorchDrainPerTravel => _torchDrainPerTravel;
     public IReadOnlyList<float> EventPositions => _eventPositions;
@@ -69,22 +77,5 @@ public class CStagecoachConfig : ScriptableObject
         }
 
         return null;
-    }
-
-    public int GetBaseSlotCount(EStagecoachSlot slot)
-    {
-        switch (slot)
-        {
-            case EStagecoachSlot.General:
-                return _generalSlots;
-            case EStagecoachSlot.Trophy:
-                return _trophySlots;
-            case EStagecoachSlot.Pet:
-                return _petSlots;
-            case EStagecoachSlot.Flame:
-                return _flameSlots;
-        }
-
-        return 0;
     }
 }

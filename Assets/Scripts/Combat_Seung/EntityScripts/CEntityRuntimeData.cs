@@ -2,7 +2,8 @@ using JetBrains.Annotations;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-
+using UnityEngine.PlayerLoop;
+using System;
 public interface ICombatData
 {
     public ICombatData ReturnCombatData();
@@ -35,6 +36,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     private CEntityBasicDataSO _heroBasicData;
 
     private string _name;
+    private string _race;
 
     private int _maxHP;
     private int _currentHP;
@@ -68,9 +70,28 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     private bool _hero = true;
     private float _extraCritical = 0f;
 
+    private CMonsterBrain _monsterBrain;
+
+    // 프로퍼티
+
+    public string EntityName => _name;
+    public string Race => _race;
+
+    public CMonsterBrain MonsterBrain { get; set; }
+
+
+
+    // 이벤트
+
+    public event Action<float, float> ChangedHP;
+
     private void Awake()
     {
-        InitializeRuntimeData();
+        if(_heroBasicData != null)
+        {
+            InitializeRuntimeData();
+        }
+
     }
 
     private void InitializeRuntimeData()
@@ -82,6 +103,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         }
 
         _name = _heroBasicData.Name;
+        _race = _heroBasicData.JobTitle;
 
         _currentHP = _heroBasicData.MaxHP;
         _maxHP = _heroBasicData.MaxHP;
@@ -119,6 +141,8 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             case EEntityStat.HP:
                 _currentHP += Mathf.RoundToInt(amount);
                 _currentHP = Mathf.Clamp(_currentHP, 0, _heroBasicData != null ? _heroBasicData.MaxHP : _currentHP);
+                ChangedHP?.Invoke(GetStat(EEntityStat.HP), GetStat(EEntityStat.MaxHP));
+
                 if (_currentHP <= 0) OnDeathblow();
                 break;
 
@@ -204,6 +228,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         {
             case EEntityStat.HP:
                 _currentHP = _heroBasicData.MaxHP;
+                ChangedHP?.Invoke(_currentHP, _heroBasicData.MaxHP);
                 break;
             case EEntityStat.MaxHP:
                 _maxHP = _heroBasicData.MaxHP;
@@ -245,6 +270,52 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         }
 
         Debug.Log($"[{_name}] 스탯 초기화됨 -> {statType}이(가) 기본값으로 복구되었습니다.");
+    }
+
+    /// <summary>
+    /// 스포너에서 받은 외부 데이터를 순서대로 데이터 호출 및 저장을 용이하게 해주는 함수
+    /// </summary>
+    /// <param name="basicData"></param>
+    /// <param name="rank"></param>
+    /// <param name="savedHP"></param>
+    /// <param name="savedStress"></param>
+    public void Init(CEntityBasicDataSO basicData, ERank rank, int savedHP, int savedStress)
+    {
+        if(basicData == null)
+        {
+            CPrint.Warn("데이터 연결 실패 영웅 데이터가 비어있습니다");
+            return;
+        }
+
+        if(savedHP <= 0)
+        {
+            CPrint.Warn("이미 사망한 영웅입니다");
+            return;
+        }
+
+        // 먼저 데이터 넣어주고
+        _heroBasicData = basicData;
+        
+        // 이름, 체력, 속도, 저항치 채워주고
+        InitializeRuntimeData();
+
+        _currentHP = Mathf.Clamp(savedHP, 1, _maxHP);
+
+        ChangedHP?.Invoke(_currentHP, _heroBasicData.MaxHP);
+
+        _currentStress = Mathf.Clamp(savedStress, 0, _maxStress);
+
+
+        // 스킬 데이터 생성
+        _skillData = new CEntitySkillData(basicData.HeroSkills.Count);
+
+        if (_skillData != null)
+        {
+            _skillData.InputSkillData(basicData.HeroSkills);
+        }
+
+        InitializeRank(rank);    
+    
     }
 
     public void InitializeRank(ERank rank)
@@ -298,6 +369,13 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     private void OnDeathblow()
     {
         Debug.Log($"{_name}이(가) 쓰러졌습니다!");
+
+        // 적일때는 바로 사망판정으로
+        if(!_hero)
+        {
+            EntityDead();
+        }
+
     }
 
     private void OnMeltdown()

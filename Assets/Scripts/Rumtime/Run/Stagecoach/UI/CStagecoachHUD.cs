@@ -6,7 +6,37 @@ public class CStagecoachHUD : MonoBehaviour
 	[SerializeField] private CStagecoachController _controller;
 	[SerializeField] private CRunValuePipView _wheelsView;
 	[SerializeField] private CRunValuePipView _armorView;
+	// 바퀴·장갑을 묶은 오브젝트 (비우면 바퀴 표시의 부모)
+	[SerializeField] private GameObject _statusRoot;
 	#endregion
+
+	// 여관처럼 다른 화면이 덮을 때 바퀴·장갑 표시를 숨긴다
+	public void SetVisible(bool visible)
+	{
+		GameObject root = GetStatusRoot();
+
+		if (root == null)
+		{
+			return;
+		}
+
+		root.SetActive(visible);
+	}
+
+	private GameObject GetStatusRoot()
+	{
+		if (_statusRoot != null)
+		{
+			return _statusRoot;
+		}
+
+		if (_wheelsView != null && _wheelsView.transform.parent != null)
+		{
+			_statusRoot = _wheelsView.transform.parent.gameObject;
+		}
+
+		return _statusRoot;
+	}
 
 	private void Start()
 	{

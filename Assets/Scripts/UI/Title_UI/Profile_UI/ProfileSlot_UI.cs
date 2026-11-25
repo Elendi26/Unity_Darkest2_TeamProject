@@ -70,16 +70,6 @@ public class ProfileSlot_UI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         _modifierField.onEndEdit.AddListener(ModifierEnd);
         _modifierField.characterLimit = 15;
 
-    }
-
-
-    private void Start()
-    {
-        if(_onSelectedFrame == null || _onSelectedCheck == null || _isProfileBG == null || _onPointerFrame == null || _nameModifyButton == null || _profileDelete == null)
-        {
-            CPrint.Warn("프로필UI 인스펙터가 비어있다. 인스펙터 확인");
-        }
-
         if (_onSelectedFrame != null && _onSelectedCheck != null && _isProfileBG != null && _onPointerFrame != null && _nameModifyButton != null && _profileDelete != null)
         {
             _onPointerFrame.SetActive(false);
@@ -93,6 +83,16 @@ public class ProfileSlot_UI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         if(_mfField != null)
         {
             _mfField.SetActive(false);
+        }
+
+    }
+
+
+    private void Start()
+    {
+        if(_onSelectedFrame == null || _onSelectedCheck == null || _isProfileBG == null || _onPointerFrame == null || _nameModifyButton == null || _profileDelete == null)
+        {
+            CPrint.Warn("프로필UI 인스펙터가 비어있다. 인스펙터 확인");
         }
     }
 

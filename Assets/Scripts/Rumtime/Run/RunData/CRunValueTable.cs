@@ -2,8 +2,6 @@
 using UnityEngine;
 
 // 자원(골드·횃불·바퀴 등)을 화면에 띄울 이름·아이콘 표
-//  ㄴ 자원 이름이 여러 화면의 switch 에 복사돼 있던 것을 에셋 하나로 모았다 → 새 자원은 표에 한 줄만 추가
-//  ㄴ Resources/RunData/RunValueTable 에 두면 어디서든 CRunValueTable.GetName() 으로 읽는다
 [CreateAssetMenu(menuName = "Run/Run Value Table")]
 public class CRunValueTable : ScriptableObject
 {
@@ -46,9 +44,6 @@ public class CRunValueTable : ScriptableObject
 		}
 	}
 
-	/// <summary>
-	/// 자원을 화면에 띄울 이름 (표에 없으면 타입 이름) / 경태
-	/// </summary>
 	public static string GetName(ERunValue type)
 	{
 		CEntry entry = Instance != null ? Instance.Find(type) : null;
@@ -56,9 +51,6 @@ public class CRunValueTable : ScriptableObject
 		return entry != null && !string.IsNullOrEmpty(entry.DisplayName) ? entry.DisplayName : type.ToString();
 	}
 
-	/// <summary>
-	/// 자원 아이콘 (표에 없으면 null) / 경태
-	/// </summary>
 	public static Sprite GetIcon(ERunValue type)
 	{
 		CEntry entry = Instance != null ? Instance.Find(type) : null;

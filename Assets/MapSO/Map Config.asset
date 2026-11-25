@@ -17,7 +17,7 @@ MonoBehaviour:
   _maxNodePerRow: 3
   _branchChance: 0.6
   _startNode: {fileID: 11400000, guid: b3986bd1f6b5ac8419383011ca6e7a50, type: 2}
-  _preStartNode: {fileID: 11400000, guid: fb4fd736bb4ca60a379d5b4e3457bd07, type: 2}
+  _preStartNode: {fileID: 0}
   _endNode: {fileID: 11400000, guid: 2c6b8ba5fa341004ba45b84a9626bd52, type: 2}
   _preEndNode: {fileID: 11400000, guid: 1ff8ea9a4f6b1ae4f8e361ed14ce5cad, type: 2}
   _fallbackNode: {fileID: 11400000, guid: 0b24377c8f0fa3c42b5109cbf8360c4d, type: 2}

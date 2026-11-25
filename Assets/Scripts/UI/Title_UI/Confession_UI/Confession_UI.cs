@@ -96,7 +96,7 @@ public class Confession_UI : MonoBehaviour
         //TODO : 나중에 기본값인지 아닌지 검사하는 방식으로 채울 것.
 
         // 기본은 현재 데이터 없음
-        return false;
+        return data != null && data.Run != null;
     }
     
 }

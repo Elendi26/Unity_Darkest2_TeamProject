@@ -9,29 +9,60 @@ public enum ECombatRank
 }
 
 /// <summary>
-/// ∞¢ ƒ≠ø° CCombatRank∏¶ ∫Ÿ¿Ã±‚
+/// Í∞Å Ïπ∏Ïóê CCombatRankÎ•º Î∂ôÏù¥Í∏∞
 /// </summary>
 public class CCombatRank : MonoBehaviour
 {
     [SerializeField] private ECombatRank _combatRank;
     [SerializeField] private bool _team;
-    [SerializeField] private CEntityRuntimeData _entityRuntimeData; // ≈◊Ω∫∆ÆøÎ¿∏∑Œ ø≠æÓµ“, ø¯∑°¥¬ SerializeField æ¯æÓµµ µ 
+    [SerializeField] private CEntityRuntimeData _entityRuntimeData; // ÌÖåÏä§Ìä∏Ïö©ÏúºÎ°ú Ïó¥Ïñ¥Îë†, ÏõêÎûòÎäî SerializeField ÏóÜÏñ¥ÎèÑ Îê®
 
-    // ø©±‚ø° »∞º∫»≠/∫Ò»∞º∫»≠ Ω√≈∞∞Ì ΩÕ¿∫ ∞Õ¿ª ≥÷∞Ì
+    [Header("CCombatCurrentTurn Ïä§ÌÅ¨Î¶ΩÌä∏ Ï∞∏Ï°∞")]
+    [SerializeField] private CCombatCurrentTurn _currentTurn;
 
+    // Ïó¨Í∏∞Ïóê ÌôúÏÑ±Ìôî/ÎπÑÌôúÏÑ±Ìôî ÏãúÌÇ§Í≥† Ïã∂ÏùÄ Í≤ÉÏùÑ ÎÑ£Í≥†
+    [Header("ÌòÑÏû¨ ÌÑ¥ ÌëúÏãú UI")]
+    [SerializeField] private GameObject _currentTurnIndicator;
+
+    [Header("ÌÉÄÍ≤ü ÌëúÏãúÍ∏∞")]
+    [SerializeField] private GameObject _targetIndicator;
+
+
+
+
+    private Transform _entityTransform;
     private int _rank;
     private bool _targetable = false;
     private ICombatData _combatData;
     
-    #region «¡∑Œ∆€∆º
+    #region ÌîÑÎ°úÌçºÌã∞
     public ICombatData CombatData => _combatData;
     public bool Targetable => _targetable;
 
+    public Transform EntityTransform => _entityTransform;
+
     #endregion
 
+    private void Awake()
+    {
+        if(_currentTurnIndicator != null)
+        {
+            _currentTurnIndicator.SetActive(false);
+        }
+
+        if(_targetIndicator != null)
+        {
+            _targetIndicator.SetActive(false);
+        }
+    }
 
     private void OnEnable()
     {
+        if(_currentTurn != null)
+        {
+            _currentTurn.ChangedEntityTurn += OnOffIndicator;
+        }
+
         ERank rank = ERank.None;
 
         switch (_combatRank)
@@ -71,6 +102,12 @@ public class CCombatRank : MonoBehaviour
 
     private void OnDisable()
     {
+        if (_currentTurn != null)
+        {
+            _currentTurn.ChangedEntityTurn -= OnOffIndicator;
+        }
+
+
         _rank = (int)ERank.None;
     }
 
@@ -83,13 +120,13 @@ public class CCombatRank : MonoBehaviour
     {
         if (!_entityRuntimeData.IsHero())
         {
-            // Ω√√º∑Œ πŸ≤Ÿ±‚
+            // ÏãúÏ≤¥Î°ú Î∞îÍæ∏Í∏∞
         }
     }
 
     public void CheckTargetRank(int skillTarget, ESkillType type)
-    { 
-
+    {
+        
         switch (type)
         {
             case ESkillType.Melee:
@@ -184,7 +221,13 @@ public class CCombatRank : MonoBehaviour
                 break;
         }
 
-        // UI Targetable ƒ—±‚
+        // UI Targetable ÏºúÍ∏∞
+
+        if(_targetIndicator != null)
+        {
+            _targetIndicator.SetActive(_targetable); 
+        }
+        
 
     }
 
@@ -203,5 +246,39 @@ public class CCombatRank : MonoBehaviour
         return _entityRuntimeData.GetStat(status);
     }
 
+    public void OnOffIndicator(CEntityRuntimeData data)
+    {
+        if (_entityRuntimeData == data)
+        {
+            _currentTurnIndicator.SetActive(true);
+        }
 
+        else
+        {
+            _currentTurnIndicator.SetActive(false);
+        }
+    }
+
+    public void ResetTargetRank()
+    {
+        _targetable = false;
+        if(_targetIndicator != null)
+        {
+            _targetIndicator.SetActive(false);
+        }
+    }
+
+    public void SetTargetRank()
+    {
+        _targetable = true;
+        if (_targetIndicator != null)
+        {
+            _targetIndicator.SetActive(true);
+        }
+    }
+
+    public void InputEntityTransform(Transform tr)
+    {
+        _entityTransform = tr;
+    }
 }

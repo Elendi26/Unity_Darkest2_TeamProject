@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 0d0fd5bfb534af34f9d9a981627e5d7b
+  m_SerializeEntries:
+  - m_GUID: 35b53634d4dd74c4b9dd1673ae2ac956
+    m_Address: Assets/Scenes/Inn/Inn.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bd6d4376b6144a5ca86c88754e9f912e
+    m_Address: Assets/Scenes/Tutorial/TutorialScene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c77b85936d3ebe844880e7d085e32739
+    m_Address: Assets/Scenes/Node/NodeTestScene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f60691340daddae48af8d3d51660054d
+    m_Address: Assets/Scenes/UI/Title_test.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 2d0b097c7a22eb0488ae9b822afbddf4, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 83de7792caf8613498abee878bf475ca, type: 2}
+    - {fileID: 11400000, guid: a42dcc3b3e484184ba6cf31f5970f20f, type: 2}

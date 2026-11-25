@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // 고물상 화면 (DD2 상점 구성) → 왼쪽 상인 그림·제목, 가운데 분류 탭·상품 칸 격자·설명 줄, 오른쪽은 짐칸 패널
-public class CShopView : MonoBehaviour
+public class CShopView : MonoBehaviour, IShopView
 {
 	#region 인스펙터
 	[SerializeField] private CanvasGroup _group;
@@ -23,6 +23,8 @@ public class CShopView : MonoBehaviour
 	[SerializeField] private Sprite _frameRare;
 	// 가격 옆 금화
 	[SerializeField] private Sprite _goldIcon;
+	// 가격 옆 패물
+	[SerializeField] private Sprite _factionIcon;
 	// 분류 탭 아이콘 (전체·보급·전투·장신구·마차 순)
 	[SerializeField] private Sprite[] _tabIcons;
 	[Header("배치")]
@@ -40,6 +42,7 @@ public class CShopView : MonoBehaviour
 
 	#region 내부 변수
 	private const int TAB_COUNT = 5;
+	private const float TITLE_CREST_SHIFT = 60f;
 	private static readonly string[] TAB_NAMES = { "모든 상품", "보급품", "전투 물품", "장신구", "마차" };
 
 	private readonly List<CShopSlotView> _slots = new List<CShopSlotView>();
@@ -48,6 +51,12 @@ public class CShopView : MonoBehaviour
 	private IReadOnlyList<CShopCardInfo> _cards;
 	private RectTransform _layout;
 	private RectTransform _grid;
+	private ScrollRect _scroll;
+	private Image _portraitImage;
+	private Image _crestImage;
+	private Image _bannerImage;
+	private Vector2 _titleBase;
+	private Vector2 _subtitleBase;
 	private Text _title;
 	private Text _subtitle;
 	private Text _tabTitle;
@@ -91,8 +100,32 @@ public class CShopView : MonoBehaviour
 		_tab = 0;
 		_hovered = -1;
 		RefreshTabs();
+		ScrollToTop();
 		SetVisible(true);
 		OpenInventory();
+	}
+
+	/// <summary>
+	/// 상점마다 다른 상인 그림·제목 문장·오른쪽 위 장식을 정한다 (그림이 null 이면 기본 그림, 나머지는 숨김) / 경태
+	/// </summary>
+	public void SetLook(Sprite portrait, Sprite crest, Sprite banner)
+	{
+		Sprite shown = portrait != null ? portrait : _portrait;
+
+		_portraitImage.sprite = shown;
+		_portraitImage.enabled = shown != null;
+
+		_crestImage.sprite = crest;
+		_crestImage.enabled = crest != null;
+
+		// 문장이 있으면 제목·설명을 오른쪽으로 민다
+		float shift = crest != null ? TITLE_CREST_SHIFT : 0f;
+
+		_title.rectTransform.anchoredPosition = _titleBase + new Vector2(shift, 0f);
+		_subtitle.rectTransform.anchoredPosition = _subtitleBase + new Vector2(shift, 0f);
+
+		_bannerImage.sprite = banner;
+		_bannerImage.enabled = banner != null;
 	}
 
 	public void SetWallet(string text)
@@ -141,7 +174,7 @@ public class CShopView : MonoBehaviour
 			CShopCardInfo info = _cards[cardIndex];
 
 			_slots[i].gameObject.SetActive(true);
-			_slots[i].Bind(info, GetFrame(info), info.CostType == ERunValue.Gold ? _goldIcon : null, () => Buy(cardIndex), isOver => Hover(cardIndex, isOver));
+			_slots[i].Bind(info, GetFrame(info), GetPriceIcon(info.CostType), () => Buy(cardIndex), isOver => Hover(cardIndex, isOver));
 		}
 
 		for (int i = _visible.Count; i < _slots.Count; i++)
@@ -222,6 +255,19 @@ public class CShopView : MonoBehaviour
 	/// <summary>
 	/// 상품 상태를 화면에 띄울 글자로 바꾼다 (살 수 있으면 빈 글자) / 경태
 	/// </summary>
+	private Sprite GetPriceIcon(ERunValue currency)
+	{
+		switch (currency)
+		{
+			case ERunValue.Gold:
+				return _goldIcon;
+			case ERunValue.Faction:
+				return _factionIcon;
+		}
+
+		return null;
+	}
+
 	public static string GetStateName(EShopCardState state)
 	{
 		switch (state)
@@ -250,6 +296,15 @@ public class CShopView : MonoBehaviour
 		_hovered = -1;
 		RefreshTabs();
 		RefreshSlots();
+		ScrollToTop();
+	}
+
+	private void ScrollToTop()
+	{
+		if (_scroll != null)
+		{
+			_scroll.verticalNormalizedPosition = 1f;
+		}
 	}
 
 	private void RefreshTabs()
@@ -347,6 +402,17 @@ public class CShopView : MonoBehaviour
 		Stretch(portrait.rectTransform, new Vector2(0f, 0f), new Vector2(0.28f, 0.9f));
 		portrait.preserveAspect = true;
 		portrait.enabled = _portrait != null;
+		_portraitImage = portrait;
+
+		// 오른쪽 위 : 실루엣 장식 (상점마다 다르다)
+		_bannerImage = CUIBuilder.CreateImage("Banner", _layout, null, Color.white);
+		_bannerImage.rectTransform.anchorMin = new Vector2(1f, 1f);
+		_bannerImage.rectTransform.anchorMax = new Vector2(1f, 1f);
+		_bannerImage.rectTransform.pivot = new Vector2(1f, 1f);
+		_bannerImage.rectTransform.anchoredPosition = new Vector2(-20f, -6f);
+		_bannerImage.rectTransform.sizeDelta = new Vector2(560f, 152f);
+		_bannerImage.preserveAspect = true;
+		_bannerImage.enabled = false;
 
 		// 왼쪽 위 : 뒤로가기 + 제목 + 설명
 		Image back = CUIBuilder.CreateImage("BackButton", _layout, null, new Color(0.12f, 0.1f, 0.08f, 0.95f));
@@ -360,12 +426,20 @@ public class CShopView : MonoBehaviour
 		Stretch(backArrow.rectTransform, Vector2.zero, Vector2.one);
 
 		_title = CreateText("Title", _layout, "고물상", 44, TextAnchor.MiddleLeft);
-		Place(_title.rectTransform, new Vector2(0f, 1f), new Vector2(110f, -30f), new Vector2(520f, 58f));
+		PlaceLeft(_title.rectTransform, new Vector2(84f, -30f), new Vector2(520f, 58f));
 		_title.fontStyle = FontStyle.Bold;
 
 		_subtitle = CreateText("Subtitle", _layout, string.Empty, 20, TextAnchor.UpperLeft);
-		Place(_subtitle.rectTransform, new Vector2(0f, 1f), new Vector2(110f, -92f), new Vector2(460f, 60f));
+		PlaceLeft(_subtitle.rectTransform, new Vector2(84f, -78f), new Vector2(460f, 60f));
 		_subtitle.color = new Color(_textColor.r, _textColor.g, _textColor.b, 0.7f);
+		_titleBase = _title.rectTransform.anchoredPosition;
+		_subtitleBase = _subtitle.rectTransform.anchoredPosition;
+
+		// 뒤로가기와 제목 사이 : 문장 (상점마다 다르다)
+		_crestImage = CUIBuilder.CreateImage("Crest", _layout, null, Color.white);
+		Place(_crestImage.rectTransform, new Vector2(0f, 1f), new Vector2(112f, -40f), new Vector2(72f, 80f));
+		_crestImage.preserveAspect = true;
+		_crestImage.enabled = false;
 
 		// 가운데 : 상품 판
 		Image panel = CUIBuilder.CreateImage("Panel", _layout, null, _panelColor);
@@ -374,10 +448,7 @@ public class CShopView : MonoBehaviour
 
 		BuildTabs(panel.rectTransform);
 
-		_grid = CUIBuilder.CreateRect("Grid", panel.rectTransform);
-		Stretch(_grid, Vector2.zero, Vector2.one);
-		_grid.offsetMin = new Vector2(30f, 150f);
-		_grid.offsetMax = new Vector2(-30f, -120f);
+		BuildScroll(panel.rectTransform);
 
 		GridLayoutGroup grid = _grid.gameObject.AddComponent<GridLayoutGroup>();
 
@@ -388,6 +459,11 @@ public class CShopView : MonoBehaviour
 		grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
 		grid.startAxis = GridLayoutGroup.Axis.Horizontal;
 		grid.childAlignment = TextAnchor.UpperLeft;
+
+		// 상품이 많으면 격자가 아래로 늘어나고 스크롤로 본다
+		ContentSizeFitter fitter = _grid.gameObject.AddComponent<ContentSizeFitter>();
+
+		fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
 		// 아래 : 설명 줄
 		_detail = CreateText("Detail", panel.rectTransform, string.Empty, 22, TextAnchor.UpperLeft);
@@ -401,6 +477,60 @@ public class CShopView : MonoBehaviour
 		_wallet = CreateText("Wallet", _layout, string.Empty, 22, TextAnchor.MiddleCenter);
 		Stretch(_wallet.rectTransform, new Vector2(0.29f, 0.05f), new Vector2(0.75f, 0.11f));
 		_wallet.color = new Color(0.95f, 0.78f, 0.35f, 1f);
+	}
+
+	// 상품 격자 → 보이는 창(가림) + 오른쪽 세로 스크롤바
+	private void BuildScroll(RectTransform panel)
+	{
+		Image viewport = CUIBuilder.CreateImage("Viewport", panel, null, new Color(0f, 0f, 0f, 0f));
+
+		Stretch(viewport.rectTransform, Vector2.zero, Vector2.one);
+		viewport.rectTransform.offsetMin = new Vector2(30f, 150f);
+		viewport.rectTransform.offsetMax = new Vector2(-50f, -120f);
+		// 칸 사이 빈 곳에서도 휠이 먹게
+		viewport.raycastTarget = true;
+		viewport.gameObject.AddComponent<RectMask2D>();
+
+		_grid = CUIBuilder.CreateRect("Grid", viewport.rectTransform);
+		_grid.anchorMin = new Vector2(0f, 1f);
+		_grid.anchorMax = new Vector2(1f, 1f);
+		_grid.pivot = new Vector2(0.5f, 1f);
+		_grid.offsetMin = Vector2.zero;
+		_grid.offsetMax = Vector2.zero;
+
+		Image track = CUIBuilder.CreateImage("Scrollbar", panel, null, new Color(0.18f, 0.16f, 0.14f, 0.9f));
+
+		track.rectTransform.anchorMin = new Vector2(1f, 0f);
+		track.rectTransform.anchorMax = new Vector2(1f, 1f);
+		track.rectTransform.pivot = new Vector2(1f, 0.5f);
+		track.rectTransform.offsetMin = new Vector2(-36f, 150f);
+		track.rectTransform.offsetMax = new Vector2(-26f, -120f);
+		track.raycastTarget = true;
+
+		RectTransform slidingArea = CUIBuilder.CreateRect("SlidingArea", track.rectTransform);
+
+		Stretch(slidingArea, Vector2.zero, Vector2.one);
+
+		Image handle = CUIBuilder.CreateImage("Handle", slidingArea, null, _tabOffColor);
+
+		Stretch(handle.rectTransform, Vector2.zero, Vector2.one);
+		handle.raycastTarget = true;
+
+		Scrollbar bar = track.gameObject.AddComponent<Scrollbar>();
+
+		bar.handleRect = handle.rectTransform;
+		bar.targetGraphic = handle;
+		bar.direction = Scrollbar.Direction.BottomToTop;
+
+		_scroll = viewport.gameObject.AddComponent<ScrollRect>();
+		_scroll.viewport = viewport.rectTransform;
+		_scroll.content = _grid;
+		_scroll.horizontal = false;
+		_scroll.vertical = true;
+		_scroll.movementType = ScrollRect.MovementType.Clamped;
+		_scroll.scrollSensitivity = 40f;
+		_scroll.verticalScrollbar = bar;
+		_scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
 	}
 
 	private void BuildTabs(RectTransform panel)
@@ -505,6 +635,16 @@ public class CShopView : MonoBehaviour
 		rect.anchorMin = anchor;
 		rect.anchorMax = anchor;
 		rect.pivot = new Vector2(0.5f, 0.5f);
+		rect.anchoredPosition = position;
+		rect.sizeDelta = size;
+	}
+
+	// 왼쪽 위 앵커에 왼쪽 가운데 피벗으로 둔다 (글이 position.x 에서 시작)
+	private static void PlaceLeft(RectTransform rect, Vector2 position, Vector2 size)
+	{
+		rect.anchorMin = new Vector2(0f, 1f);
+		rect.anchorMax = new Vector2(0f, 1f);
+		rect.pivot = new Vector2(0f, 0.5f);
 		rect.anchoredPosition = position;
 		rect.sizeDelta = size;
 	}
