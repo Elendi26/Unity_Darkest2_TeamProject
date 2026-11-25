@@ -258,12 +258,6 @@ public class CCombatManager : MonoBehaviour
 
     }
 
-
-}
-
-
-
-
     /// <summary>
     /// 일단 스폰을 먼저 시키고, 전투에 진입할 수 있도록하는 함수
     /// </summary>
