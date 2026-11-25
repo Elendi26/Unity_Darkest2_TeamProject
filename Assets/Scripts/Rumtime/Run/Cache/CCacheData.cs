@@ -20,6 +20,8 @@ public class CCacheData : ScriptableObject
 	public class CLootPool
 	{
 		public string Name = "전투 아이템";
+		// 이 범주가 나올 확률 (0~1) → 못 뽑으면 이 범주는 아무것도 안 나온다
+		[Range(0f, 1f)] public float Chance = 1f;
 		public CItemDataBase[] Items;
 		public int MinKinds = 1;
 		public int MaxKinds = 1;

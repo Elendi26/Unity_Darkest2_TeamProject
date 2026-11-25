@@ -47,6 +47,8 @@ public class Confession_UI : MonoBehaviour
     {
         // 전달받은 프로필 저장
         _currentProfile = userProfileData;
+
+        OnClickBackButton();
     }
 
     public void OnConfessionButtonClick()
@@ -77,6 +79,7 @@ public class Confession_UI : MonoBehaviour
 
         else
         {
+            _continueBt.SetActive(haveSaveData);
             _newConfBt.SetActive(true);
             _backBt.SetActive(true);
         }
