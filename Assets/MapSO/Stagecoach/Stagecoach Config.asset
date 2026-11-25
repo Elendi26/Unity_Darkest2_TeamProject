@@ -12,14 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f5120d1640e5f249bdb5a6e424e355e, type: 3}
   m_Name: Stagecoach Config
   m_EditorClassIdentifier: 
+  _relicItem: {fileID: 11400000, guid: 5b39478286064d16ace8caa8ce31c789, type: 2}
+  _factionItem: {fileID: 11400000, guid: 7836dc556d1142328e77a88041cb8016, type: 2}
   _baseWheels: 2
   _baseArmor: 2
   _maxWheels: 4
   _maxArmor: 4
-  _generalSlots: 1
-  _trophySlots: 1
-  _petSlots: 0
-  _flameSlots: 1
+  _coachSlots: 4
   _travelDistance: 200
   _torchDrainPerTravel: 5
   _eventPositions:

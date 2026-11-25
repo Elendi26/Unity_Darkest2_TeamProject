@@ -15,6 +15,8 @@ public class CStagecoach
     private readonly List<CStagecoachUpgradeData> _equipped = new List<CStagecoachUpgradeData>();
     private readonly Dictionary<EStagecoachSlot, int> _unlockedSlots = new Dictionary<EStagecoachSlot, int>();
     private readonly CInventory _inventory;
+    private readonly CRelicInventorySync _relicSync;
+    private readonly CRelicInventorySync _factionSync;
     #endregion
 
     // 마차 짐칸 (소모품)
@@ -22,6 +24,12 @@ public class CStagecoach
     public CRunValue Wheels => _runData.Get(ERunValue.Wheels);
     public CRunValue Armor => _runData.Get(ERunValue.Armor);
     public IReadOnlyList<CStagecoachUpgradeData> Equipped => _equipped;
+    // 업그레이드로 더 연 슬롯 수 (씬을 넘길 때 기록용)
+    public IReadOnlyDictionary<EStagecoachSlot, int> UnlockedSlots => _unlockedSlots;
+    // 짐칸을 차지하는 유물 아이템 (없으면 null)
+    public CItemDataBase RelicItem => _config.RelicItem;
+    // 짐칸을 차지하는 패물 아이템 (없으면 null)
+    public CItemDataBase FactionItem => _config.FactionItem;
     public bool IsWheelBroken => Wheels == null || Wheels.IsEmpty;
     public CStagecoach(CStagecoachConfig config, CRunData runData)
     {
@@ -33,6 +41,18 @@ public class CStagecoach
         _runData.Register(ERunValue.Armor, _config.BaseArmor, _config.BaseArmor);
 
         _inventory = new CInventory(GetInventorySlotCount);
+
+        // 유물 아이템이 있으면 유물 값과 짐칸을 맞춘다 (유물 값은 역마차보다 먼저 등록돼 있어야 한다)
+        if (_config.RelicItem != null)
+        {
+            _relicSync = new CRelicInventorySync(_runData.Get(ERunValue.Gold), _inventory, _config.RelicItem);
+        }
+
+        // 패물도 유물처럼 짐칸에 겹쳐 넣는다
+        if (_config.FactionItem != null)
+        {
+            _factionSync = new CRelicInventorySync(_runData.Get(ERunValue.Faction), _inventory, _config.FactionItem);
+        }
     }
 
     // 짐칸 수 → 기본 칸 + 업그레이드(InventorySlots)
@@ -41,11 +61,17 @@ public class CStagecoach
         return _config.InventorySlots + Mathf.RoundToInt(GetStat(ERunStat.InventorySlots));
     }
 
-    public int GetSlotCount(EStagecoachSlot slot)
+    // 마차 칸 수 → 종류 구분 없이 함께 쓰는 칸 + 업그레이드로 더 연 칸
+    public int GetSlotCount()
     {
-        int unlocked = _unlockedSlots.TryGetValue(slot, out int count) ? count : 0;
+        int unlocked = 0;
 
-        return _config.GetBaseSlotCount(slot) + unlocked;
+        foreach (KeyValuePair<EStagecoachSlot, int> pair in _unlockedSlots)
+        {
+            unlocked += pair.Value;
+        }
+
+        return _config.CoachSlots + unlocked;
     }
 
     public void UnlockSlot(EStagecoachSlot slot, int amount)
@@ -60,13 +86,14 @@ public class CStagecoach
         _unlockedSlots[slot] = unlocked + amount;
     }
 
-    public int GetUsedSlots(EStagecoachSlot slot)
+    // 칸을 차지한 아이템 수 (슬롯 None 은 칸을 쓰지 않는다)
+    public int GetUsedSlots()
     {
         int used = 0;
 
         for (int i = 0; i < _equipped.Count; i++)
         {
-            if (_equipped[i].Slot == slot)
+            if (_equipped[i].Slot != EStagecoachSlot.None)
             {
                 used++;
             }
@@ -83,7 +110,7 @@ public class CStagecoach
             return false;
         }
 
-        if (upgrade.Slot != EStagecoachSlot.None && GetUsedSlots(upgrade.Slot) >= GetSlotCount(upgrade.Slot))
+        if (upgrade.Slot != EStagecoachSlot.None && GetUsedSlots() >= GetSlotCount())
         {
             return false;
         }
@@ -126,6 +153,75 @@ public class CStagecoach
         RefreshDurability();
         _inventory.NotifySlotsChanged();
         OnUnequipped?.Invoke(upgrade);
+        return true;
+    }
+
+    // 짐칸 칸에 든 마차 아이템 (아니면 null)
+    private CStagecoachUpgradeData GetInventoryUpgrade(int index)
+    {
+        if (index < 0 || index >= _inventory.Stacks.Count)
+        {
+            return null;
+        }
+
+        CItemStack stack = _inventory.Stacks[index];
+
+        return stack != null ? stack.Item as CStagecoachUpgradeData : null;
+    }
+
+    public bool CanEquipFromInventory(int index)
+    {
+        return CanEquip(GetInventoryUpgrade(index));
+    }
+
+    // 짐칸의 마차 아이템을 단다 → 짐칸에서 1개 빠진다
+    public bool TryEquipFromInventory(int index)
+    {
+        CStagecoachUpgradeData upgrade = GetInventoryUpgrade(index);
+
+        if (!CanEquip(upgrade))
+        {
+            return false;
+        }
+
+        _inventory.Remove(index, 1);
+        return TryEquip(upgrade);
+    }
+
+    // 떼면 짐칸으로 돌아간다 → 짐칸 수를 늘려 주던 것이면 줄어든 칸에도 짐이 다 들어가야 뗄 수 있다
+    public bool CanUnequipToInventory(CStagecoachUpgradeData upgrade)
+    {
+        if (upgrade == null || !_equipped.Contains(upgrade))
+        {
+            return false;
+        }
+
+        int lostSlots = 0;
+        IReadOnlyList<CRunStatModifier> modifiers = upgrade.Modifiers;
+
+        if (modifiers != null)
+        {
+            for (int i = 0; i < modifiers.Count; i++)
+            {
+                if (modifiers[i] != null && modifiers[i].Stat == ERunStat.InventorySlots)
+                {
+                    lostSlots += Mathf.RoundToInt(modifiers[i].Value);
+                }
+            }
+        }
+
+        return _inventory.UsedSlots + 1 <= _inventory.SlotCount - lostSlots;
+    }
+
+    public bool TryUnequipToInventory(CStagecoachUpgradeData upgrade)
+    {
+        if (!CanUnequipToInventory(upgrade))
+        {
+            return false;
+        }
+
+        Unequip(upgrade);
+        _inventory.Add(upgrade, 1);
         return true;
     }
 

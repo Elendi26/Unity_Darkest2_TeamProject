@@ -24,6 +24,8 @@ public class CNodeTypeData : ScriptableObject
     [SerializeField] private CNodeEventData _event;
     // 도착하면 열 상점 (이벤트보다 먼저 쓴다)
     [SerializeField] private CShopData _shop;
+    // 도착하면 뒤질 은닉처 (상점 다음, 이벤트보다 먼저 쓴다)
+    [SerializeField] private CCacheData _cache;
     // 도착할 때 길 오른쪽에 세울 건축물 (비우면 없음)
     [SerializeField] private GameObject _landmarkPrefab;
     // 정찰과 상관없이 지역에 들어가자마자 지도에 공개 (소굴·성채·여관 등)
@@ -45,6 +47,8 @@ public class CNodeTypeData : ScriptableObject
     public CNodeEventData Event => _event;
     // 도착하면 열 상점 (없으면 null)
     public CShopData Shop => _shop;
+    // 도착하면 뒤질 은닉처 (없으면 null)
+    public CCacheData Cache => _cache;
     // 도착할 때 길 오른쪽에 세울 건축물 (없으면 null)
     public GameObject LandmarkPrefab => _landmarkPrefab;
     // 정찰과 상관없이 처음부터 공개

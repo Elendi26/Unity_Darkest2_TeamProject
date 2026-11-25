@@ -49,4 +49,10 @@ public class UserProfileData
     // 파티원들hdata.PartyHeroes.Count의 동적 데이터를 담기 위한 리스트 변수
     public List<HeroSaveData> PartyHeroes = new List<HeroSaveData>();
 
+    // 튜토리얼을 마쳤는지 (첫 모험이면 튜토리얼부터 시작)
+    public bool TutorialDone;
+
+    // 진행 중인 런 (역마차 자원, 짐칸, 장착품, 이어할 씬). 없으면 null
+    public CRunSaveData Run;
+
 }

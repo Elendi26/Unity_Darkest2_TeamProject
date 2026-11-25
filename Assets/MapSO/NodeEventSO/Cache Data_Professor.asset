@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5065563ba83e4ed3a78c6149f6a9462a, type: 3}
+  m_Name: Cache Data_Professor
+  m_EditorClassIdentifier: 
+  _title: "교수의 은닉처"
+  _body: "길가 바위 틈에 교수가 숨겨 둔 보급품이 있다. 전투 없이 챙겨 갈 수 있다."
+  _searchLabel: "은닉처를 뒤진다"
+  _leaveLabel: "그냥 지나간다"
+  _doneLabel: "챙겨서 떠난다"
+  _currencies:
+  - Type: 1
+    Min: 12
+    Max: 16
+  - Type: 2
+    Min: 12
+    Max: 16
+  _pools:
+  - Name: "전투 아이템"
+    Items:
+    - {fileID: 11400000, guid: 9dfb31adc15a06d879c9cd68e441f50c, type: 2}
+    - {fileID: 11400000, guid: 194a1647f7157658c28735de4a49ab0f, type: 2}
+    - {fileID: 11400000, guid: 1170b41c234d49d19dc15d2cc301990a, type: 2}
+    MinKinds: 1
+    MaxKinds: 2
+    MinCount: 1
+    MaxCount: 2
+  - Name: "여관 아이템"
+    Items: []
+    MinKinds: 1
+    MaxKinds: 2
+    MinCount: 1
+    MaxCount: 2
+  - Name: "역마차 아이템"
+    Items:
+    - {fileID: 11400000, guid: 837da9385a6a4468b52c467f973947e8, type: 2}
+    - {fileID: 11400000, guid: 9081199bc31a4b27b4268b48538652b4, type: 2}
+    MinKinds: 1
+    MaxKinds: 1
+    MinCount: 1
+    MaxCount: 1
+  - Name: "장신구"
+    Items:
+    - {fileID: 11400000, guid: 0e7ad33036a38ceedfa99110595fef75, type: 2}
+    - {fileID: 11400000, guid: b5e677ea553c6453889cfaf4fcb4aa61, type: 2}
+    MinKinds: 1
+    MaxKinds: 1
+    MinCount: 1
+    MaxCount: 1

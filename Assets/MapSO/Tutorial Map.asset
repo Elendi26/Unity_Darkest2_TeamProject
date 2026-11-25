@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1610ce22a71c453ea22090d250b37397, type: 3}
+  m_Name: Tutorial Map
+  m_EditorClassIdentifier: 
+  _rows:
+  - Nodes:
+    - Type: {fileID: 11400000, guid: b3986bd1f6b5ac8419383011ca6e7a50, type: 2}
+      NextLanes: []
+      Route: {fileID: 11400000, guid: 9b80030e6d06532a9bb64e6819d6420b, type: 2}
+      RoadEventCount: 0
+  - Nodes:
+    - Type: {fileID: 11400000, guid: fb4fd736bb4ca60a379d5b4e3457bd07, type: 2}
+      NextLanes: []
+      Route: {fileID: 11400000, guid: f75567bf39dd4bb1a49dcd936323cc02, type: 2}
+      RoadEventCount: 0
+  - Nodes:
+    - Type: {fileID: 11400000, guid: f85e7e66606057643af6bfe9356db132, type: 2}
+      NextLanes: []
+      Route: {fileID: 11400000, guid: f75567bf39dd4bb1a49dcd936323cc02, type: 2}
+      RoadEventCount: 0
+  - Nodes:
+    - Type: {fileID: 11400000, guid: 7ad52d5ccc7f4edd9d3c35c99a0c8b0a, type: 2}
+      NextLanes: []
+      Route: {fileID: 0}
+      RoadEventCount: 0
+  _revealAll: 1

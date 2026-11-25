@@ -30,7 +30,5 @@ public class CNodeEventOption
 	public int Cost = 0;
 	// 고른 뒤 팝업을 닫는다 → 상점처럼 여러 번 사게 하려면 끈다
 	public bool CloseAfter = true;
-	// 고르면 역마차에 다는 업그레이드 (비우면 없음). 달 수 없으면 버튼이 꺼진다
-	public CStagecoachUpgradeData Upgrade;
 	[SerializeReference] public List<IRunEffect> Effects = new List<IRunEffect>();
 }

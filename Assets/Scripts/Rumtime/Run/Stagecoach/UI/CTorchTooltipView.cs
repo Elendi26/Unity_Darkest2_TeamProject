@@ -45,6 +45,13 @@ public class CTorchTooltipView : MonoBehaviour
 			return;
 		}
 
+		// 칸 높이보다 폰트 줄 높이가 크면 Text 가 줄을 통째로 숨긴다 → 수치는 넘쳐도 그리게 한다
+		if (_valueText != null)
+		{
+			_valueText.horizontalOverflow = HorizontalWrapMode.Overflow;
+			_valueText.verticalOverflow = VerticalWrapMode.Overflow;
+		}
+
 		_value = _controller.RunData.Get(ERunValue.Torch);
 
 		if (_value != null)

@@ -14,7 +14,6 @@ public class CInventoryView : MonoBehaviour
 	[SerializeField] private CInventoryTab[] _tabs;
 	[SerializeField] private Color _tabOnColor = new Color(0.95f, 0.85f, 0.6f, 1f);
 	[SerializeField] private Color _tabOffColor = new Color(0.45f, 0.42f, 0.38f, 1f);
-	[SerializeField] private int _columns = 3;
 	[SerializeField] private CRunValueView _goldView;
 	[SerializeField] private CRunValueView _factionView;
 	[SerializeField] private RectTransform _slotRoot;
@@ -43,9 +42,25 @@ public class CInventoryView : MonoBehaviour
 	private CRunContext _ctx;
 	private int _selected = -1;
 	private bool _isOpen;
+	private IInventoryUseHandler _useHandler;
+	private Text _useLabel;
+	private string _defaultUseLabel;
 	#endregion
 
 	public bool IsOpen => _isOpen;
+
+	// 다른 화면이 '사용' 버튼을 맡는다 (null 이면 원래대로)
+	public void SetUseHandler(IInventoryUseHandler handler)
+	{
+		_useHandler = handler;
+		Refresh();
+	}
+
+	// 고른 아이템을 다른 화면이 맡고 있는지
+	private bool IsHandled(CItemDataBase item)
+	{
+		return _useHandler != null && item != null && _useHandler.Handles(item);
+	}
 
 	private void Awake()
 	{
@@ -74,6 +89,12 @@ public class CInventoryView : MonoBehaviour
 		}
 
 		AddListener(_useButton, Use);
+
+		if (_useButton != null)
+		{
+			_useLabel = _useButton.GetComponentInChildren<Text>(true);
+			_defaultUseLabel = _useLabel != null ? _useLabel.text : null;
+		}
 		AddListener(_dropButton, Drop);
 		AddListener(_closeButton, Close);
 		AddListener(_openButton, Toggle);
@@ -223,8 +244,9 @@ public class CInventoryView : MonoBehaviour
 			}
 		}
 
-		int columns = Mathf.Max(1, _columns);
-		int target = showAll ? Mathf.Max(_inventory.SlotCount, _visible.Count) : Mathf.Max(columns, Mathf.CeilToInt(_visible.Count / (float)columns) * columns);
+		// 남은 빈칸은 탭과 상관없이 모두 보여 준다 → 칸 수로 더 넣을 수 있는 자리를 바로 안다
+		int freeSlots = Mathf.Max(0, _inventory.SlotCount - _inventory.UsedSlots);
+		int target = showAll ? Mathf.Max(_inventory.SlotCount, _visible.Count) : _visible.Count + freeSlots;
 
 		while (_visible.Count < target)
 		{
@@ -359,9 +381,16 @@ public class CInventoryView : MonoBehaviour
 			_detailDescText.text = GetDetailText(item);
 		}
 
+		bool isHandled = IsHandled(item);
+
 		if (_useButton != null)
 		{
-			_useButton.interactable = _ctx != null && _inventory.CanUse(_selected, _ctx.RunData);
+			_useButton.interactable = isHandled ? _useHandler.CanUse(_selected) : _ctx != null && _inventory.CanUse(_selected, _ctx.RunData);
+		}
+
+		if (_useLabel != null)
+		{
+			_useLabel.text = isHandled ? _useHandler.UseLabel : _defaultUseLabel;
 		}
 
 		if (_dropButton != null)
@@ -393,6 +422,18 @@ public class CInventoryView : MonoBehaviour
 	{
 		if (!_isOpen || _inventory == null)
 		{
+			return;
+		}
+
+		CItemDataBase item = _selected >= 0 && _selected < _inventory.Stacks.Count ? _inventory.Stacks[_selected].Item : null;
+
+		if (IsHandled(item))
+		{
+			if (_useHandler.CanUse(_selected))
+			{
+				_useHandler.Use(_selected);
+			}
+
 			return;
 		}
 

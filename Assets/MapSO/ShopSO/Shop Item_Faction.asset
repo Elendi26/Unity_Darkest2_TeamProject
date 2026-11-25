@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63bc043e8ac88c899be3eb4ed0463fdd, type: 3}
   m_Name: Shop Item_Faction
   m_EditorClassIdentifier: 
-  _displayName: 문장 거래
-  _description: 골드를 주고 문장 5개를 받는다.
+  _displayName: 패물 거래
+  _description: 유물을 주고 패물 5개를 받는다.
   _icon: {fileID: 21300000, guid: 6c9166303f240564b80cdf28ce315823, type: 2}
   _costType: 1
   _cost: 20

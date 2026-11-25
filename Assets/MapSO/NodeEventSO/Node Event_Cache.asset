@@ -16,7 +16,7 @@ MonoBehaviour:
   _body: 길가에 버려진 보급품 상자가 있다. 하나만 챙길 수 있다.
   _leaveLabel: 그냥 지나간다
   _options:
-  - Label: 금화를 챙긴다
+  - Label: 유물을 챙긴다
     CostType: 1
     Cost: 0
     CloseAfter: 1
@@ -28,12 +28,6 @@ MonoBehaviour:
     CloseAfter: 1
     Effects:
     - rid: 1001
-  - Label: 예비 바퀴를 챙긴다
-    CostType: 1
-    Cost: 0
-    CloseAfter: 1
-    Effects:
-    - rid: 1002
   references:
     version: 2
     RefIds:
@@ -47,8 +41,3 @@ MonoBehaviour:
       data:
         _type: 3
         _delta: 20
-    - rid: 1002
-      type: {class: CRunValueDeltaEffect, ns: , asm: Assembly-CSharp}
-      data:
-        _type: 4
-        _delta: 1
