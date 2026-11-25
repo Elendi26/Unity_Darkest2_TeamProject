@@ -4,17 +4,17 @@ using UnityEngine;
 
 public struct SDamageoverTime
 {
-    private EDamageoverTime _tokenName;
-    private ETokenTriggerPoint _tokenTriggerPoint;
-    private int _tokenDamage;
-    private int _tokenCurrentStack;
+    private EDamageoverTime _dotName;
+    private ETokenTriggerPoint _dotTriggerPoint;
+    private int _dotDamage;
+    private int _dotRemainingTurn;
 
-    public SDamageoverTime(EDamageoverTime tokenName, ETokenTriggerPoint tokenTriggerPoint, int tokenDamage, int tokenStack)
+    public SDamageoverTime(EDamageoverTime dotName, int dotDamage, int dotTurn)
     {
-        _tokenName = tokenName;
-        _tokenTriggerPoint = tokenTriggerPoint;
-        _tokenDamage = tokenDamage;
-        _tokenCurrentStack = tokenStack;
+        _dotName = dotName;
+        _dotTriggerPoint = ETokenTriggerPoint.TurnStart;
+        _dotDamage = dotDamage;
+        _dotRemainingTurn = dotTurn;
     }
 }
 

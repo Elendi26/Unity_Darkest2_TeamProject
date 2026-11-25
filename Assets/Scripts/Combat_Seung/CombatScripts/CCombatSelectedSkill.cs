@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CCombatSelectedSkill : MonoBehaviour
@@ -38,7 +39,7 @@ public class CCombatSelectedSkill : MonoBehaviour
     {
         if (combatData is CEntityRuntimeData target)
         {
-            _skillData.UseSKill(_entity, target);
+            SkillExcute(target);
         }
     }
 
@@ -54,20 +55,75 @@ public class CCombatSelectedSkill : MonoBehaviour
             }
         }
 
-        _skillData.UseSKill(_entity, targets);
+        SkillExcute(targets);
     }
 
 
-    private bool CheckHit()
+    private bool CheckHit(CEntityRuntimeData target)
     {
-        return true;
+        float hit = 100f;
+
+        if (_entity._tokenStatus.CheckToken(ETokenBitMask.Blind))
+        {
+            hit *= 0.5f;
+        }
+
+        if (target._tokenStatus.CheckToken(ETokenBitMask.Dodge))
+        {
+            hit *= 0.5f;
+        }
+
+        else if (target._tokenStatus.CheckToken(ETokenBitMask.DodgeE))
+        {
+            hit *= 0.25f;
+        }
+
+        float rand = Random.Range(0, 100f);
+
+        if (rand <= hit)
+        {
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
     }
 
-    private bool CheckCritical()
+    private bool CheckCritical(CEntityRuntimeData target)
     {
-        return true;
+        if (_entity._tokenStatus.CheckToken(ETokenBitMask.Crit))
+        {
+            return true;
+        }
+
+        float ciritcal = (_skillData.Critical) + _entity.GetStat(EEntityStat.ExtraCritical);
+
+        float rand = Random.Range(0, 100);
+
+        if (rand <= ciritcal)
+        {
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
     }
 
+    private void SkillExcute(CEntityRuntimeData target)
+    {
+        _skillData.UseSKill(_entity, target, CheckCritical(target), CheckHit(target));
+    }
 
+    private void SkillExcute(List<CEntityRuntimeData> targets)
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            _skillData.UseSKill(_entity, targets[i], CheckHit(targets[i]), CheckCritical(targets[i]));
+        }
+    }
 
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -78,7 +79,7 @@ public class CTokenStatus : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        CTokenStructDataSO tokenStructData = Resources.Load<CTokenStructDataSO>("TokenDataSO/TokenStructData");
+        CTokenStructDataSO tokenStructData = Resources.Load<CTokenStructDataSO>("Scripts/Combat_Data/TokenDataSO");
 
         if (tokenStructData != null)
         {
@@ -93,26 +94,37 @@ public class CTokenStatus : MonoBehaviour
         }
     }
 
-    private STokenData TryGetTokenStruct (ETokenBitMask token)
+    private int TryGetTokenStruct (ETokenBitMask token)
     {
-        foreach (STokenData tokenData in _tokenData)
+        for (int i = 0;  i < _tokenData.Count; i++)
         {
-            if (tokenData.CheckTokenByBitMask(token))
+            if (_tokenData[i].CheckTokenByBitMask(token))
             {
-                return tokenData;
+                return i;
             }
         }
 
         Debug.Log("일치하는 토큰을 찾지 못했습니다. 입력 확인 요망");
 
-        return default (STokenData);
+        return default (int);
     }
 
     public void AddToken(params ETokenBitMask[] tokens)
     {
         foreach (var token in tokens)
         {
-            _tokenBitMask |= token;
+            if ((_tokenBitMask & token) == 0)
+            {
+                _tokenBitMask |= token;
+            }
+
+            else
+            {
+                int i = TryGetTokenStruct (token);
+
+                _tokenData[i].IncreaseStack();
+                _tokenData[i].ResetTurn();
+            }
         }
     }
 
@@ -120,7 +132,14 @@ public class CTokenStatus : MonoBehaviour
     {
         foreach (var token in tokens)
         {
-            _tokenBitMask &= ~token;
+            for (int i = 0; i< _tokenData.Count; i++)
+            {
+                if (_tokenData[i].CheckTokenByBitMask(token))
+                {
+                    _tokenData[i].ResetToken();
+                    _tokenBitMask &= ~token;
+                }
+            }
         }
     }
 
@@ -128,13 +147,58 @@ public class CTokenStatus : MonoBehaviour
     {
         if ((_tokenBitMask & token) != 0)
         {
-            
+            int i = TryGetTokenStruct(token);
 
+            if (!_tokenData[i].ReduceStack())
+            {
+                RemoveToken(token);
+            }
 
+            return true;
         }
 
-        return true;
+        else
+        {
+            return false;
+        }       
     }
 
 
+    /// <summary>
+    /// 토큰 데이터 호출용
+    /// </summary>
+    /// <param name="activeTokens"></param>
+    public void GetActiveTokens(List<(Sprite, int)> activeTokens)
+    {
+        if (activeTokens == null)
+        {
+            Debug.Log("데이터를 받을 토큰 비트 마스크 리스트가 비어 있음");
+
+            return;
+        }
+
+        activeTokens.Clear();
+
+        int rawMask = (int) _tokenBitMask;
+
+        foreach (ETokenBitMask token in Enum.GetValues(typeof(ETokenBitMask)))
+        {
+            int rawValue = (int)token;
+
+            if (rawValue == 0 || (rawValue & (rawValue - 1)) != 0)
+            {
+                continue;
+            }
+
+            if ((rawMask & rawValue) == rawValue)
+            {
+                (Sprite, int) tuple;
+
+                tuple.Item1 = _tokenData[TryGetTokenStruct(token)].GetTokenSprite();
+                tuple.Item2 = _tokenData[TryGetTokenStruct(token)].GetTokenStack();
+
+                activeTokens.Add(tuple);
+            }
+        }
+    }
 }

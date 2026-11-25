@@ -282,6 +282,19 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         return _dead;
     }
 
+    public void AddDamageoverTime(SDamageoverTime dot)
+    {
+        _damageoverTime.Add(dot);
+    }
+
+    public void CheckDamageoverTime()
+    {
+        foreach(var dot in _damageoverTime)
+        {
+
+        }
+    }
+
     private void OnDeathblow()
     {
         Debug.Log($"{_name}이(가) 쓰러졌습니다!");

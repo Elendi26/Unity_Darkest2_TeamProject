@@ -90,9 +90,13 @@ public class CCombatManager : MonoBehaviour
 
             case ECombatPhase.RoundOver:
 
+                RoundOver();
+
                 break;
 
             case ECombatPhase.CombatOver:
+
+                CombatOver();
 
                 break;
 
@@ -141,6 +145,16 @@ public class CCombatManager : MonoBehaviour
         for (int i = 0; i < entities.Count; i++)
         {
             entities[i].ModifyStat(EEntityStat.CurrentSpeed, entities[i].GetStat(EEntityStat.Speed) + extraSpeed[i]);
+
+            if (entities[i]._tokenStatus.CheckToken(ETokenBitMask.Speed))
+            {
+                entities[i].ModifyStat(EEntityStat.CurrentSpeed, 999);
+            }
+
+            if (entities[i]._tokenStatus.CheckToken(ETokenBitMask.Daze))
+            {
+                entities[i].ModifyStat(EEntityStat.CurrentSpeed, -999);
+            }
         }
 
         List<CEntityRuntimeData> sortEntities = entities.OrderByDescending(x => x.GetStat(EEntityStat.CurrentSpeed)).ToList();
@@ -183,6 +197,16 @@ public class CCombatManager : MonoBehaviour
         {
             ChangePhase(ECombatPhase.TurnStart);
         }
+    }
+
+    public void RoundOver()
+    {
+
+    }
+
+    public void CombatOver()
+    {
+
     }
 
 

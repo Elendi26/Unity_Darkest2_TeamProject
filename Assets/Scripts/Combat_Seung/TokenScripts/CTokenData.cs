@@ -32,14 +32,22 @@ public struct STokenData
     private int _tokenMaxStack;
     private int _tokenDuration;
     private int _tokenRemainingTurn;
+    private Sprite _tokenSprite;
 
-    public STokenData(ETokenBitMask tokenBitMask, ETokenTriggerPoint tokenTriggerPoint, int tokenMaxStack, int tokenDuration)
+    public STokenData(ETokenBitMask tokenBitMask, ETokenTriggerPoint tokenTriggerPoint, int tokenMaxStack, int tokenDuration, Sprite tokenSprite)
     {
         _tokenName = tokenBitMask;
         _tokenTriggerPoint = tokenTriggerPoint;
         _tokenCurrentStack = 0;
         _tokenMaxStack = tokenMaxStack;
         _tokenDuration = tokenDuration;
+        _tokenRemainingTurn = 0;
+        _tokenSprite = tokenSprite;
+    }
+
+    public void ResetToken()
+    {
+        _tokenCurrentStack = 0;
         _tokenRemainingTurn = 0;
     }
 
@@ -59,6 +67,16 @@ public struct STokenData
     public void CheckTriggerPoint(ETokenTriggerPoint trigger)
     {
 
+    }
+
+    public Sprite GetTokenSprite()
+    {
+        return _tokenSprite;
+    }
+
+    public int GetTokenStack()
+    {
+        return _tokenCurrentStack;
     }
 
 
@@ -89,9 +107,21 @@ public struct STokenData
         return true;
     }
 
-    public void DecrementTurn()
+    public bool DecrementTurn()
     {
         _tokenRemainingTurn--;
+
+        if (_tokenRemainingTurn <= 0)
+        {
+            _tokenCurrentStack = 0;
+
+            return false;
+        }
+
+        else
+        {
+            return true;
+        }
     }
 
     public void ResetTurn()
@@ -110,10 +140,11 @@ public class CTokenData : ITokenInterface
     [SerializeField] private ETokenTriggerPoint _tokenTriggerPoint;
     [SerializeField] private int _tokenMaxStack;
     [SerializeField] private int _tokenDuration = -1; // -1 = None
+    [SerializeField] private Sprite _tokenSprite;
 
     public STokenData MakeTokenInstance()
     {
-        STokenData tokenData = new STokenData(_tokenName, _tokenTriggerPoint, _tokenMaxStack, _tokenDuration);
+        STokenData tokenData = new STokenData(_tokenName, _tokenTriggerPoint, _tokenMaxStack, _tokenDuration, _tokenSprite);
 
         return tokenData;
     }

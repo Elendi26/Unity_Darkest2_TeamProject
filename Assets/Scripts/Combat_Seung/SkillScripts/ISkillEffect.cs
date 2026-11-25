@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using UnityEngine;
 
 public interface ISkillEffect
@@ -118,10 +119,37 @@ public class CSkillHeal : ISkillEffect
 public class CAddToken : ISkillEffect // 토큰 적용
 {
     [SerializeField] private EInteractCombo _combo;
+    [SerializeField] private ETokenBitMask _token;
 
     public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
     {
+        float p = 100f - target.GetStat(EEntityStat.DebuffRes);
 
+        if (!hit)
+        {
+            return;
+        }
+
+        if (critical)
+        {
+            p = p - 20f;
+        }
+
+        float rand = Random.Range(0, 100);
+
+        if (rand <= p)
+        {
+            target._tokenStatus.AddToken(_token);
+
+            Debug.Log($"토큰 적용 성공 : {_token}");
+        }
+
+        else
+        {
+            // 저항
+
+            Debug.Log($"토큰 적용 실패 : {_token}");
+        }
     }
 }
 
@@ -129,10 +157,17 @@ public class CAddToken : ISkillEffect // 토큰 적용
 public class CRemoveToken : ISkillEffect
 {
     [SerializeField] private EInteractCombo _combo;
+    [SerializeField] private ETokenBitMask _token;
+    [SerializeField] private EDamageoverTime _dot;
 
     public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
     {
+        // 크리티컬, 히트 X
 
+        if ((target._tokenStatus.TokenBitMask & _token) != 0)
+        {
+            target._tokenStatus.RemoveToken(_token);
+        }
     }
 }
 
@@ -141,21 +176,72 @@ public class CRemoveToken : ISkillEffect
 public class CAddTokenDamageoveTime : ISkillEffect
 {
     [Header("지속 피해 정보")]
-    [SerializeField] private EDamageoverTime _tokenName;
-    [SerializeField] private ETokenTriggerPoint _tokenTriggerPoint;
+    [SerializeField] private EDamageoverTime _dotName;
     [SerializeField] private EInteractCombo _combo;
-    [SerializeField] private int _tokenDamage;
-    [SerializeField] private int _tokenStack;
+    [SerializeField] private int _dotDamage;
+    [SerializeField] private int _dotTurn;
 
     public SDamageoverTime MakeTokenInstance()
     {
-        SDamageoverTime damageoverTime = new SDamageoverTime(_tokenName, _tokenTriggerPoint, _tokenDamage, _tokenStack);
+        SDamageoverTime damageoverTime = new SDamageoverTime(_dotName, _dotDamage, _dotTurn);
 
         return damageoverTime;
     }
 
     public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
     {
+        float p = 100f;
+
+        if (!hit)
+        {
+            return;
+        }
+
+        switch (_dotName)
+        {
+            case EDamageoverTime.Bleed:
+
+                p -= target.GetStat(EEntityStat.BleedRes);
+
+                break;
+
+            case EDamageoverTime.Blight:
+
+                p -= target.GetStat(EEntityStat.BlightRes);
+
+                break;
+
+            case EDamageoverTime.Burn:
+
+                p -= target.GetStat(EEntityStat.BurnRes);
+
+                break;
+
+            default:
+                break;
+        }
+
+        if (critical)
+        {
+            p += 20f;
+        }
+
+        float rand = Random.Range(0, 100);
+
+        if (rand <= p)
+        {
+            SDamageoverTime dot = MakeTokenInstance();
+
+            target.AddDamageoverTime(dot);
+
+            Debug.Log($"도트 대미지 적용 성공 {_dotName}");
+        }
+
+        else
+        {
+            Debug.Log($"도트 대미지 적용 실패 {_dotName}");
+        }
+
 
     }
 }

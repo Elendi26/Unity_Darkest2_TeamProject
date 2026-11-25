@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "name": "New Actions",
+    "maps": [
+        {
+            "name": "Click",
+            "id": "c5c2ad51-194b-4bc8-a5c9-0836d28cddb9",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "1eb55884-9296-4fcd-9c7b-c6ab5bcb5f26",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "6b0095b3-5b9b-45d7-b769-3d70597ba1f1",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
