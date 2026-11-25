@@ -9,7 +9,6 @@ public class CNodeEventHandler : INodeHandler
 	private readonly CNodeEventData _event;
 	private readonly CRoadEventPopup _popup;
 	private readonly CRunContext _ctx;
-	private readonly CStagecoach _stagecoach;
 	private readonly List<string> _labels = new List<string>();
 	private readonly List<bool> _interactable = new List<bool>();
 	private Action _onComplete;
@@ -17,13 +16,12 @@ public class CNodeEventHandler : INodeHandler
 
 	public ENodeType Type => _type;
 
-	public CNodeEventHandler(ENodeType type, CNodeEventData nodeEvent, CRoadEventPopup popup, CRunContext ctx, CStagecoach stagecoach)
+	public CNodeEventHandler(ENodeType type, CNodeEventData nodeEvent, CRoadEventPopup popup, CRunContext ctx)
 	{
 		_type = type;
 		_event = nodeEvent;
 		_popup = popup;
 		_ctx = ctx;
-		_stagecoach = stagecoach;
 	}
 
 	public void Enter(CNodeInstance node, Action onComplete)
@@ -88,11 +86,6 @@ public class CNodeEventHandler : INodeHandler
 			_ctx.RunData.Add(option.CostType, -option.Cost);
 		}
 
-		if (option.Upgrade != null)
-		{
-			_stagecoach.TryEquip(option.Upgrade);
-		}
-
 		CRunEffectUtil.ApplyAll(option.Effects, _ctx);
 		CPrint.Log($"{_type} 노드 이벤트 → {option.Label}");
 
@@ -117,15 +110,10 @@ public class CNodeEventHandler : INodeHandler
 		onComplete?.Invoke();
 	}
 
-	// 비용이 되고, 업그레이드가 있으면 달 수 있어야 고를 수 있다
+	// 비용이 되어야 고를 수 있다
 	private bool CanChoose(CNodeEventOption option)
 	{
-		if (option.Cost > 0 && !_ctx.RunData.Has(option.CostType, option.Cost))
-		{
-			return false;
-		}
-
-		return option.Upgrade == null || (_stagecoach != null && _stagecoach.CanEquip(option.Upgrade));
+		return option.Cost <= 0 || _ctx.RunData.Has(option.CostType, option.Cost);
 	}
 
 }

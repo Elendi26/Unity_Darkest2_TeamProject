@@ -37,6 +37,8 @@ public abstract class CItemDataBase : ScriptableObject
 	public int BuyPrice => Mathf.Max(0, _buyPrice);
 	// 팔 때 받는 금화
 	public int SellPrice => Mathf.Max(0, _sellPrice);
+	// 상점에서 살 때 내는 재화 (장신구·마차 아이템은 패물)
+	public virtual ERunValue BuyCurrency => ERunValue.Gold;
 	// 짐칸에서 '사용' 버튼으로 쓸 수 있는 종류인지
 	public virtual bool IsUsable => false;
 
@@ -44,6 +46,12 @@ public abstract class CItemDataBase : ScriptableObject
 	public virtual bool IsBlocked(CRunData runData)
 	{
 		return false;
+	}
+
+	// 칸에 띄울 아이콘 → 겹친 개수에 따라 바뀌는 종류(유물)만 덮어쓴다
+	public virtual Sprite GetIcon(int count)
+	{
+		return Icon;
 	}
 
 	// 짐칸에서 쓸 수 있는지

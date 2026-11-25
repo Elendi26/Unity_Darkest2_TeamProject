@@ -15,10 +15,25 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_Data:
     m_SerializedData: []
-  m_GUID: 59359ece1cd1c024981e96c900f499b2
+  m_GUID: 0d0fd5bfb534af34f9d9a981627e5d7b
   m_SerializeEntries:
-  - m_GUID: 6967341ba10979f4dbbbff48c1e1db04
-    m_Address: Assets/Prefabs/FadeCanvas.prefab
+  - m_GUID: 35b53634d4dd74c4b9dd1673ae2ac956
+    m_Address: Assets/Scenes/Inn/Inn.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bd6d4376b6144a5ca86c88754e9f912e
+    m_Address: Assets/Scenes/Tutorial/TutorialScene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c77b85936d3ebe844880e7d085e32739
+    m_Address: Assets/Scenes/Node/NodeTestScene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f60691340daddae48af8d3d51660054d
+    m_Address: Assets/Scenes/UI/Title_test.unity
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

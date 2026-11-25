@@ -142,65 +142,6 @@ public class CMapRunner
         return revealed;
     }
 
-    public int ScoutRandom(int count, System.Random random)
-    {
-        if (_graph == null || count <= 0)
-        {
-            return 0;
-        }
-
-        int fromRow = _current != null ? _current.Row : 0;
-        List<object> hidden = new List<object>();
-
-        for (int i = 0; i < _graph.Nodes.Count; i++)
-        {
-            CNodeInstance node = _graph.Nodes[i];
-
-            if (!node.IsRevealed && node.Row > fromRow)
-            {
-                hidden.Add(node);
-            }
-        }
-
-        for (int i = 0; i < _graph.Links.Count; i++)
-        {
-            CNodeLink link = _graph.Links[i];
-
-            if (!link.IsRevealed && link.From.Row >= fromRow)
-            {
-                hidden.Add(link);
-            }
-        }
-
-        random ??= new System.Random();
-
-        int revealed = 0;
-
-        while (revealed < count && hidden.Count > 0)
-        {
-            int index = random.Next(hidden.Count);
-
-            if (hidden[index] is CNodeInstance node)
-            {
-                revealed += RevealNode(node);
-            }
-            else if (hidden[index] is CNodeLink link)
-            {
-                revealed += RevealLink(link);
-            }
-
-            hidden.RemoveAt(index);
-        }
-
-        if (_logState)
-        {
-            CPrint.Log($"CMapRunner : 정찰 → {revealed}곳을 밝혔습니다.");
-        }
-
-        NotifyRevealed();
-        return revealed;
-    }
-
     private static int RevealNode(CNodeInstance node)
     {
         if (node == null || node.IsRevealed)

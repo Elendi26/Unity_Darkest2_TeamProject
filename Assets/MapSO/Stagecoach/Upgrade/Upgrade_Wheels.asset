@@ -13,9 +13,15 @@ MonoBehaviour:
   m_Name: Upgrade_Wheels
   m_EditorClassIdentifier: 
   _id: upgrade_wheel_axle
+  _displayName: 바퀴 축 보강
+  _description: 바퀴 최대치가 1 늘고 늘어난 칸은 채워진다.
+  _icon: {fileID: 21300000, guid: 649cf954fed627840b0ae6eb30acd1ba, type: 2}
+  _category: 4
+  _rarity: 0
+  _maxStack: 1
+  _buyPrice: 0
+  _sellPrice: 0
   _slot: 0
-  _costCurrency: 1
-  _buyCost: 30
   _modifiers:
   - Stat: 4
     Value: 1

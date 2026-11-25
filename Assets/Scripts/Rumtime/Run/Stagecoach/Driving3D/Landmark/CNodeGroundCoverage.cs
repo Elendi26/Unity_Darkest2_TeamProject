@@ -1,24 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-#region 노드 장면이 덮는 자리
-/*
-	▶ 노드 장면이 실제로 덮는 자리를 촘촘한 점으로 기록한다
-	ㆍ 왜?
-		장면을 감싸는 상자 하나로 길가 장식을 지우면
-		장면 바닥만 있는 넓은 귀퉁이까지 나무가 사라져 텅 비고, 상자 밖 장식은 장면 안으로 삐져나온다
-	ㆍ 바닥 점 : 낮고 위를 보는 면(장면 바닥)이 덮는 점
-	ㆍ 물체 점 : 바닥보다 높은 면(건물·나무·바위)이 덮는 점 (objectPadding 만큼 넓힐 수 있다)
-	ㆍ 점 좌표 : space 로컬 XZ 를 sampleSize 간격으로 나눈 칸 번호, 점 (i, j) 의 위치는 ((i + 0.5) * size, (j + 0.5) * size)
-*/
-#endregion
 public static class CNodeGroundCoverage
 {
 	private const float MIN_UP_NORMAL = 0.5f;
 
-	/// <summary>
-	/// source 아래 메시가 덮는 바닥 점·물체 점을 space 로컬 기준으로 모은다 (읽을 수 있는 메시가 없으면 false) / 경태
-	/// </summary>
 	public static bool TryBuild
 		(
 		Transform source,

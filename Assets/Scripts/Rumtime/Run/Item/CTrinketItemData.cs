@@ -18,6 +18,8 @@ public class CTrinketItemData : CItemDataBase
 	public bool AllowDuplicate => _allowDuplicate;
 	// 장신구는 겹치지 않는다
 	public override int MaxStack => 1;
+	// 장신구는 패물로 산다
+	public override ERunValue BuyCurrency => ERunValue.Faction;
 
 	// TODO : 영웅 장착 칸·장착/해제 흐름 연결 (영웅 데이터 쪽과 맞춰서)
 	// TODO : 조건부 효과 (체력 50% 이하일 때 등) 추가

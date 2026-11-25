@@ -41,13 +41,33 @@ public class CStagecoachController : MonoBehaviour, IRoadTravelProvider, IRunCon
             return;
         }
 
+        // 앞 씬에서 넘어온 런이 있으면 시작 값 대신 그 기록을 잇는다
+        CRunSnapshot carried = CRunCarry.Take();
+
         _runData = new CRunData();
-        _runData.Register(ERunValue.Gold, _startGold, int.MaxValue);
-        _runData.Register(ERunValue.Faction, _startFaction, int.MaxValue);
-        _runData.Register(ERunValue.Torch, _startTorch, _maxTorch);
+
+        if (carried != null)
+        {
+            carried.RegisterValues(_runData);
+        }
+        else
+        {
+            _runData.Register(ERunValue.Gold, _startGold, int.MaxValue);
+            _runData.Register(ERunValue.Faction, _startFaction, int.MaxValue);
+            _runData.Register(ERunValue.Torch, _startTorch, _maxTorch);
+        }
 
         _stagecoach = new CStagecoach(_config, _runData);
-        AddStartItems();
+
+        if (carried != null)
+        {
+            carried.ApplyTo(_stagecoach, _runData);
+            CPrint.Log("CStagecoachController : 앞 씬의 런 데이터를 이어받았습니다.");
+        }
+        else
+        {
+            AddStartItems();
+        }
 
         int seed = _seed != 0 ? _seed : Environment.TickCount;
         _ctx = new CRunContext

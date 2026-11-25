@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -6,6 +7,8 @@ public class CMapController : MonoBehaviour
 {
     #region 인스펙터
     [SerializeField] private CMapConfig _config;
+    // 고정 지도 (튜토리얼 등). 넣으면 _config 무작위 생성 대신 이 지도를 쓴다
+    [SerializeField] private CFixedMapData _fixedMap;
     // IRoadTravelProvider 를 구현한 컴포넌트 (역마차 등). 비우면 이동 없이 바로 도착
     [SerializeField, FormerlySerializedAs("_stagecoachController")] private MonoBehaviour _travelSource;
     [SerializeField] private MonoBehaviour[] _handlerSources;	// INodeHandler 를 구현한 컴포넌트 (전투·상점 등). 없는 종류는 통과 처리
@@ -39,7 +42,7 @@ public class CMapController : MonoBehaviour
     private void Start()
     {
         int seed = _seed != 0 ? _seed : Environment.TickCount;
-        CMapGraph graph = new CMapGenerator(_config).Generate(seed);
+        CMapGraph graph = _fixedMap != null ? _fixedMap.Build(seed) : new CMapGenerator(_config).Generate(seed);
 
         if (graph == null)
         {
@@ -47,12 +50,6 @@ public class CMapController : MonoBehaviour
         }
 
         _runner = new CMapRunner(graph, GetTravel());
-
-        // 정찰 이벤트 효과가 지도를 밝힐 수 있게 런 데이터에 지도를 알려 둔다
-        if (_travelSource is IRunContextProvider contextProvider && contextProvider.Context != null)
-        {
-            contextProvider.Context.Map = _runner;
-        }
 
         RegisterSceneHandlers();
         RegisterEventHandlers();
@@ -131,6 +128,26 @@ public class CMapController : MonoBehaviour
             return;
         }
 
+        // 고정 지도는 지도에 쓰인 칸 종류만 등록한다
+        if (_fixedMap != null)
+        {
+            List<CNodeTypeData> types = new List<CNodeTypeData>();
+
+            _fixedMap.CollectNodeTypes(types);
+
+            for (int i = 0; i < types.Count; i++)
+            {
+                RegisterEventHandler(types[i], ctx);
+            }
+
+            return;
+        }
+
+        if (_config == null)
+        {
+            return;
+        }
+
         RegisterEventHandler(_config.StarNode, ctx);
         RegisterEventHandler(_config.PreStartNode, ctx);
         RegisterEventHandler(_config.EndNode, ctx);
@@ -164,9 +181,16 @@ public class CMapController : MonoBehaviour
             return;
         }
 
+        // 은닉처 → 뒤지면 재화·아이템을 무작위로 얻는다
+        if (data.Cache != null && _eventPopup != null)
+        {
+            _runner.RegisterHandler(new CCacheNodeHandler(data.Type, data.Cache, _eventPopup, ctx, stagecoach));
+            return;
+        }
+
         if (data.Event != null && _eventPopup != null)
         {
-            _runner.RegisterHandler(new CNodeEventHandler(data.Type, data.Event, _eventPopup, ctx, stagecoach));
+            _runner.RegisterHandler(new CNodeEventHandler(data.Type, data.Event, _eventPopup, ctx));
         }
     }
 
