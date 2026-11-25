@@ -125,7 +125,7 @@ public class CCombatSelectedSkill : MonoBehaviour
                             _enemyRanks[i] != null && _enemyRanks[i].Targetable == true && _enemyRanks[i].GetEntityRuntimeData() == target
                             )
                         {
-                            _skillData.UseSKill(_entity, target);
+                            SkillExcute(target);
 
                             OffIndicator();
 
@@ -231,7 +231,7 @@ public class CCombatSelectedSkill : MonoBehaviour
             }
         }
 
-        _skillData.UseSKill(_entity, targets);
+        SkillExcute(targets);
 
         OffIndicator();
 

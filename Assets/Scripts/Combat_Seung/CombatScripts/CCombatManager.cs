@@ -168,8 +168,11 @@ public class CCombatManager : MonoBehaviour
 
     private void RoundStart()
     {
+<<<<<<< Updated upstream
         // 정렬된 턴을 실제로 담아야 다음턴으로 넘어간다.
         _orderedTurn = OrderTurn();
+=======
+>>>>>>> Stashed changes
 
         ChangePhase(ECombatPhase.TurnStart);
     }
@@ -257,12 +260,6 @@ public class CCombatManager : MonoBehaviour
     {
 
     }
-
-
-}
-
-
-
 
     /// <summary>
     /// 일단 스폰을 먼저 시키고, 전투에 진입할 수 있도록하는 함수
