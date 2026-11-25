@@ -8,10 +8,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/UI/Title_test.unity
     guid: f60691340daddae48af8d3d51660054d
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/UI/The_Crossroads_Test.unity
     guid: 7b9f711c390d87140b55350663f17ce5
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/UI/Combat_test.unity
     guid: b77d0dfb06c31b9438c0b3ab48448955
   m_configObjects:

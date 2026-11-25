@@ -19,7 +19,7 @@ public class CGameManager : CManagerSingleton<CGameManager>
 
     // 내부 변수
     private bool _isQuitting;
-  
+
     public CGameModeDataSO CurrentGameMode { get; private set; }
 
     public string TitleModeId => _titleModeId;
@@ -45,6 +45,54 @@ public class CGameManager : CManagerSingleton<CGameManager>
         if (_gameModeDB == null)
         {
             CPrint.Error("CGameModeDatabaseSO가 할당되지 않았습니다.");
+        }
+    }
+    private void OnEnable()
+    {
+        OnGameModeChanged += HandleGameModeChanged;
+    }
+
+    private void OnDisable()
+    {
+        OnGameModeChanged -= HandleGameModeChanged;
+    }
+
+    private void Start()
+    {
+        // 시작 시 이미 타이틀 상태인 경우 초기 BGM 재생
+        if (CurrentGameMode == null && !string.IsNullOrWhiteSpace(_titleModeId))
+        {
+            SetCurrentGameModeWithoutLoad(_titleModeId);
+        }
+    }
+
+    private void HandleGameModeChanged(CGameModeDataSO previousMode, CGameModeDataSO currentMode)
+    {
+        if (currentMode == null || CSoundManager.Instance == null)
+        {
+            return;
+        }
+
+        // 씬 전환/페이드가 진행 중이면 완료 시점까지 기다렸다가 재생합니다.
+        if (CAddressableSceneManager.Instance != null && CAddressableSceneManager.Instance.IsTransitioning)
+        {
+            PlayBgmAfterTransitionAsync(currentMode).Forget();
+            return;
+        }
+
+        CSoundManager.Instance.PlayModeBgm(currentMode);
+    }
+
+    private async UniTaskVoid PlayBgmAfterTransitionAsync(CGameModeDataSO targetMode)
+    {
+        if (CAddressableSceneManager.Instance != null)
+        {
+            await UniTask.WaitUntil(() => CAddressableSceneManager.Instance == null || !CAddressableSceneManager.Instance.IsTransitioning);
+        }
+
+        if (CurrentGameMode == targetMode && CSoundManager.Instance != null)
+        {
+            CSoundManager.Instance.PlayModeBgm(targetMode);
         }
     }
 
@@ -182,7 +230,9 @@ public class CGameManager : CManagerSingleton<CGameManager>
             CGameModeDataSO nodeMode = GetGameModeData(_nodeModeId);
             if (nodeMode != null)
             {
+                CGameModeDataSO previousMode = CurrentGameMode;
                 CurrentGameMode = nodeMode;
+                OnGameModeChanged?.Invoke(previousMode, CurrentGameMode);
             }
         }
 
