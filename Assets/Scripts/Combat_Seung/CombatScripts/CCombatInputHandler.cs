@@ -32,7 +32,7 @@ public class CCombatInputHandler : MonoBehaviour
 
     private void Start()
     {
-        if(_stateManager == null)
+        if(_combatManager == null)
         {
             CPrint.Warn("매니저 참조가 비어있다. 인스펙터 확인 (CCombatInputHandler)");
             return;
@@ -131,7 +131,7 @@ public class CCombatInputHandler : MonoBehaviour
 
             case ECombatSelectType.Move:
 
-                _stateManager.CombatCurrentTurn.SelectedSkill.InputTargetData(entityData);
+                _combatManager.CombatCurrentTurn.SelectedSkill.InputTargetData(entityData);
 
                 break;
 
