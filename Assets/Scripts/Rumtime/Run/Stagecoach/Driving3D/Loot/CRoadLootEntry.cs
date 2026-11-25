@@ -11,6 +11,8 @@ public class CRoadLootEntry
 	public int Weight = 1;
 	// 줄 금화 범위 x ~ y (둘 다 0 이면 금화 없음)
 	public Vector2Int Gold = new Vector2Int(3, 8);
+	// 줄 패물 범위 x ~ y (둘 다 0 이면 패물 없음)
+	public Vector2Int Faction = Vector2Int.zero;
 	// 줄 아이템 (비우면 금화만)
 	public CItemDataBase Item;
 	// 채우면 Item 대신 이 목록에서 희귀도 비중으로 하나를 뽑는다
