@@ -9,22 +9,22 @@ public enum ECombatRank
 }
 
 /// <summary>
-/// °¢ Ä­¿¡ CCombatRank¸¦ ºÙÀÌ±â
+/// ê° ì¹¸ì— CCombatRankë¥¼ ë¶™ì´ê¸°
 /// </summary>
 public class CCombatRank : MonoBehaviour
 {
     [SerializeField] private ECombatRank _combatRank;
     [SerializeField] private bool _team;
-    [SerializeField] private CEntityRuntimeData _entityRuntimeData; // Å×½ºÆ®¿ëÀ¸·Î ¿­¾îµÒ, ¿ø·¡´Â SerializeField ¾ø¾îµµ µÊ
+    [SerializeField] private CEntityRuntimeData _entityRuntimeData; // í…ŒìŠ¤íŠ¸ìš©ìœ¼ë¡œ ì—´ì–´ë‘ , ì›ë˜ëŠ” SerializeField ì—†ì–´ë„ ë¨
 
-    [Header("CCombatCurrentTurn ½ºÅ©¸³Æ® ÂüÁ¶")]
+    [Header("CCombatCurrentTurn ìŠ¤í¬ë¦½íŠ¸ ì°¸ì¡°")]
     [SerializeField] private CCombatCurrentTurn _currentTurn;
 
-    // ¿©±â¿¡ È°¼ºÈ­/ºñÈ°¼ºÈ­ ½ÃÅ°°í ½ÍÀº °ÍÀ» ³Ö°í
-    [Header("ÇöÀç ÅÏ Ç¥½Ã UI")]
+    // ì—¬ê¸°ì— í™œì„±í™”/ë¹„í™œì„±í™” ì‹œí‚¤ê³  ì‹¶ì€ ê²ƒì„ ë„£ê³ 
+    [Header("í˜„ì¬ í„´ í‘œì‹œ UI")]
     [SerializeField] private GameObject _currentTurnIndicator;
 
-    [Header("Å¸°Ù Ç¥½Ã±â")]
+    [Header("íƒ€ê²Ÿ í‘œì‹œê¸°")]
     [SerializeField] private GameObject _targetIndicator;
 
 
@@ -35,7 +35,7 @@ public class CCombatRank : MonoBehaviour
     private bool _targetable = false;
     private ICombatData _combatData;
     
-    #region ÇÁ·ÎÆÛÆ¼
+    #region í”„ë¡œí¼í‹°
     public ICombatData CombatData => _combatData;
     public bool Targetable => _targetable;
 
@@ -120,7 +120,7 @@ public class CCombatRank : MonoBehaviour
     {
         if (!_entityRuntimeData.IsHero())
         {
-            // ½ÃÃ¼·Î ¹Ù²Ù±â
+            // ì‹œì²´ë¡œ ë°”ê¾¸ê¸°
         }
     }
 
@@ -136,8 +136,6 @@ public class CCombatRank : MonoBehaviour
                     if ((skillTarget & _rank) != 0)
                     {
                         _targetable = true;
-
-                        
                     }
 
                     else
@@ -223,7 +221,7 @@ public class CCombatRank : MonoBehaviour
                 break;
         }
 
-        // UI Targetable ÄÑ±â
+        // UI Targetable ì¼œê¸°
 
         if(_targetIndicator != null)
         {

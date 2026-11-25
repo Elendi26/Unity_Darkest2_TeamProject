@@ -59,6 +59,9 @@ public class CEntityBasicDataSO : ScriptableObject
     [Header("위치 및 대상 표시 이미지")]
     [SerializeField] private Sprite _heroRank;
 
+    [Header("애니메이터")]
+    [SerializeField] private Animator _animator;
+
     #endregion
 
     #region 프로퍼티
@@ -94,6 +97,8 @@ public class CEntityBasicDataSO : ScriptableObject
     public Sprite HeroRank => _heroRank;
     public List<CSkillDataSO> HeroSkills => _heroSkills;
     public GameObject HeroModel => _heroModel;
+
+    public Animator Animator => _animator;
 
     #endregion
 

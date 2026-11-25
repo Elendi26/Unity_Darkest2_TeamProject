@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -63,6 +64,8 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     public CTokenStatus _tokenStatus = new CTokenStatus();
     public List<SDamageoverTime> _damageoverTime = new List<SDamageoverTime>();
 
+    private Animator _animator;
+
     private bool _dead = false;
     private bool _hero = true;
     private float _extraCritical = 0f;
@@ -125,6 +128,8 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         _extraCritical = 0f;
 
         _relationships = new Dictionary<string, int>();
+
+        _animator = _heroBasicData.Animator;
 
         Debug.Log($"[{_name}] 런타임 데이터 초기화 완료 (MaxHP: {_currentHP}, Speed: {_speed})");
     }
@@ -348,6 +353,19 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         return _dead;
     }
 
+    public void AddDamageoverTime(SDamageoverTime dot)
+    {
+        _damageoverTime.Add(dot);
+    }
+
+    public void CheckDamageoverTime()
+    {
+        foreach(var dot in _damageoverTime)
+        {
+
+        }
+    }
+
     private void OnDeathblow()
     {
         Debug.Log($"{_name}이(가) 쓰러졌습니다!");
@@ -364,4 +382,10 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     {
         Debug.Log($"{_name}이(가) 붕괴(Meltdown) 상태가 되었습니다!");
     }
+
+    public void AnimateTrigger(string trigger)
+    {
+        _animator.SetTrigger(trigger);
+    }
+
 }

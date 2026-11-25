@@ -1,21 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CCombatSelectedSkill : MonoBehaviour
 {
-    [Header("CCombatCurrentTurn ½ºÅ©¸³Æ® ÂüÁ¶")]
+    [Header("CCombatCurrentTurn ìŠ¤í¬ë¦½íŠ¸ ì°¸ì¡°")]
     [SerializeField] private CCombatCurrentTurn _currentTurn;
 
-    // ¿ø·¡ ÀüÃ¼ 8°³¸¦ ÇÑ¹ø¿¡ ¸®½ºÆ®·Î ³ù¾ú´Âµ¥, ÆÀ¿ø / ÀûÀ¸·Î ³ª´²¼­ Àç±¸¼ºÇÔ.
-    [Header("¾Æ±º ·©Å© 4°³")]
+    // ì›ë˜ ì „ì²´ 8ê°œë¥¼ í•œë²ˆì— ë¦¬ìŠ¤íŠ¸ë¡œ ë†¨ì—ˆëŠ”ë°, íŒ€ì› / ì ìœ¼ë¡œ ë‚˜ëˆ ì„œ ì¬êµ¬ì„±í•¨.
+    [Header("ì•„êµ° ë­í¬ 4ê°œ")]
     [SerializeField] private CCombatRank[] _teamRanks;
-    [Header("¾Æ±º ·©Å© »çÀÌ + ¾ÆÀÌÄÜ")]
+    [Header("ì•„êµ° ë­í¬ ì‚¬ì´ + ì•„ì´ì½˜")]
     [SerializeField] private GameObject[] _teamPlusIcons;
 
-    [Header("Àû±º ·©Å© 4°³")]
+    [Header("ì êµ° ë­í¬ 4ê°œ")]
     [SerializeField] private CCombatRank[] _enemyRanks;
-    [Header("Àû±º ·©Å© »çÀÌ + ¾ÆÀÌÄÜ")]
+    [Header("ì êµ° ë­í¬ ì‚¬ì´ + ì•„ì´ì½˜")]
     [SerializeField] private GameObject[] _enemyPlusIcons;
 
     private CEntityRuntimeData _entity;
@@ -44,17 +45,17 @@ public class CCombatSelectedSkill : MonoBehaviour
     }
 
     /// <summary>
-    /// ÀÌµ¿À» ´­·¶À» ¶§
+    /// ì´ë™ì„ ëˆŒë €ì„ ë•Œ
     /// </summary>
     /// <param name="mover"></param>
     public void InputMoveSlot(CEntityRuntimeData mover)
     {
-        // ÀÎµğÄÉÀÌÅÍ ´Ù ²ô°í
+        // ì¸ë””ì¼€ì´í„° ë‹¤ ë„ê³ 
         OffIndicator();
 
         _entity = mover;
 
-        // ÇöÀç ·©Å©¸¦ Á¤¼ö·Î °¡Á®¿À±â
+        // í˜„ì¬ ë­í¬ë¥¼ ì •ìˆ˜ë¡œ ê°€ì ¸ì˜¤ê¸°
         int currentRank = (int)mover.GetRank();
 
         int moveMask = ((((int)currentRank << 1) | ((int)currentRank >> 1)) & 15) & ~(int)currentRank;
@@ -78,7 +79,7 @@ public class CCombatSelectedSkill : MonoBehaviour
 
     private void CheckTarget()
     {
-        CPrint.Log("½ºÅ³ÀÇ ´ë»óÀ» ¼±ÅÃÇÏ¼¼¿ä");
+        CPrint.Log("ìŠ¤í‚¬ì˜ ëŒ€ìƒì„ ì„ íƒí•˜ì„¸ìš”");
 
         int targetBitmask = _skillData.GetTargetBitmask();
 
@@ -140,7 +141,7 @@ public class CCombatSelectedSkill : MonoBehaviour
                 
             }
 
-            // ÀÌµ¿¹öÆ° ´­·¶À» °æ¿ì
+            // ì´ë™ë²„íŠ¼ ëˆŒë €ì„ ê²½ìš°
             else if(_currentTurn.SelectType == ECombatSelectType.Move)
             {
                 CCombatRank fromRank = null;
@@ -240,16 +241,73 @@ public class CCombatSelectedSkill : MonoBehaviour
     }
 
 
-    private bool CheckHit()
+    private bool CheckHit(CEntityRuntimeData target)
     {
-        return true;
+        float hit = 100f;
+
+        if (_entity._tokenStatus.CheckToken(ETokenBitMask.Blind))
+        {
+            hit *= 0.5f;
+        }
+
+        if (target._tokenStatus.CheckToken(ETokenBitMask.Dodge))
+        {
+            hit *= 0.5f;
+        }
+
+        else if (target._tokenStatus.CheckToken(ETokenBitMask.DodgeE))
+        {
+            hit *= 0.25f;
+        }
+
+        float rand = Random.Range(0, 100f);
+
+        if (rand <= hit)
+        {
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
     }
 
-    private bool CheckCritical()
+    private bool CheckCritical(CEntityRuntimeData target)
     {
-        return true;
+        if (_entity._tokenStatus.CheckToken(ETokenBitMask.Crit))
+        {
+            return true;
+        }
+
+        float ciritcal = (_skillData.Critical) + _entity.GetStat(EEntityStat.ExtraCritical);
+
+        float rand = Random.Range(0, 100);
+
+        if (rand <= ciritcal)
+        {
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
     }
 
+    private void SkillExcute(CEntityRuntimeData target)
+    {
+        _skillData.UseSKill(_entity, target, CheckCritical(target), CheckHit(target));
+    }
+
+    private void SkillExcute(List<CEntityRuntimeData> targets)
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            _skillData.UseSKill(_entity, targets[i], CheckHit(targets[i]), CheckCritical(targets[i]));
+        }    
+    }
+    
     private void OffIndicator()
     {
         if(_teamRanks != null)

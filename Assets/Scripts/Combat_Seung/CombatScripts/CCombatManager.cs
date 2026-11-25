@@ -15,28 +15,28 @@ public enum ECombatPhase
     CombatOver
 }
 
-// ÀüÅõ ÃÑ°ı ¸Å´ÏÀú
+// ì „íˆ¬ ì´ê´„ ë§¤ë‹ˆì €
 public class CCombatManager : MonoBehaviour
 {
     public static CCombatManager Instance { get; private set; }
 
-    #region ÀÎ½ºÆåÅÍ
+    #region ì¸ìŠ¤í™í„°
 
     [SerializeField] private List<CEntityRuntimeData> _onCombatEntities = new List<CEntityRuntimeData>();
     [SerializeField] private CTeamData<CEntityRuntimeData> _testEnemies;
     [SerializeField] private CCombatCurrentTurn _currentTurn;
 
-    [Header("ÇöÀç ÅÏ ¿µ¿õ ÀÌ¸§ ÅØ½ºÆ®")]
+    [Header("í˜„ì¬ í„´ ì˜ì›… ì´ë¦„ í…ìŠ¤íŠ¸")]
     [SerializeField] private TextMeshProUGUI _heroNameText;
 
-    [Header("¾Æ±º ¿µ¿õ ½ºÆ÷³Ê ÂüÁ¶")]
+    [Header("ì•„êµ° ì˜ì›… ìŠ¤í¬ë„ˆ ì°¸ì¡°")]
     [SerializeField] private CombatHeroSpawner _heroSpawner;
-    [Header("Àû ½ºÆ÷³Ê ÂüÁ¶")]
+    [Header("ì  ìŠ¤í¬ë„ˆ ì°¸ì¡°")]
     [SerializeField] private CombatEnemySpawner _enemyspawner;
 
     #endregion
 
-    #region ³»ºÎº¯¼ö
+    #region ë‚´ë¶€ë³€ìˆ˜
 
     private List<CEntityRuntimeData> _orderedTurn = new List<CEntityRuntimeData>();
 
@@ -48,7 +48,7 @@ public class CCombatManager : MonoBehaviour
 
     #endregion
 
-    #region ÇÁ·ÎÆÛÆ¼
+    #region í”„ë¡œí¼í‹°
 
     public List<CEntityRuntimeData> OnCombatEntities => _onCombatEntities;
     public List<CEntityRuntimeData> OrderedTurn
@@ -72,7 +72,7 @@ public class CCombatManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-        // ¸ÕÀú ½ºÆ÷³Ê°¡ ¿µ¿õ°ú ÀûÀ» ½ºÆùÇÏ°Ô ÇÏ°í, ¸ÅÄ¿´ÏÁò ÇÔ¼ö¸¦ È£ÃâÇÏ´Â ¼ø¼­°¡ ÇÊ¿äÇÒ °Í °°¾Æ¼­ ÁÖ¼®À¸·Î Ã³¸®ÇÏ°í ¼öÁ¤ÇÕ´Ï´Ù.
+        // ë¨¼ì € ìŠ¤í¬ë„ˆê°€ ì˜ì›…ê³¼ ì ì„ ìŠ¤í°í•˜ê²Œ í•˜ê³ , ë§¤ì»¤ë‹ˆì¦˜ í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•˜ëŠ” ìˆœì„œê°€ í•„ìš”í•  ê²ƒ ê°™ì•„ì„œ ì£¼ì„ìœ¼ë¡œ ì²˜ë¦¬í•˜ê³  ìˆ˜ì •í•©ë‹ˆë‹¤.
         //CombatMechanism();
     }
 
@@ -100,7 +100,7 @@ public class CCombatManager : MonoBehaviour
         {
             case ECombatPhase.None:
 
-                Debug.Log("ÄÄ¹î ÆäÀÌÁî°¡ ºñ¾úÀ½");
+                Debug.Log("ì»´ë±ƒ í˜ì´ì¦ˆê°€ ë¹„ì—ˆìŒ");
 
                 break;
 
@@ -130,15 +130,19 @@ public class CCombatManager : MonoBehaviour
 
             case ECombatPhase.RoundOver:
 
+                RoundOver();
+
                 break;
 
             case ECombatPhase.CombatOver:
+
+                CombatOver();
 
                 break;
 
             default:
 
-                Debug.Log("ÄÄ¹î ÆäÀÌÁî ¿À·ù");
+                Debug.Log("ì»´ë±ƒ í˜ì´ì¦ˆ ì˜¤ë¥˜");
 
                 break;
         }
@@ -155,8 +159,8 @@ public class CCombatManager : MonoBehaviour
 
     private void CombatStart()
     {
-        // µ¥ÀÌÅÍ ·Îµù
-        // -> ¿©±â¼­ µ¥ÀÌÅÍ ·ÎµåÇÏ´Â °Íµµ ÁÁÁö¸¸, ½ºÆ÷³Ê ½ºÅ©¸³Æ®°¡ Á¸ÀçÇÏ±â ¶§¹®¿¡ µû·Î ÇÔ¼ö¸¦ ¸¸µé¾î¼­ ¸ÕÀú ½ºÆùÇÒ°Å ½ºÆù½ÃÅ°°í ÀüÅõ ½ÃÀÛÇÏ´Â°Ô ³ª¾Æ º¸ÀÔ´Ï´Ù.
+        // ë°ì´í„° ë¡œë”©
+        // -> ì—¬ê¸°ì„œ ë°ì´í„° ë¡œë“œí•˜ëŠ” ê²ƒë„ ì¢‹ì§€ë§Œ, ìŠ¤í¬ë„ˆ ìŠ¤í¬ë¦½íŠ¸ê°€ ì¡´ì¬í•˜ê¸° ë•Œë¬¸ì— ë”°ë¡œ í•¨ìˆ˜ë¥¼ ë§Œë“¤ì–´ì„œ ë¨¼ì € ìŠ¤í°í• ê±° ìŠ¤í°ì‹œí‚¤ê³  ì „íˆ¬ ì‹œì‘í•˜ëŠ”ê²Œ ë‚˜ì•„ ë³´ì…ë‹ˆë‹¤.
 
         ChangePhase(ECombatPhase.RoundStart);
     }
@@ -164,7 +168,7 @@ public class CCombatManager : MonoBehaviour
 
     private void RoundStart()
     {
-        // Á¤·ÄµÈ ÅÏÀ» ½ÇÁ¦·Î ´ã¾Æ¾ß ´ÙÀ½ÅÏÀ¸·Î ³Ñ¾î°£´Ù.
+        // ì •ë ¬ëœ í„´ì„ ì‹¤ì œë¡œ ë‹´ì•„ì•¼ ë‹¤ìŒí„´ìœ¼ë¡œ ë„˜ì–´ê°„ë‹¤.
         _orderedTurn = OrderTurn();
 
         ChangePhase(ECombatPhase.TurnStart);
@@ -183,6 +187,16 @@ public class CCombatManager : MonoBehaviour
         for (int i = 0; i < entities.Count; i++)
         {
             entities[i].ModifyStat(EEntityStat.CurrentSpeed, entities[i].GetStat(EEntityStat.Speed) + extraSpeed[i]);
+
+            if (entities[i]._tokenStatus.CheckToken(ETokenBitMask.Speed))
+            {
+                entities[i].ModifyStat(EEntityStat.CurrentSpeed, 999);
+            }
+
+            if (entities[i]._tokenStatus.CheckToken(ETokenBitMask.Daze))
+            {
+                entities[i].ModifyStat(EEntityStat.CurrentSpeed, -999);
+            }
         }
 
         List<CEntityRuntimeData> sortEntities = entities.OrderByDescending(x => x.GetStat(EEntityStat.CurrentSpeed)).ToList();
@@ -226,15 +240,32 @@ public class CCombatManager : MonoBehaviour
         {
             ChangePhase(ECombatPhase.TurnStart);
         }
-
+        
         if (_orderedTurn.Count <= 0)
         {
             ChangePhase(ECombatPhase.RoundOver);
         }
     }
+    
+
+    public void RoundOver()
+    {
+
+    }
+
+    public void CombatOver()
+    {
+
+    }
+
+
+}
+
+
+
 
     /// <summary>
-    /// ÀÏ´Ü ½ºÆùÀ» ¸ÕÀú ½ÃÅ°°í, ÀüÅõ¿¡ ÁøÀÔÇÒ ¼ö ÀÖµµ·ÏÇÏ´Â ÇÔ¼ö
+    /// ì¼ë‹¨ ìŠ¤í°ì„ ë¨¼ì € ì‹œí‚¤ê³ , ì „íˆ¬ì— ì§„ì…í•  ìˆ˜ ìˆë„ë¡í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public void StartCombat()
     {
@@ -247,7 +278,7 @@ public class CCombatManager : MonoBehaviour
 
         if(_isStartCombat)
         {
-            // ÀüÅõ ½ÃÀÛÇÏ´Â ½ÃÀÛÁöÁ¡ È£Ãâ
+            // ì „íˆ¬ ì‹œì‘í•˜ëŠ” ì‹œì‘ì§€ì  í˜¸ì¶œ
             ChangePhase(ECombatPhase.CombatStart);
         }
 
