@@ -26,7 +26,9 @@ MonoBehaviour:
   _critical: 0
   _cooldown: -1
   _charges: -1
-  _skillEffect: []
+  _skillEffect:
+  - rid: 7086014359020240896
+  - rid: 7086014359020240897
   _skillSelfEffect: 0
   _skillEffectForSelf: []
   _skillIcon: {fileID: 0}
@@ -37,4 +39,16 @@ MonoBehaviour:
   _inactiveImage: {fileID: 0}
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 7086014359020240896
+      type: {class: CAddToken, ns: , asm: Assembly-CSharp}
+      data:
+        _combo: 2
+        _token: 0
+    - rid: 7086014359020240897
+      type: {class: CAddTokenDamageoveTime, ns: , asm: Assembly-CSharp}
+      data:
+        _dotName: 0
+        _combo: 1
+        _dotDamage: 0
+        _dotTurn: 0

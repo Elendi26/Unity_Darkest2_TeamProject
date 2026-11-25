@@ -1,0 +1,135 @@
+
+
+@@@	몬스터 AI 로직
+	
+	# CMonsterBrain.cs
+		몬스터 AI 판단 총괄 담당
+		2개의 스킬, 타겟 코드를 통해 판단을 내리고 -> 판단 보관으로 넘김 
+		
+	# CMonsterBrainDecision.cs
+		판단 결과 보관 객체
+			담고 있는 정보 & 기능
+				Decision (EBrainDecisionType.Pass / Play): 행동 여부
+				SelectedSkill (CSkillDataSO) : 선택된 스킬
+				TargetUnits (List<CEntityRuntimeData>) : 최종 대상 목록
+			기능 : ClearTargets(), SetTargets(...) null/사망자 제외 후 반영, SetPass() Pass 상태로 초기화 등등
+			
+	# CSkillSelectionDesire.cs
+		사용 가능 스킬 검증하는 곳
+			현재 미비한 점 -> 은신, 도발 고려에 대해 ??
+			
+	# CTargetSelectionDesire.cs
+		최종 타겟 결정하는 곳
+			현재 애매한 점 -> 광역이 지금 제대로 작동하는지 ??
+
+====================================================================================================================
+@@	1  @@ ========================================================== 		
+@@@	현재 스킬데이터SO에서 추가해야 하는 기능
+
+	인스펙터
+	[Header("AI 스킬 선택 가중치")]
+    [SerializeField, Min(0f)] private float _baseWeight = 10f;
+    [SerializeField, Min(0f)] private float _lowHpWeight = 10f;
+	
+	프로퍼티
+	public float BaseWeight => _baseWeight;
+    public float LowHpWeight => _lowHpWeight;
+	
+	가중치와 낮은 체력일 시 (전체 체력의 30% 이하일 시 ) 가중치입니다.
+	사용할 수 있는 스킬의 각 가중치를 모두 더한 뒤 각 스킬의 가중치 퍼센트 만큼 결정합니다.
+	(ex, 사용할 수 있는 2개의 스킬 가중치가 10, 10이면 50% 확률) 
+	낮은 체력일 시 SO에서 회복 가중치를 높게 넣으면 됩니다.
+
+====================================================================================================================
+
+
+	# CMonsterBrain.Decide 를 통해 → Pass / Play 를 판단합니다
+
+		brain.Decide(_entity, combatEntities)가 생존 후보(CollectAliveEntity)를 모으고, 
+		사용 가능 스킬(CollectUsableSkillEntities)을 검증한 뒤 
+		스킬 욕구 → 타겟 욕구 순서로 CMonsterBrainDecision을 반환합니다.
+
+==========================================================================
+
+EX) 	@@ 예시 @@
+	# CCombatStateManager.cs의 경우
+
+		Decision == EBrainDecisionType.Pass이거나 유효한 스킬/대상이 없으면 
+		CCombatStateManager.Instance.TurnOver()를 호출해 턴을 종료합니다.
+
+		Decision == EBrainDecisionType.Play이면 
+		선택된 SelectedSkill(CSkillDataSO)과 TargetUnits(List<CEntityRuntimeData>)를 사용해 
+		스킬을 실행하고 TurnOver()로 턴을 넘깁니다
+		
+		
+		CMonsterBrainDecision decision = brain.Decide(_entity, combatEntities);
+		
+		
+		
+====================================================================================================================
+@@	2  @@ ========================================================== 		
+	예시)
+		// CEntityRuntimeData 내부에 브레인 참조 추가 필요
+		private CMonsterBrain _monsterBrain;
+
+		public CMonsterBrain MonsterBrain { get; set; }
+		
+====================================================================================================================
+@@	3  @@ ========================================================== 		
+	예시)		
+		CCombatCurrentTurn의 경우
+		private void ExecuteEnemyTurn()
+		{
+			CCombatStateManager stateManager = CCombatStateManager.Instance;
+			List<CEntityRuntimeData> combatEntities = stateManager != null ? stateManager.OnCombatEntities : null;
+			CMonsterBrain brain = _entity != null ? _entity.MonsterBrain : null;
+
+			if (brain == null || combatEntities == null || combatEntities.Count == 0)
+			{
+				stateManager?.TurnOver();
+				return;
+			}
+
+			// 여기서부터 ai 반영 
+			CMonsterBrainDecision decision = brain.Decide(_entity, combatEntities);
+
+			// 사용 가능 스킬이 없거나 판단 실패 시 Pass -> 즉시 턴 종료
+			if (
+				decision == null ||
+				decision.Decision == EBrainDecisionType.Pass ||
+				decision.SelectedSkill == null ||
+				decision.TargetUnits.Count == 0
+				)
+			{
+				// Pass 처리 (턴 넘김, 대기 연출 등)
+				stateManager?.TurnOver();
+				return;
+			}
+
+			// Play -> 광역 여부 어떻게 되는지 잘 모르겠습니다.
+			if (decision.SelectedSkill.AOE)
+			{
+				decision.SelectedSkill.UseSKill(_entity, decision.TargetUnits);
+			}
+			else
+			{
+				decision.SelectedSkill.UseSKill(_entity, decision.TargetUnits[0]);
+			}
+
+			stateManager?.TurnOver();
+			
+			/*
+			//적용은 이렇게 됩니다.
+			//선택한 스킬
+			CSkillDataSO skill = decision.SelectedSkill;
+			// 선택한 타겟
+			List<CEntityRuntimeData> targets = decision.TargetUnits;
+			*/
+		}
+====================================================================================================================
+
+		
+
+
+
+
