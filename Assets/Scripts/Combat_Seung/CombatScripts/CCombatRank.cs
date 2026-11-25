@@ -29,6 +29,8 @@ public class CCombatRank : MonoBehaviour
 
 
 
+
+    private Transform _entityTransform;
     private int _rank;
     private bool _targetable = false;
     private ICombatData _combatData;
@@ -36,6 +38,8 @@ public class CCombatRank : MonoBehaviour
     #region 프로퍼티
     public ICombatData CombatData => _combatData;
     public bool Targetable => _targetable;
+
+    public Transform EntityTransform => _entityTransform;
 
     #endregion
 
@@ -244,7 +248,7 @@ public class CCombatRank : MonoBehaviour
         return _entityRuntimeData.GetStat(status);
     }
 
-    private void OnOffIndicator(CEntityRuntimeData data)
+    public void OnOffIndicator(CEntityRuntimeData data)
     {
         if (_entityRuntimeData == data)
         {
@@ -266,4 +270,17 @@ public class CCombatRank : MonoBehaviour
         }
     }
 
+    public void SetTargetRank()
+    {
+        _targetable = true;
+        if (_targetIndicator != null)
+        {
+            _targetIndicator.SetActive(true);
+        }
+    }
+
+    public void InputEntityTransform(Transform tr)
+    {
+        _entityTransform = tr;
+    }
 }

@@ -67,8 +67,15 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     private bool _hero = true;
     private float _extraCritical = 0f;
 
+    private CMonsterBrain _monsterBrain;
+
+    // 프로퍼티
+
     public string EntityName => _name;
     public string Race => _race;
+
+    public CMonsterBrain MonsterBrain { get; set; }
+
 
 
     // 이벤트

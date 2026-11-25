@@ -42,6 +42,7 @@ public class CombatHeroSpawner : MonoBehaviour
 
     private bool _completeSpawned = false;
 
+
     // 프로퍼티
 
     public List<CEntityRuntimeData> SpawnedHeroData => _spawnedHeroData;
@@ -160,9 +161,6 @@ public class CombatHeroSpawner : MonoBehaviour
             runtimeData.Init(heroDataSO, rank, heroSaveData.CurrentHP, heroSaveData.CurrentStress);
         }
 
-
-        //CEntityRuntimeData spawnHero = new CEntityRuntimeData();
-
         // 런타임 데이터에 데이터 추가하고
         if (runtimeData != null)
         {
@@ -190,6 +188,7 @@ public class CombatHeroSpawner : MonoBehaviour
 
         // 위치, 회전, 스케일 값 고정
         spawnModel.transform.localPosition = Vector3.zero;
+        _heroRanks[heroSaveData.PartySlotIndex].InputEntityTransform(spawnModel.transform);
         spawnModel.transform.localRotation = Quaternion.Euler(0, _rotationAngle, 0);
         spawnModel.transform.localScale = spawnModel.transform.localScale * _scaleMulti;
 

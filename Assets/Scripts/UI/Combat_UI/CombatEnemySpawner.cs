@@ -74,11 +74,7 @@ public class CombatEnemySpawner : MonoBehaviour
             _spawnEnemies = mainGroup.EnemyBasicData;
 
             EnemyModelSpawn();
-
         }
-
-
-
     }
 
     public void EnemyModelSpawn()
@@ -99,6 +95,16 @@ public class CombatEnemySpawner : MonoBehaviour
 
             // 런타임 데이터 가져오고
             CEntityRuntimeData runtimeData = spawnEnemy.GetComponent<CEntityRuntimeData>();
+
+            // 몬스터 AI 주입시키고
+            CMonsterBrain monsterAI = new CMonsterBrain();
+
+            // 리스트에 욕망 추가하고
+            monsterAI.SkillDesireSet.Add(new CSkillSelectionSelfHpWeighted());
+            monsterAI.TargetDesireSet.Add(new CTargetSelectionHpRatioWeighted());
+
+            // 런타임데이터에 할당
+            runtimeData.MonsterBrain = monsterAI;
 
             // HUD UI소환
             CombatEntityHUD hudUI = Instantiate(_hudPrefab, _spawnPoints[i].transform);
