@@ -129,6 +129,12 @@ public class CCombatInputHandler : MonoBehaviour
 
                 break;
 
+            case ECombatSelectType.Move:
+
+                _stateManager.CombatCurrentTurn.SelectedSkill.InputTargetData(entityData);
+
+                break;
+
             default:
                 break;
         }

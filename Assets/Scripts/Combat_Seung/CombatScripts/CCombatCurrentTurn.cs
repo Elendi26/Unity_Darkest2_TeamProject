@@ -8,7 +8,8 @@ public enum ECombatSelectType
 {
     None,
     Entity,
-    Entities
+    Entities,
+    Move
 }
 
 public class CCombatCurrentTurn : MonoBehaviour
@@ -76,8 +77,10 @@ public class CCombatCurrentTurn : MonoBehaviour
         {
             CPrint.Log("적 몬스터 턴 진입");
             // 임시로 일단 적군 턴은 넘기기
-            CCombatManager.Instance.TurnOver();
+            //CCombatManager.Instance.TurnOver();
             // 적 AI 행동패턴 추가
+
+            ExecuteEnemyTurn();
         }
     }
 
@@ -103,9 +106,17 @@ public class CCombatCurrentTurn : MonoBehaviour
 
     public void SkillSelect(CombatSkillSlot_UI slot)
     {
-        if(slot != null && slot.SlotType != ESlotTypes.TurnChange)
+        if( slot != null)
         {
-            InputSelectedSkillData(slot.SkillData);
+            if(slot.SlotType == ESlotTypes.Skill)
+            {
+                InputSelectedSkillData(slot.SkillData);
+            }
+        
+            if(slot.SlotType == ESlotTypes.Move)
+            {
+                InputSelectedMove(_entity);
+            }
         }
     }
 
@@ -125,10 +136,68 @@ public class CCombatCurrentTurn : MonoBehaviour
 
             _seletedSkill.InputSelectedSkill(_entity, skillData);
         }
+    
     }
+
+    public void InputSelectedMove(CEntityRuntimeData entity)
+    {
+        _selectType = ECombatSelectType.Move;
+
+        _seletedSkill.InputMoveSlot(_entity);
+    }
+
 
     public void StateReset()
     {
         _selectType = ECombatSelectType.None;
+    }
+
+    private void ExecuteEnemyTurn()
+    {
+        CCombatManager stateManager = CCombatManager.Instance;
+        List<CEntityRuntimeData> combatEntities = stateManager != null ? stateManager.OnCombatEntities : null;
+        CMonsterBrain brain = _entity != null ? _entity.MonsterBrain : null;
+
+        if (brain == null || combatEntities == null || combatEntities.Count == 0)
+        {
+            stateManager?.TurnOver();
+            return;
+        }
+
+        // 여기서부터 ai 반영 
+        CMonsterBrainDecision decision = brain.Decide(_entity, combatEntities);
+
+        // 사용 가능 스킬이 없거나 판단 실패 시 Pass -> 즉시 턴 종료
+        if (
+            decision == null ||
+            decision.Decision == EBrainDecisionType.Pass ||
+            decision.SelectedSkill == null ||
+            decision.TargetUnits.Count == 0
+            )
+        {
+            // Pass 처리 (턴 넘김, 대기 연출 등)
+            stateManager?.TurnOver();
+            return;
+        }
+
+        // Play -> 광역 여부 어떻게 되는지 잘 모르겠습니다.
+        if (decision.SelectedSkill.AOE)
+        {
+            decision.SelectedSkill.UseSKill(_entity, decision.TargetUnits);
+        }
+        else
+        {
+            decision.SelectedSkill.UseSKill(_entity, decision.TargetUnits[0]);
+        }
+
+        stateManager?.TurnOver();
+
+        /*
+        //적용은 이렇게 됩니다.
+        //선택한 스킬
+        CSkillDataSO skill = decision.SelectedSkill;
+        // 선택한 타겟
+        List<CEntityRuntimeData> targets = decision.TargetUnits;
+        */
     }
 }

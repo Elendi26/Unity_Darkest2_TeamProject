@@ -43,6 +43,39 @@ public class CCombatSelectedSkill : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 이동을 눌렀을 때
+    /// </summary>
+    /// <param name="mover"></param>
+    public void InputMoveSlot(CEntityRuntimeData mover)
+    {
+        // 인디케이터 다 끄고
+        OffIndicator();
+
+        _entity = mover;
+
+        // 현재 랭크를 정수로 가져오기
+        int currentRank = (int)mover.GetRank();
+
+        int moveMask = ((((int)currentRank << 1) | ((int)currentRank >> 1)) & 15) & ~(int)currentRank;
+
+        if (_currentTurn.SelectType == ECombatSelectType.Move)
+        {
+            for (int i = 0; i < _teamRanks.Length; i++)
+            {
+                bool canMoveRank = (moveMask & (1 << i)) != 0 && _teamRanks[i].GetEntityRuntimeData() != null;
+
+                if (canMoveRank)
+                {
+                    _teamRanks[i].SetTargetRank();
+
+                }
+
+            }
+        }
+
+    }
+
     private void CheckTarget()
     {
         CPrint.Log("스킬의 대상을 선택하세요");
@@ -78,27 +111,94 @@ public class CCombatSelectedSkill : MonoBehaviour
 
     public void InputTargetData(ICombatData combatData)
     {
-        if (combatData is CEntityRuntimeData target && !target.IsDead())
+        if (combatData is CEntityRuntimeData target )
         {
-            for(int i = 0; i< _teamRanks.Length;  i++)
+            if(_currentTurn.SelectType != ECombatSelectType.Move)
             {
-                if (
-                    _teamRanks[i] != null && _teamRanks[i].Targetable == true && _teamRanks[i].GetEntityRuntimeData() == target ||
-                    _enemyRanks[i] != null && _enemyRanks[i].Targetable == true && _enemyRanks[i].GetEntityRuntimeData() == target
-                    )
+                if(!target.IsDead())
                 {
-                    _skillData.UseSKill(_entity, target);
+                    for (int i = 0; i < _teamRanks.Length; i++)
+                    {
+                        if (
+                            _teamRanks[i] != null && _teamRanks[i].Targetable == true && _teamRanks[i].GetEntityRuntimeData() == target ||
+                            _enemyRanks[i] != null && _enemyRanks[i].Targetable == true && _enemyRanks[i].GetEntityRuntimeData() == target
+                            )
+                        {
+                            _skillData.UseSKill(_entity, target);
 
-                    OffIndicator();
+                            OffIndicator();
 
-                    _currentTurn.StateReset();
+                            _currentTurn.StateReset();
 
-                    CCombatManager.Instance.TurnOver();
+                            CCombatManager.Instance.TurnOver();
 
-                    return;
+                            return;
+                        }
+
+                    }
                 }
-
+                
             }
+
+            // 이동버튼 눌렀을 경우
+            else if(_currentTurn.SelectType == ECombatSelectType.Move)
+            {
+                CCombatRank fromRank = null;
+
+                for (int i = 0; i < _teamRanks.Length; i++)
+                {
+                    if( _teamRanks[i] != null && _teamRanks[i].Targetable == true && _teamRanks[i].GetEntityRuntimeData() == target)
+                    {
+
+                        CCombatRank toRank = _teamRanks[i];
+
+                        for(int j = 0; j < _teamRanks.Length; j++)
+                        {
+                            if(_teamRanks[j].GetEntityRuntimeData() == _entity)
+                            {
+                                fromRank = _teamRanks[j];
+
+                                break;
+                            }
+                        }
+
+                        if( fromRank == null)
+                        {
+                            return;
+                        }
+
+                        ERank tempRank = _entity.GetRank();
+                        
+                        _entity.ChangeRank(target.GetRank());
+
+                        target.ChangeRank(tempRank);
+                        fromRank.InputEntityData(target);
+                        toRank.InputEntityData(_entity);
+
+                        Transform moverTransform = fromRank.EntityTransform;
+                        Transform targetTransform = toRank.EntityTransform;
+
+                        if (moverTransform != null && targetTransform != null)
+                        {
+                            Vector3 tempPos = moverTransform.position;
+                            moverTransform.position = targetTransform.position;
+                            targetTransform.position = tempPos;
+                        }
+
+                        fromRank.InputEntityTransform(targetTransform);
+                        toRank.InputEntityTransform(moverTransform);
+
+                        OffIndicator();
+
+                        _currentTurn.StateReset();
+
+                        CCombatManager.Instance.TurnOver();
+
+                        return;
+                    }
+                }
+            }
+
         }
     }
 
