@@ -9806,34 +9806,54 @@ MonoBehaviour:
   - {fileID: 1000000000000000003, guid: dcae032e8734f5639ab20d12323c3660, type: 3}
   - {fileID: 1000000000000000003, guid: 4455c869487f408615c021ff2751279d, type: 3}
   _entries:
-  - Label: "\uBE48 \uC218\uD480"
-    Weight: 150
+  - Label: "빈 수풀"
+    Weight: 180
     Gold: {x: 0, y: 0}
+    Faction: {x: 0, y: 0}
     Item: {fileID: 0}
     ItemPool: {fileID: 0}
     ItemCount: 1
     FullGold: 0
-  - Label: "\uAE08\uD654 \uC870\uAE08"
-    Weight: 70
-    Gold: {x: 3, y: 8}
+  - Label: "유물 조금"
+    Weight: 45
+    Gold: {x: 1, y: 3}
+    Faction: {x: 0, y: 0}
     Item: {fileID: 0}
     ItemPool: {fileID: 0}
     ItemCount: 1
-    FullGold: 5
-  - Label: "\uAE08\uD654 \uB9CE\uC774"
+    FullGold: 3
+  - Label: "유물 많이"
+    Weight: 8
+    Gold: {x: 4, y: 6}
+    Faction: {x: 0, y: 0}
+    Item: {fileID: 0}
+    ItemPool: {fileID: 0}
+    ItemCount: 1
+    FullGold: 3
+  - Label: "패물 조금"
     Weight: 25
-    Gold: {x: 12, y: 20}
+    Gold: {x: 0, y: 0}
+    Faction: {x: 1, y: 3}
     Item: {fileID: 0}
     ItemPool: {fileID: 0}
     ItemCount: 1
-    FullGold: 5
-  - Label: "\uC544\uC774\uD15C"
+    FullGold: 3
+  - Label: "패물 많이"
+    Weight: 5
+    Gold: {x: 0, y: 0}
+    Faction: {x: 4, y: 6}
+    Item: {fileID: 0}
+    ItemPool: {fileID: 0}
+    ItemCount: 1
+    FullGold: 3
+  - Label: "아이템"
     Weight: 4
     Gold: {x: 0, y: 0}
+    Faction: {x: 0, y: 0}
     Item: {fileID: 0}
     ItemPool: {fileID: 11400000, guid: b0875cabfe6ad60c029650995fa5ca2a, type: 2}
     ItemCount: 1
-    FullGold: 5
+    FullGold: 3
   _rarityWeights:
   - 4
   - 2
