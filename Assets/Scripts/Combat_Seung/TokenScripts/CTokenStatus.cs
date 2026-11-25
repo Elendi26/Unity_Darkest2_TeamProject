@@ -67,7 +67,7 @@ public enum ETokenBitMask
     // 체력이 회복되거나 한 번 더 맞을 때 확률적으로 사망하며 소모됨
 }
 
-public class CTokenStatus : MonoBehaviour
+public class CTokenStatus
 {
     private ETokenBitMask _tokenBitMask = ETokenBitMask.None;
     private List<STokenData> _tokenData;
@@ -77,7 +77,7 @@ public class CTokenStatus : MonoBehaviour
     /// <summary>
     /// Resources 사용 중!!!
     /// </summary>
-    private void Awake()
+    public void LoadTokenData()
     {
         CTokenStructDataSO tokenStructData = Resources.Load<CTokenStructDataSO>("Scripts/Combat_Data/TokenDataSO");
 

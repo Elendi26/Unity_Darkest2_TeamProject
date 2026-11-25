@@ -29,6 +29,9 @@ public class CCombatCurrentTurn : MonoBehaviour
 
     #endregion
 
+    // 내부 변수
+    private bool _isExecutingEnemyTurn;
+
     // 이벤트
 
     // 현재 턴이 누구인지 이벤트를 보낸다. (영웅 턴일 때만)
@@ -75,7 +78,7 @@ public class CCombatCurrentTurn : MonoBehaviour
 
         else
         {
-            CPrint.Log("적 몬스터 턴 진입");
+            CPrint.Log($"적 몬스터 턴 진입 {_entity.EntityName}");
             // 임시로 일단 적군 턴은 넘기기
             //CCombatManager.Instance.TurnOver();
             // 적 AI 행동패턴 추가
@@ -154,12 +157,20 @@ public class CCombatCurrentTurn : MonoBehaviour
 
     private void ExecuteEnemyTurn()
     {
+        if(_isExecutingEnemyTurn)
+        {
+            return;
+        }
+
+        _isExecutingEnemyTurn = true;
+
         CCombatManager stateManager = CCombatManager.Instance;
         List<CEntityRuntimeData> combatEntities = stateManager != null ? stateManager.OnCombatEntities : null;
         CMonsterBrain brain = _entity != null ? _entity.MonsterBrain : null;
 
         if (brain == null || combatEntities == null || combatEntities.Count == 0)
         {
+            _isExecutingEnemyTurn = false;
             stateManager?.TurnOver();
             return;
         }
@@ -176,6 +187,7 @@ public class CCombatCurrentTurn : MonoBehaviour
             )
         {
             // Pass 처리 (턴 넘김, 대기 연출 등)
+            CPrint.Log("턴 종료");
             stateManager?.TurnOver();
             return;
         }
@@ -183,13 +195,15 @@ public class CCombatCurrentTurn : MonoBehaviour
         // Play -> 광역 여부 어떻게 되는지 잘 모르겠습니다.
         if (decision.SelectedSkill.AOE)
         {
-            //decision.SelectedSkill.SkillExcute(decision.TargetUnits);
+            decision.SelectedSkill.SkillExcute(decision.TargetUnits);
         }
         else
         {
-            //decision.SelectedSkill.SkillExcute(decision.TargetUnits[0]);
+            decision.SelectedSkill.SkillExcute(decision.TargetUnits[0]);
         }
 
+        _isExecutingEnemyTurn = false;
+        CPrint.Log("턴 종료");
         stateManager?.TurnOver();
 
         /*

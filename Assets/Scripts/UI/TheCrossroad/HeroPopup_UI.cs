@@ -82,6 +82,12 @@ public class HeroPopup_UI : MonoBehaviour
 
     private int _currentHeroIndex;
 
+    private bool _isCombatScene;
+
+    private List<CEntityRuntimeData> _combatHeroes = new List<CEntityRuntimeData>();
+
+    private CEntityRuntimeData _currentEntity;
+
     private HeroSaveData _currentHeroSaveData;
 
     private UserProfileData _currentProfileData;
@@ -115,6 +121,12 @@ public class HeroPopup_UI : MonoBehaviour
         {
             _skillSlots[i].OnPopupSkillSlotClicked += SetCombatSkills;
         }
+
+        if(_currentEntity != null)
+        {
+            _currentEntity.ChangedHP += RefreshHp;
+            _currentEntity.ChangedStress += RefreshStress;
+        }
     }
 
 
@@ -124,10 +136,25 @@ public class HeroPopup_UI : MonoBehaviour
         {
             _skillSlots[i].OnPopupSkillSlotClicked -= SetCombatSkills;
         }
+
+        if (_currentEntity != null)
+        {
+            _currentEntity.ChangedHP -= RefreshHp;
+            _currentEntity.ChangedStress -= RefreshStress;
+        }
     }
 
     public void OpenPopup(List<CEntityBasicDataSO> list, int startIndex)
     {
+        _isCombatScene = false;
+
+        if (_currentEntity != null)
+        {
+            _currentEntity.ChangedHP -= RefreshHp;
+            _currentEntity.ChangedStress -= RefreshStress;
+        }
+
+        _currentEntity = null;
         _currentHeroIndex = startIndex;
         _heroes = list;
         HeroDataUpdate(list[_currentHeroIndex]);
@@ -199,6 +226,80 @@ public class HeroPopup_UI : MonoBehaviour
         RefreshSkillUI();
     }
 
+    /// <summary>
+    /// 전투씬에서 영웅 팝업UI를 켤경우
+    /// </summary>
+    /// <param name="data"></param>
+    public void OpenPopupinCombatScene(List<CEntityRuntimeData> list, int startIndex)
+    {
+        _isCombatScene = true;
+
+        if (_currentEntity != null)
+        {
+            _currentEntity.ChangedHP -= RefreshHp;
+            _currentEntity.ChangedStress -= RefreshStress;
+        }
+
+        _currentHeroIndex = startIndex;
+        _combatHeroes = list;
+        CombatHeroDataUpdate(list[_currentHeroIndex]);
+
+    }
+
+    public void CombatHeroDataUpdate(CEntityRuntimeData data)
+    {
+        if (data == null)
+        {
+            return;
+        }
+
+        _currentHeroSaveData = null;
+        _currentHeroDataSO = data.HeroBasicData;
+
+        _currentEntity = data;
+
+        // 기존 영웅 구독 해제하고
+        if (_currentEntity != null)
+        {
+            _currentEntity.ChangedHP -= RefreshHp;
+            _currentEntity.ChangedStress -= RefreshStress;
+        }
+
+        // 영웅 데이터 갱신
+        _currentEntity = data;
+
+        // 데이터 갱신 됐으면 구독
+        if (_currentEntity != null)
+        {
+            _currentEntity.ChangedHP += RefreshHp;
+            _currentEntity.ChangedStress += RefreshStress;
+        }
+
+        // 기본으로 출력할 탭은 전투 기술 탭
+        SelectTab(PopupTab.CombatSkills);
+
+        // 모델링 갱신
+        if (_modelingViewer != null)
+        {
+            _modelingViewer.ShowModeling(data.HeroBasicData.HeroModel);
+        }
+
+        _bleedingValue.text = data.GetStat(EEntityStat.BleedRes).ToString();
+        _poisoningValue.text = data.GetStat(EEntityStat.BlightRes).ToString();
+        _burnValue.text = data.GetStat(EEntityStat.BurnRes).ToString();
+        _stunValue.text = data.GetStat(EEntityStat.StunRes).ToString();
+        _moveValue.text = data.GetStat(EEntityStat.MoveRes).ToString();
+        _weakeningValue.text = data.GetStat(EEntityStat.DebuffRes).ToString();
+        _diseaseValue.text = data.GetStat(EEntityStat.DiseaseRes).ToString();
+        _deathblowValue.text = data.GetStat(EEntityStat.DeathblowRes).ToString();
+        _stressValue.text = $"{data.GetStat(EEntityStat.Stress)} / {data.GetStat(EEntityStat.MaxStress)}";
+        _heroHP.text = $"{data.GetStat(EEntityStat.HP)} / {data.GetStat(EEntityStat.MaxHP)}";
+        _speed.text = data.GetStat(EEntityStat.Speed).ToString();
+
+        RefreshSkillUI();
+
+    }
+
     private void CanvasGroupState(CanvasGroup targetCanvas, bool OnCanvas)
     {
         if (targetCanvas == null)
@@ -235,16 +336,34 @@ public class HeroPopup_UI : MonoBehaviour
 
     public void OnClickNextHero()
     {
-        _currentHeroIndex = (_currentHeroIndex + 1) % _heroes.Count;
+        if(_isCombatScene)
+        {
+            _currentHeroIndex = (_currentHeroIndex + 1) % _combatHeroes.Count;
+            CombatHeroDataUpdate(_combatHeroes[_currentHeroIndex]);
+        }
 
-        HeroDataUpdate(_heroes[_currentHeroIndex]);
+        else
+        {
+            _currentHeroIndex = (_currentHeroIndex + 1) % _heroes.Count;
+            HeroDataUpdate(_heroes[_currentHeroIndex]);
+        }
+
     }
 
     public void OnClickpreviousHero()
     {
-        _currentHeroIndex = (_currentHeroIndex - 1 + _heroes.Count) % _heroes.Count;
+        if(_isCombatScene)
+        {
+            _currentHeroIndex = (_currentHeroIndex - 1 + _combatHeroes.Count) % _combatHeroes.Count;
+            CombatHeroDataUpdate(_combatHeroes[_currentHeroIndex]);
+        }
 
-        HeroDataUpdate(_heroes[_currentHeroIndex]);
+        else
+        {            
+            _currentHeroIndex = (_currentHeroIndex - 1 + _heroes.Count) % _heroes.Count;
+            HeroDataUpdate(_heroes[_currentHeroIndex]);
+        }
+
     }
 
     /// <summary>
@@ -254,6 +373,12 @@ public class HeroPopup_UI : MonoBehaviour
     public void SetCombatSkills(int skillIndex)
     {
         if (_currentHeroSaveData == null || _currentHeroDataSO == null)
+        {
+            return;
+        }
+
+        // 현재 전투 씬일 경우 해당 함수는 사용 불가
+        if(_isCombatScene)
         {
             return;
         }
@@ -321,6 +446,16 @@ public class HeroPopup_UI : MonoBehaviour
 
         }
       
+    }
+
+    public void RefreshHp(float currentHP, float maxHP)
+    {
+        _heroHP.text = $"{currentHP.ToString()} / {maxHP.ToString()}";
+    }
+
+    public void RefreshStress(float currentStress, float maxStress)
+    {
+        _stressValue.text = $"{currentStress.ToString()} / {maxStress.ToString()}";
     }
 
 

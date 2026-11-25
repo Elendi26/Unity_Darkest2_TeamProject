@@ -79,11 +79,15 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
 
     public CMonsterBrain MonsterBrain { get; set; }
 
+    public CEntityBasicDataSO HeroBasicData => _heroBasicData;
+
 
 
     // 이벤트
 
     public event Action<float, float> ChangedHP;
+
+    public event Action<float, float> ChangedStress;
 
     private void Awake()
     {
@@ -131,6 +135,8 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
 
         _animator = _heroBasicData.Animator;
 
+        _tokenStatus.LoadTokenData();
+
         Debug.Log($"[{_name}] 런타임 데이터 초기화 완료 (MaxHP: {_currentHP}, Speed: {_speed})");
     }
 
@@ -153,6 +159,8 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             case EEntityStat.Stress:
                 _currentStress += Mathf.RoundToInt(amount);
                 _currentStress = Mathf.Clamp(_currentStress, 0, 10);
+                ChangedStress?.Invoke(GetStat(EEntityStat.Stress), GetStat(EEntityStat.MaxStress));
+
                 if (_currentStress >= 10) OnMeltdown();
                 break;
             case EEntityStat.MaxStress:

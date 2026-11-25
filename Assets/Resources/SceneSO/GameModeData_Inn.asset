@@ -15,11 +15,11 @@ MonoBehaviour:
   _id: Inn
   _modeName: Inn Mod
   _sceneReference:
-    m_AssetGUID: 
+    m_AssetGUID: 35b53634d4dd74c4b9dd1673ae2ac956
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  _sceneAddress: Inn
+  _sceneAddress: Assets/Scenes/Inn/Inn.unity
   _loadMode: 1
   _useFade: 1
   _isActiveMode: 0

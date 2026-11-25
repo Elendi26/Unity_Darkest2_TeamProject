@@ -11,8 +11,10 @@ public class CRoadLootSpawner : MonoBehaviour
 	[SerializeField] private CRoadLootBush[] _bushPrefabs;
 	[SerializeField] private CRoadLootEntry[] _entries =
 	{
-		new CRoadLootEntry { Label = "유물 조금", Weight = 6, Gold = new Vector2Int(3, 8) },
-		new CRoadLootEntry { Label = "유물 많이", Weight = 2, Gold = new Vector2Int(12, 20) },
+		new CRoadLootEntry { Label = "유물 조금", Weight = 6, Gold = new Vector2Int(2, 5) },
+		new CRoadLootEntry { Label = "유물 많이", Weight = 2, Gold = new Vector2Int(6, 10) },
+		new CRoadLootEntry { Label = "패물 조금", Weight = 4, Gold = Vector2Int.zero, Faction = new Vector2Int(2, 5) },
+		new CRoadLootEntry { Label = "패물 많이", Weight = 1, Gold = Vector2Int.zero, Faction = new Vector2Int(6, 10) },
 	};
 	// 아이템 목록에서 뽑을 때 희귀도별 비중 (흔함·드묾·희귀·전설 순)
 	[SerializeField] private float[] _rarityWeights = { 4f, 2f, 1f, 0.5f };
@@ -372,12 +374,27 @@ public class CRoadLootSpawner : MonoBehaviour
 		int gained = gold > 0 ? _controller.RunData.Add(ERunValue.Gold, gold) : 0;
 		string goldText = gained > 0 ? $"유물 +{gained}" : null;
 
-		if (itemText != null && goldText != null)
+		int faction = entry.Faction.y > 0 ? Random.Range(entry.Faction.x, Mathf.Max(entry.Faction.x, entry.Faction.y) + 1) : 0;
+		int factionGained = faction > 0 ? _controller.RunData.Add(ERunValue.Faction, faction) : 0;
+		string factionText = factionGained > 0 ? $"패물 +{factionGained}" : null;
+
+		// 아이템 → 유물 → 패물 순으로 한 줄씩
+		string message = itemText;
+
+		message = JoinLine(message, goldText);
+		message = JoinLine(message, factionText);
+
+		return message;
+	}
+
+	private static string JoinLine(string head, string line)
+	{
+		if (string.IsNullOrEmpty(line))
 		{
-			return $"{itemText}\n{goldText}";
+			return head;
 		}
 
-		return itemText ?? goldText;
+		return string.IsNullOrEmpty(head) ? line : $"{head}\n{line}";
 	}
 	#endregion
 

@@ -336,10 +336,6 @@ public class TheCrossroadManager : MonoBehaviour
             _heroPopupCanvas.blocksRaycasts = true;
             _heroPopupCanvas.interactable = true;
         }
-
-        
-
-
     }
     
     /// <summary>
