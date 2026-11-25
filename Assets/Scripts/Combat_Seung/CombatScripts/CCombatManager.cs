@@ -34,6 +34,10 @@ public class CCombatManager : MonoBehaviour
     [Header("적 스포너 참조")]
     [SerializeField] private CombatEnemySpawner _enemyspawner;
 
+    [Header("영웅 팝업 UI 캔버스")]
+    [SerializeField] private CanvasGroup _heroPopupCanvasG;
+
+
     #endregion
 
     #region 내부변수
@@ -46,6 +50,8 @@ public class CCombatManager : MonoBehaviour
 
     private bool _isStartCombat = false;
 
+    private bool _onPopup;
+
     #endregion
 
     #region 프로퍼티
@@ -57,6 +63,8 @@ public class CCombatManager : MonoBehaviour
         set => _orderedTurn = value;
     }
     public CCombatCurrentTurn CombatCurrentTurn => _currentTurn;
+
+    public bool OnPopup => _onPopup;
 
     #endregion
 
@@ -71,9 +79,24 @@ public class CCombatManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
 
-        // 먼저 스포너가 영웅과 적을 스폰하게 하고, 매커니즘 함수를 호출하는 순서가 필요할 것 같아서 주석으로 처리하고 수정합니다.
-        //CombatMechanism();
+    private void Start()
+    {
+
+        if (_heroPopupCanvasG == null && HeroPopup_UI.instance != null)
+        {
+            _heroPopupCanvasG = HeroPopup_UI.instance.GetComponent<CanvasGroup>();
+        }
+
+        _onPopup = false;
+        if(_heroPopupCanvasG != null)
+        {
+            _heroPopupCanvasG.alpha = 0f;
+            _heroPopupCanvasG.interactable = false;
+            _heroPopupCanvasG.blocksRaycasts = false;
+        }
+
     }
 
     private void OnEnable()
@@ -296,6 +319,40 @@ public class CCombatManager : MonoBehaviour
     {
         _heroNameText.text = data.EntityName;
     }
+
+    /// <summary>
+    /// 영웅 모델링 우클릭했을 경우 팝업 ui 켜기
+    /// </summary>
+    /// <param name="data"></param>
+    public void HeroRightClicked(CEntityRuntimeData data)
+    {
+        _heroSpawner.SpawnedHeroData.IndexOf(data);
+
+        HeroPopup_UI.instance.OpenPopupinCombatScene(_heroSpawner.SpawnedHeroData, _heroSpawner.SpawnedHeroData.IndexOf(data));
+
+        if (_heroPopupCanvasG != null)
+        {
+            _onPopup = true;
+            _heroPopupCanvasG.alpha = 1f;
+            _heroPopupCanvasG.blocksRaycasts = true;
+            _heroPopupCanvasG.interactable = true;
+        }
+    }
+
+    /// <summary>
+    /// 팝업 창 닫고 닫기 전 마지막으로 띄워놓은 영웅 데이터로 리셋
+    /// </summary>
+    public void ExitPopup()
+    {
+        if (_heroPopupCanvasG != null)
+        {
+            _onPopup = false;
+            _heroPopupCanvasG.alpha = 0f;
+            _heroPopupCanvasG.blocksRaycasts = false;
+            _heroPopupCanvasG.interactable = false;
+        }
+    }
+
 }
 
 
