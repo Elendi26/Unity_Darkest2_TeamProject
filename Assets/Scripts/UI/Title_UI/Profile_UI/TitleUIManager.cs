@@ -105,6 +105,8 @@ public class TitleUIManager : MonoBehaviour
 
     private void DeleteProfile(int slotIndex)
     {
+        bool isCurrent = slotIndex == DataSaveManager.Instance.CurrentSlotIndex;
+
         // 디스크에 저장된 데이터 삭제하고
         DataSaveManager.Instance.DeleteSaveData(slotIndex);
 
@@ -114,8 +116,6 @@ public class TitleUIManager : MonoBehaviour
         // 선택되어있던 슬롯이라면 초기화 후 고해 UI에도 전달
         if (slotIndex == DataSaveManager.Instance.CurrentSlotIndex)
         {
-            DataSaveManager.Instance.CurrentSlotIndex = -1;
-
             _confessionUI.MenuUpdate(null);
         }
         
