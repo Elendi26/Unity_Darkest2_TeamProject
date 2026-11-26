@@ -1,41 +1,41 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class CMapController : MonoBehaviour
 {
-    #region ì¸ìŠ¤í™í„°
+    #region ÀÎ½ºÆåÅÍ
     [SerializeField] private CMapConfig _config;
-    // ê³ ì • ì§€ë„ (íŠœí† ë¦¬ì–¼ ë“±). ë„£ìœ¼ë©´ _config ë¬´ì‘ìœ„ ìƒì„± ëŒ€ì‹  ì´ ì§€ë„ë¥¼ ì“´ë‹¤
+    // °íÁ¤ Áöµµ (Æ©Åä¸®¾ó µî). ³ÖÀ¸¸é _config ¹«ÀÛÀ§ »ı¼º ´ë½Å ÀÌ Áöµµ¸¦ ¾´´Ù
     [SerializeField] private CFixedMapData _fixedMap;
-    // IRoadTravelProvider ë¥¼ êµ¬í˜„í•œ ì»´í¬ë„ŒíŠ¸ (ì—­ë§ˆì°¨ ë“±). ë¹„ìš°ë©´ ì´ë™ ì—†ì´ ë°”ë¡œ ë„ì°©
+    // IRoadTravelProvider ¸¦ ±¸ÇöÇÑ ÄÄÆ÷³ÍÆ® (¿ª¸¶Â÷ µî). ºñ¿ì¸é ÀÌµ¿ ¾øÀÌ ¹Ù·Î µµÂø
     [SerializeField, FormerlySerializedAs("_stagecoachController")] private MonoBehaviour _travelSource;
-    [SerializeField] private MonoBehaviour[] _handlerSources;	// INodeHandler ë¥¼ êµ¬í˜„í•œ ì»´í¬ë„ŒíŠ¸ (ì „íˆ¬Â·ìƒì  ë“±). ì—†ëŠ” ì¢…ë¥˜ëŠ” í†µê³¼ ì²˜ë¦¬
+    [SerializeField] private MonoBehaviour[] _handlerSources;	// INodeHandler ¸¦ ±¸ÇöÇÑ ÄÄÆ÷³ÍÆ® (ÀüÅõ¡¤»óÁ¡ µî). ¾ø´Â Á¾·ù´Â Åë°ú Ã³¸®
     [SerializeField] private int _seed = 0;
-    // ë…¸ë“œ ì´ë²¤íŠ¸ë¥¼ ë„ìš¸ íŒì—…. ë¹„ìš°ë©´ ì”¬ì—ì„œ ì°¾ëŠ”ë‹¤
+    // ³ëµå ÀÌº¥Æ®¸¦ ¶ç¿ï ÆË¾÷. ºñ¿ì¸é ¾À¿¡¼­ Ã£´Â´Ù
     [SerializeField] private CRoadEventPopup _eventPopup;
-    // ìƒì  í™”ë©´. ë¹„ìš°ë©´ ì”¬ì—ì„œ ì°¾ëŠ”ë‹¤
+    // »óÁ¡ È­¸é. ºñ¿ì¸é ¾À¿¡¼­ Ã£´Â´Ù
     [SerializeField] private CShopView _shopView;
     #endregion
 
-    #region ì´ë²¤íŠ¸
+    #region ÀÌº¥Æ®
     public event Action<CMapRunner> OnRunnerCreated;
     #endregion
 
-    #region ë‚´ë¶€ ë³€ìˆ˜
+    #region ³»ºÎ º¯¼ö
     private CMapRunner _runner;
     #endregion
 
-    // ì§„í–‰ ì¤‘ì¸ ë§µ ëŸ°ë„ˆ
+    // ÁøÇà ÁßÀÎ ¸Ê ·±³Ê
     public CMapRunner Runner => _runner;
 
-    // ì—°ê²°í•œ ì»´í¬ë„ŒíŠ¸ê°€ ì´ë™ ë‹´ë‹¹ì´ ì•„ë‹ˆë©´ ì—ë””í„°ì—ì„œ ë°”ë¡œ ì•Œë¦°ë‹¤
+    // ¿¬°áÇÑ ÄÄÆ÷³ÍÆ®°¡ ÀÌµ¿ ´ã´çÀÌ ¾Æ´Ï¸é ¿¡µğÅÍ¿¡¼­ ¹Ù·Î ¾Ë¸°´Ù
     private void OnValidate()
     {
         if (_travelSource != null && !(_travelSource is IRoadTravelProvider))
         {
-            CPrint.Warn($"CMapController : {_travelSource.name} ì€ IRoadTravelProvider ê°€ ì•„ë‹™ë‹ˆë‹¤.");
+            CPrint.Warn($"CMapController : {_travelSource.name} Àº IRoadTravelProvider °¡ ¾Æ´Õ´Ï´Ù.");
         }
     }
 
@@ -59,12 +59,12 @@ public class CMapController : MonoBehaviour
         _runner.Begin();
     }
 
-    // IRoadTravelProvider ì¸í„°í˜ì´ìŠ¤ë¡œë§Œ ì´ë™ ë‹´ë‹¹ì„ êº¼ë‚¸ë‹¤
+    // IRoadTravelProvider ÀÎÅÍÆäÀÌ½º·Î¸¸ ÀÌµ¿ ´ã´çÀ» ²¨³½´Ù
     private IRoadTravel GetTravel()
     {
         if (_travelSource == null)
         {
-            CPrint.Warn("CMapController : ì´ë™ ë‹´ë‹¹ì´ ì—°ê²°ë˜ì§€ ì•Šì•„ ì´ë™ ì—†ì´ ë°”ë¡œ ë„ì°©í•©ë‹ˆë‹¤.");
+            CPrint.Warn("CMapController : ÀÌµ¿ ´ã´çÀÌ ¿¬°áµÇÁö ¾Ê¾Æ ÀÌµ¿ ¾øÀÌ ¹Ù·Î µµÂøÇÕ´Ï´Ù.");
             return null;
         }
 
@@ -72,7 +72,7 @@ public class CMapController : MonoBehaviour
 
         if (provider == null)
         {
-            CPrint.Error($"CMapController : {_travelSource.name} ì€ IRoadTravelProvider ê°€ ì•„ë‹™ë‹ˆë‹¤.");
+            CPrint.Error($"CMapController : {_travelSource.name} Àº IRoadTravelProvider °¡ ¾Æ´Õ´Ï´Ù.");
             return null;
         }
 
@@ -88,7 +88,7 @@ public class CMapController : MonoBehaviour
 
         for (int i = 0; i < _handlerSources.Length; i++)
         {
-            // ë¹ˆ ì¹¸ì€ ì¡°ìš©íˆ ë„˜ê¸´ë‹¤
+            // ºó Ä­Àº Á¶¿ëÈ÷ ³Ñ±ä´Ù
             if (_handlerSources[i] == null)
             {
                 continue;
@@ -96,10 +96,10 @@ public class CMapController : MonoBehaviour
 
             INodeHandler handler = _handlerSources[i] as INodeHandler;
 
-            // ì˜ëª» ë„£ì€ ì»´í¬ë„ŒíŠ¸ëŠ” ì•Œë¦°ë‹¤
+            // Àß¸ø ³ÖÀº ÄÄÆ÷³ÍÆ®´Â ¾Ë¸°´Ù
             if (handler == null)
             {
-                CPrint.Warn($"CMapController : {_handlerSources[i]} ì€ INodeHandler ê°€ ì•„ë‹™ë‹ˆë‹¤.");
+                CPrint.Warn($"CMapController : {_handlerSources[i]} Àº INodeHandler °¡ ¾Æ´Õ´Ï´Ù.");
                 continue;
             }
 
@@ -107,7 +107,7 @@ public class CMapController : MonoBehaviour
         }
     }
 
-    // ì´ë²¤íŠ¸ê°€ ë¶™ì€ ë…¸ë“œ ì¢…ë¥˜ëŠ” íŒì—… í•¸ë“¤ëŸ¬ë¡œ ì²˜ë¦¬í•œë‹¤
+    // ÀÌº¥Æ®°¡ ºÙÀº ³ëµå Á¾·ù´Â ÆË¾÷ ÇÚµé·¯·Î Ã³¸®ÇÑ´Ù
     private void RegisterEventHandlers()
     {
         CRunContext ctx = _travelSource is IRunContextProvider provider ? provider.Context : null;
@@ -124,11 +124,11 @@ public class CMapController : MonoBehaviour
 
         if (ctx == null)
         {
-            CPrint.Warn("CMapController : ëŸ° ë°ì´í„°ê°€ ì—†ì–´ ë…¸ë“œ ì´ë²¤íŠ¸ ì—†ì´ í†µê³¼í•©ë‹ˆë‹¤.");
+            CPrint.Warn("CMapController : ·± µ¥ÀÌÅÍ°¡ ¾ø¾î ³ëµå ÀÌº¥Æ® ¾øÀÌ Åë°úÇÕ´Ï´Ù.");
             return;
         }
 
-        // ê³ ì • ì§€ë„ëŠ” ì§€ë„ì— ì“°ì¸ ì¹¸ ì¢…ë¥˜ë§Œ ë“±ë¡í•œë‹¤
+        // °íÁ¤ Áöµµ´Â Áöµµ¿¡ ¾²ÀÎ Ä­ Á¾·ù¸¸ µî·ÏÇÑ´Ù
         if (_fixedMap != null)
         {
             List<CNodeTypeData> types = new List<CNodeTypeData>();
@@ -174,14 +174,14 @@ public class CMapController : MonoBehaviour
 
         CStagecoach stagecoach = _travelSource is IStagecoachProvider provider ? provider.Stagecoach : null;
 
-        // ìƒì  í™”ë©´ì´ ìˆìœ¼ë©´ ìƒì ì´ ì´ë²¤íŠ¸ íŒì—…ë³´ë‹¤ ë¨¼ì €
+        // »óÁ¡ È­¸éÀÌ ÀÖÀ¸¸é »óÁ¡ÀÌ ÀÌº¥Æ® ÆË¾÷º¸´Ù ¸ÕÀú
         if (data.Shop != null && _shopView != null)
         {
             _runner.RegisterHandler(new CShopNodeHandler(data.Type, data.Shop, _shopView, ctx, stagecoach));
             return;
         }
 
-        // ì€ë‹‰ì²˜ â†’ ë’¤ì§€ë©´ ì¬í™”Â·ì•„ì´í…œì„ ë¬´ì‘ìœ„ë¡œ ì–»ëŠ”ë‹¤
+        // Àº´ĞÃ³ ¡æ µÚÁö¸é ÀçÈ­¡¤¾ÆÀÌÅÛÀ» ¹«ÀÛÀ§·Î ¾ò´Â´Ù
         if (data.Cache != null && _eventPopup != null)
         {
             _runner.RegisterHandler(new CCacheNodeHandler(data.Type, data.Cache, _eventPopup, ctx, stagecoach));
