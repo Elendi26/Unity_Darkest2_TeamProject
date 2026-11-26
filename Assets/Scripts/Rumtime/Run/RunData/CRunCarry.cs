@@ -14,11 +14,15 @@ public static class CRunCarry
 	private static CRunSnapshot _pending;
 	#endregion
 
+	// 이번 런에서 교차로 출정으로 파티를 골랐는지 → 세이브에 함께 넣고 이어하기 때 되살린다
+	public static bool PartyChosen { get; private set; }
+
 	// 에디터에서 도메인 리로드를 꺼 둬도 지난 재생의 기록이 남지 않게 비운다
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 	private static void ResetOnPlay()
 	{
 		_pending = null;
+		PartyChosen = false;
 	}
 
 	public static void Save(CRunData runData, CStagecoach stagecoach, string nextScenePath = null)
@@ -32,7 +36,11 @@ public static class CRunCarry
 		_pending = CRunSnapshot.Capture(runData, stagecoach);
 
 		// 파일 저장은 구독한 쪽에 맡긴다 → 런 쪽은 세이브 형식을 몰라도 된다
-		OnRunSaved?.Invoke(_pending.ToSave(nextScenePath));
+		CRunSaveData save = _pending.ToSave(nextScenePath);
+
+		save.PartyChosen = PartyChosen;
+		save.HeroTrinkets = CHeroTrinkets.ToSave();
+		OnRunSaved?.Invoke(save);
 	}
 
 	public static bool Restore(CRunSaveData save)
@@ -43,8 +51,22 @@ public static class CRunCarry
 			return false;
 		}
 
+		PartyChosen = save.PartyChosen;
+		CHeroTrinkets.Restore(save.HeroTrinkets);
 		_pending = CRunSnapshot.FromSave(save);
 		return _pending != null;
+	}
+
+	// 교차로에서 출정했을 때
+	public static void MarkPartyChosen()
+	{
+		PartyChosen = true;
+	}
+
+	// 새 모험을 시작할 때 → 지난 런의 파티는 아직 고르지 않은 것으로
+	public static void ClearPartyChosen()
+	{
+		PartyChosen = false;
 	}
 
 	public static CRunSnapshot Take()

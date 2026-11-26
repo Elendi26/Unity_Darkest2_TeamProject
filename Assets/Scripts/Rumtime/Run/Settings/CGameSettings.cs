@@ -12,6 +12,20 @@ public static class CGameSettings
 	private const string KEY_WIDTH = "Settings.ResolutionWidth";
 	private const string KEY_HEIGHT = "Settings.ResolutionHeight";
 	private const string KEY_FULLSCREEN = "Settings.Fullscreen";
+
+	// 설정 창에서 고를 수 있는 해상도
+	private static readonly Vector2Int[] RESOLUTIONS =
+	{
+		new Vector2Int(2560, 1440),
+		new Vector2Int(1920, 1080),
+		new Vector2Int(1600, 900),
+		new Vector2Int(1366, 768),
+		new Vector2Int(1360, 768),
+		new Vector2Int(1280, 800),
+		new Vector2Int(1280, 768),
+		new Vector2Int(1280, 720),
+		new Vector2Int(1176, 664),
+	};
 	#endregion
 
 	#region 이벤트
@@ -167,29 +181,87 @@ public static class CGameSettings
 		PlayerPrefs.Save();
 	}
 
-	// 고를 수 있는 해상도 (같은 크기의 주사율 차이는 하나로) → 작은 것부터
+	// 고를 수 있는 해상도 → 정해 둔 목록 중 모니터보다 크지 않은 것만, 작은 것부터
 	public static void GetResolutions(List<Vector2Int> result)
 	{
 		result.Clear();
 
+		Vector2Int max = GetMonitorMaxResolution();
+
+		for (int i = 0; i < RESOLUTIONS.Length; i++)
+		{
+			Vector2Int size = RESOLUTIONS[i];
+
+			if (max.x > 0 && (size.x > max.x || size.y > max.y))
+			{
+				continue;
+			}
+
+			result.Add(size);
+		}
+
+		// 모니터가 목록의 가장 작은 것보다도 작으면 → 목록을 그대로 쓴다
+		if (result.Count == 0)
+		{
+			result.AddRange(RESOLUTIONS);
+		}
+
+		result.Sort((a, b) => a.x != b.x ? a.x.CompareTo(b.x) : a.y.CompareTo(b.y));
+	}
+
+	// 목록에 없는 크기(예전에 적용한 값 등)일 때 → 넓이가 가장 가까운 것
+	public static int FindNearestResolution(List<Vector2Int> list, Vector2Int size)
+	{
+		int best = -1;
+		long bestDiff = long.MaxValue;
+		long area = (long)size.x * size.y;
+
+		for (int i = 0; i < list.Count; i++)
+		{
+			long diff = Math.Abs((long)list[i].x * list[i].y - area);
+
+			if (diff < bestDiff)
+			{
+				bestDiff = diff;
+				best = i;
+			}
+		}
+
+		return best;
+	}
+
+	// 지금 모니터의 해상도 (전체 화면은 이 크기로) → 모를 때는 지금 화면 크기
+	public static Vector2Int GetMonitorResolution()
+	{
+		Display display = Display.main;
+
+		if (display != null && display.systemWidth > 0 && display.systemHeight > 0)
+		{
+			return new Vector2Int(display.systemWidth, display.systemHeight);
+		}
+
+		Resolution current = Screen.currentResolution;
+
+		if (current.width > 0 && current.height > 0)
+		{
+			return new Vector2Int(current.width, current.height);
+		}
+
+		return new Vector2Int(Screen.width, Screen.height);
+	}
+
+	// 모니터가 지원하는 가장 큰 크기 → 모를 때는 (0, 0)
+	private static Vector2Int GetMonitorMaxResolution()
+	{
+		Vector2Int max = Vector2Int.zero;
 		Resolution[] resolutions = Screen.resolutions;
 
 		for (int i = 0; i < resolutions.Length; i++)
 		{
-			Vector2Int size = new Vector2Int(resolutions[i].width, resolutions[i].height);
-
-			if (!result.Contains(size))
-			{
-				result.Add(size);
-			}
+			max.x = Mathf.Max(max.x, resolutions[i].width);
+			max.y = Mathf.Max(max.y, resolutions[i].height);
 		}
 
-		// 목록이 비면 지금 크기라도 고를 수 있게 (에디터 Game 창 크기 같은 값이 목록에 끼지 않도록 빌 때만)
-		if (result.Count == 0)
-		{
-			result.Add(new Vector2Int(Screen.width, Screen.height));
-		}
-
-		result.Sort((a, b) => a.x != b.x ? a.x.CompareTo(b.x) : a.y.CompareTo(b.y));
+		return max;
 	}
 }

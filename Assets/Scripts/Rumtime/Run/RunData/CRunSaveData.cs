@@ -30,6 +30,15 @@ public class CRunSaveData
 		public int Count;
 	}
 
+	// 영웅 장신구 한 칸
+	[Serializable]
+	public struct SHeroTrinketSave
+	{
+		public string HeroId;
+		public int Slot;
+		public string ItemId;
+	}
+
 	// 이어하기를 누르면 열 씬 경로
 	public string ScenePath;
 	// 자원 (유물·패물·횃불·바퀴·장갑)
@@ -40,4 +49,8 @@ public class CRunSaveData
 	public List<string> EquippedIds = new List<string>();
 	// 업그레이드로 더 연 슬롯
 	public List<SSlotSave> UnlockedSlots = new List<SSlotSave>();
+	// 이번 런에서 교차로 출정으로 파티를 골랐는지 (주행 화면 아래 파티 줄을 띄운다)
+	public bool PartyChosen;
+	// 영웅이 끼운 장신구
+	public List<SHeroTrinketSave> HeroTrinkets = new List<SHeroTrinketSave>();
 }
