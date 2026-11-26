@@ -861,6 +861,7 @@ public class CGarageView : MonoBehaviour, IInventoryUseHandler
 
 			Place(root, new Vector2(0.5f, 0.5f), new Vector2(x, 0f), new Vector2(_slotSize, _slotSize + 34f));
 			_slots.Add(CreateSlot(root));
+			SetupSlotDrag(root, i);
 			_slotRects.Add(root);
 			_locks.Add(CreateLock(row, i, x));
 		}
@@ -927,6 +928,45 @@ public class CGarageView : MonoBehaviour, IInventoryUseHandler
 
 		slot.Setup(frame, icon, count, price, priceIcon, state, group);
 		return slot;
+	}
+
+	// 짐칸에서 마차 아이템을 끌어와 놓으면 장착, 단 칸을 끌어 짐칸에 놓으면 해제 (짐칸 쪽이 받는다)
+	private void SetupSlotDrag(RectTransform root, int index)
+	{
+		Image highlight = CUIBuilder.CreateImage("DropHighlight", root, null, new Color(1f, 0.8f, 0.4f, 0.3f));
+
+		Place(highlight.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -_slotSize * 0.5f), new Vector2(_slotSize, _slotSize));
+
+		CItemDropZone zone = root.gameObject.AddComponent<CItemDropZone>();
+
+		zone.Setup(CanAcceptDrop, AcceptDrop, highlight);
+
+		CItemDragSource source = root.gameObject.AddComponent<CItemDragSource>();
+
+		source.Setup(() => MakeDragPayload(index));
+	}
+
+	private CItemDragPayload MakeDragPayload(int index)
+	{
+		if (!IsOpen || index < 0 || index >= _coachSlots.Count || _coachSlots[index].Upgrade == null)
+		{
+			return null;
+		}
+
+		return new CItemDragPayload { Source = EItemDragSource.Coach, Item = _coachSlots[index].Upgrade };
+	}
+
+	private bool CanAcceptDrop(CItemDragPayload payload)
+	{
+		return IsOpen && _stagecoach != null && payload.Source == EItemDragSource.Inventory && payload.Item is CStagecoachUpgradeData && _stagecoach.CanEquipFromInventory(payload.InventoryIndex);
+	}
+
+	private void AcceptDrop(CItemDragPayload payload)
+	{
+		if (_stagecoach.TryEquipFromInventory(payload.InventoryIndex) && _logState)
+		{
+			CPrint.Log($"CGarageView : {payload.Item.DisplayName} 끌어서 장착");
+		}
 	}
 
 	private GameObject CreateLock(RectTransform row, int index, float x)

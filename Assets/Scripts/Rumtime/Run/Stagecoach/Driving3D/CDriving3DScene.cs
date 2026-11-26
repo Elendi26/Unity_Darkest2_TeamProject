@@ -51,6 +51,8 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 	[SerializeField, Range(0f, 1f)] private float _forkAutoThrottle = 0.6f;
 	[SerializeField] private bool _debugAlwaysDrive = false;
 	[SerializeField] private bool _logInput = false;
+	[SerializeField] private bool _useIntroFade = true;
+	[SerializeField] private CDriveIntroFade _introFade;
 	#endregion
 
 	#region 내부 변수
@@ -96,6 +98,7 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 
 	private void Start()
 	{
+		SetupIntroFade();
 		SetupDriving();
 
 		if (_inventoryView == null)
@@ -782,6 +785,12 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 
 	private bool CanDrive()
 	{
+		// 시작 연출이 끝나기 전에는 세워 둔다
+		if (_introFade != null && _introFade.IsPlaying)
+		{
+			return false;
+		}
+
 		// 짐칸이 열려 있으면 입력을 막고 브레이크
 		if (_stopWhileInventoryOpen && _inventoryView != null && _inventoryView.IsOpen)
 		{
@@ -800,6 +809,16 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 		}
 
 		return _travel != null && _travel.State == ETravelState.Driving;
+	}
+
+	private void SetupIntroFade()
+	{
+		if (!_useIntroFade || _introFade != null)
+		{
+			return;
+		}
+
+		_introFade = gameObject.AddComponent<CDriveIntroFade>();
 	}
 
 	// 인스펙터에서 바인딩을 따로 안 넣었으면 기본 조작키를 넣는다

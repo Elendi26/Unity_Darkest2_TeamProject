@@ -37,6 +37,7 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
     private readonly Dictionary<AudioSource, CancellationTokenSource> _sfxCtsMap = new Dictionary<AudioSource, CancellationTokenSource>();
 
     private AudioClip _currentLoopClip;
+    private float _modeBgmScale = 1f;
     private CancellationTokenSource _bgmCts;
     #endregion
 
@@ -138,7 +139,7 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
 
     private float GetEffectiveBgmVolume()
     {
-        return _masterVolume * _bgmVolume;
+        return _masterVolume * _bgmVolume * _modeBgmScale;
     }
 
     private float GetEffectiveSfxVolume()
@@ -330,6 +331,8 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
             return;
         }
 
+        _modeBgmScale = modeData.BgmVolumeScale;
+
         AudioClip introClip = modeData.BgmIntroClip;
         AudioClip loopClip = modeData.BgmLoopClip;
 
@@ -383,6 +386,8 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
         {
             return;
         }
+
+        _modeBgmScale = modeData.BgmVolumeScale;
 
         AudioClip outroClip = modeData.BgmOutroClip;
         StopBgm();

@@ -209,6 +209,8 @@ public class CCrossroadNodeHandler : MonoBehaviour, INodeHandler
 			return;
 		}
 
+		// 이번 런 파티가 정해졌다 → 주행 화면 아래 파티 줄이 뜬다
+		CRunCarry.MarkPartyChosen();
 		StartCoroutine(LeaveRoutine());
 	}
 

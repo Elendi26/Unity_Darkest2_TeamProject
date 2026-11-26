@@ -65,13 +65,20 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     public List<SDamageoverTime> _damageoverTime = new List<SDamageoverTime>();
 
     private Animator _animator;
+    private CEntityAnimation _entityAnimation;
+
+
 
     private bool _dead = false;
     private bool _hero = true;
     private float _extraCritical = 0f;
     private bool _isCorpse = false;
     private int _corpseTurn = 1;
+    private float _entityTimeScale = 1f;
+    private Renderer _originRenderer;
+
     private GameObject _entityModel;
+    private GameObject _corpseModel;
 
     private CMonsterBrain _monsterBrain;
 
@@ -81,8 +88,15 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     public string Race => _race;
     public bool IsCorpse => _isCorpse;
     public int CorpseTurn => _corpseTurn;
-   
+    public Animator Animator => _animator;
+    public CEntityAnimation EntityAnimation => _entityAnimation;
+    public float LocalDeltaTime => Time.timeScale * _entityTimeScale;
     
+
+    // 원본 SO데이터에 존재하는 초상화 프로퍼티에 연결
+    public Sprite TurnPortrait => _heroBasicData != null ? _heroBasicData.HeroPortrait : null;
+
+
 
     public CMonsterBrain MonsterBrain { get; set; }
 
@@ -331,8 +345,10 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
 
         InitializeRank(rank);
 
-        Animator tempGM = GetComponentInChildren<Animator>();
-        _entityModel = tempGM.gameObject;
+        // 기존 방식은 콜리더랑 런타임데이터까지 꺼지기 때문에 수정합니다.
+        _animator = GetComponentInChildren<Animator>();
+        _entityAnimation = GetComponentInChildren<CEntityAnimation>();
+        _originRenderer = GetComponentInChildren<Renderer>();
 
 
     }
@@ -448,6 +464,37 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     {
         _animator.SetTrigger(trigger);
     }
+
+    /// <summary>
+    /// 스킬을 사용하지 않고있는 다른 엔티티들의 아이들 애니메이션을 멈추게하기 위한 함수
+    /// </summary>
+    /// <param name="scale"></param>
+    public void ManageLocalTimescale(float scale)
+    {
+        _entityTimeScale = scale;
+
+        if(_animator != null)
+        {
+            _animator.speed = scale;
+        }
+    }
+
+    public void ShowDamageTextUI(float damage)
+    {
+        if(CCombatManager.Instance == null || CCombatManager.Instance.DirectPrefab == null)
+        {
+            CPrint.Warn("인스펙터 참조 오류 인스펙터 확인");
+            return;
+        }
+
+        // 엔티티 머리 윗 부분에 UI 출력
+        Vector3 spawnPos = transform.position + new Vector3(3, 2, 0);
+        CombatDirection_UI directionUI = Instantiate(CCombatManager.Instance.DirectPrefab, spawnPos, Quaternion.identity);
+
+        directionUI.DamageDiretion(damage);
+
+    }
+
 
     public void DestroyCorpse()
     {

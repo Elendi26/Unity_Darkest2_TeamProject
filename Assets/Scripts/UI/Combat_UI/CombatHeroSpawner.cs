@@ -42,7 +42,6 @@ public class CombatHeroSpawner : MonoBehaviour
 
     private bool _completeSpawned = false;
 
-
     // 프로퍼티
 
     public List<CEntityRuntimeData> SpawnedHeroData => _spawnedHeroData;
@@ -117,13 +116,13 @@ public class CombatHeroSpawner : MonoBehaviour
     /// <param name="slotIndex"></param>
     private void HeroModelSpawn(CEntityBasicDataSO heroDataSO, UserProfileData.HeroSaveData heroSaveData)
     {
-        if(heroDataSO == null || heroDataSO.HeroModel == null)
+        if (heroDataSO == null || heroDataSO.HeroModel == null)
         {
             CPrint.Warn("영웅 데이터 혹은 영웅 모델링이 존재하지 않는다.");
             return;
         }
 
-        if(_spawnPoints == null || heroSaveData.PartySlotIndex < 0 || heroSaveData.PartySlotIndex >= _spawnPoints.Length || _spawnPoints[heroSaveData.PartySlotIndex] == null)
+        if (_spawnPoints == null || heroSaveData.PartySlotIndex < 0 || heroSaveData.PartySlotIndex >= _spawnPoints.Length || _spawnPoints[heroSaveData.PartySlotIndex] == null)
         {
             CPrint.Warn("인스펙터가 비어있다. 인스펙터 확인");
             return;
@@ -134,6 +133,14 @@ public class CombatHeroSpawner : MonoBehaviour
 
         // 꺼낸 모델에 부착된 런타임 데이터 가져오기
         CEntityRuntimeData runtimeData = spawnModel.GetComponent<CEntityRuntimeData>();
+
+        // 애니메이터 저장
+        Animator hAnimator = spawnModel.GetComponent<Animator>();
+
+        if (hAnimator != null)
+        {
+            runtimeData.InputAnimator(hAnimator);
+        }
 
         // 랭크에 따른 부여기준 잡고
         ERank rank = ERank.None;

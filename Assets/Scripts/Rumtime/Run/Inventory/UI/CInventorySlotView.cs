@@ -19,6 +19,7 @@ public class CInventorySlotView : MonoBehaviour
 	#region 내부 변수
 	private Action _onClick;
 	private bool _hasItem;
+	private CItemDragSource _drag;
 	#endregion
 
 	private void Awake()
@@ -63,6 +64,17 @@ public class CInventorySlotView : MonoBehaviour
 		{
 			_button.interactable = true;
 		}
+	}
+
+	// 끌어서 다른 칸(정비공·영웅 장신구)에 놓을 때 들 아이템 → null 이면 이 칸은 끌지 않는다
+	public void SetDrag(Func<CItemDragPayload> getPayload)
+	{
+		if (_drag == null)
+		{
+			_drag = gameObject.AddComponent<CItemDragSource>();
+		}
+
+		_drag.Setup(getPayload);
 	}
 
 	private void Click()

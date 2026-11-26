@@ -10,7 +10,7 @@ public class CNodeEventBanner : MonoBehaviour
 	#region 인스펙터
 	[SerializeField] private Font _font;
 	[SerializeField] private Vector2 _size = new Vector2(620f, 74f);
-	[SerializeField] private float _bottomOffset = 70f;
+	[SerializeField] private float _bottomOffset = 140f;
 	[SerializeField] private float _fadeTime = 0.3f;
 	[SerializeField] private Color _textColor = new Color(0.86f, 0.8f, 0.68f, 1f);
 	[SerializeField] private Color _hoverTextColor = new Color(1f, 0.9f, 0.62f, 1f);

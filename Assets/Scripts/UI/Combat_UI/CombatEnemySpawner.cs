@@ -96,6 +96,15 @@ public class CombatEnemySpawner : MonoBehaviour
             // 런타임 데이터 가져오고
             CEntityRuntimeData runtimeData = spawnEnemy.GetComponent<CEntityRuntimeData>();
 
+            // 애니메이터 가져와서
+            Animator eAnimator = spawnEnemy.GetComponent<Animator>();
+
+            if(eAnimator != null)
+            {
+                runtimeData.InputAnimator(eAnimator);
+            }
+
+
             // 몬스터 AI 주입시키고
             CMonsterBrain monsterAI = new CMonsterBrain();
 
