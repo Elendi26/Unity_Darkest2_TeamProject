@@ -103,4 +103,9 @@ public class CEntityAnimation : MonoBehaviour
     {
         _animator.SetTrigger("Idle");
     }
+
+    public void IdleAnimate(Animator target)
+    {
+        _animator.SetTrigger("Idle");
+    }
 }
