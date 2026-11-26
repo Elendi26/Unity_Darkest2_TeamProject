@@ -20,8 +20,8 @@ MonoBehaviour:
   _skillDetail: "\uC7AC\uC0AC\uC6A9 \uB300\uAE30 \uC2DC\uAC04: 1"
   _index: 4
   _rank: -1
-  _target: 0
-  _type: 0
+  _target: -1
+  _type: 2
   _areaOfEffect: 0
   _critical: 0
   _cooldown: -1
@@ -36,6 +36,10 @@ MonoBehaviour:
   _testAnimation: {fileID: 0}
   _activeImage: {fileID: 0}
   _inactiveImage: {fileID: 0}
+  _baseWeight: 10
+  _lowHpWeight: 10
+  _useSkillDelay: 1.08
+  _afterSkillDelay: 1.08
   references:
     version: 2
     RefIds:

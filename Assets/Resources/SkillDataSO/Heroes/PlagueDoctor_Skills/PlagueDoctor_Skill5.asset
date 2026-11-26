@@ -23,7 +23,7 @@ MonoBehaviour:
   _rank: 14
   _target: -1
   _type: 2
-  _areaOfEffect: 0
+  _areaOfEffect: 1
   _critical: 0
   _cooldown: -1
   _charges: -1
@@ -36,6 +36,10 @@ MonoBehaviour:
   _testAnimation: {fileID: 0}
   _activeImage: {fileID: 0}
   _inactiveImage: {fileID: 0}
+  _baseWeight: 10
+  _lowHpWeight: 10
+  _useSkillDelay: 1.08
+  _afterSkillDelay: 1.08
   references:
     version: 2
     RefIds: []
