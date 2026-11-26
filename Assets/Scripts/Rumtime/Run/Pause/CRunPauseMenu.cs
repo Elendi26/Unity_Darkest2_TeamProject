@@ -38,6 +38,8 @@ public class CRunPauseMenu : MonoBehaviour
 	// 열기 전 시간 배율 → 닫을 때 그대로 돌려준다 (지도 등이 따로 멈춰 둔 경우)
 	private float _prevTimeScale = 1f;
 	private bool _isLeaving;
+	// 영웅 정보 창이 마지막으로 열려 있던 프레임
+	private int _heroPopupFrame = -10;
 	#endregion
 
 	private void Awake()
@@ -125,6 +127,12 @@ public class CRunPauseMenu : MonoBehaviour
 			return;
 		}
 
+		// 교차로 영웅 정보 창을 닫는 ESC 로 일시정지까지 열리지 않게
+		if (IsHeroPopupRecentlyOpen())
+		{
+			return;
+		}
+
 		_isPaused = true;
 		_prevTimeScale = Time.timeScale;
 		Time.timeScale = 0f;
@@ -178,6 +186,44 @@ public class CRunPauseMenu : MonoBehaviour
 		}
 
 		return false;
+	}
+
+	// 교차로 영웅 정보 창도 ESC 로 닫힌다 (TheCrossroadManager 가 닫는다)
+	//  ㄴ 같은 프레임에 창이 먼저 닫히면 열림 검사가 빗나간다 → 직전 프레임까지 열려 있었어도 막는다
+	private void LateUpdate()
+	{
+		if (IsHeroPopupOpen())
+		{
+			_heroPopupFrame = Time.frameCount;
+		}
+	}
+
+	private bool IsHeroPopupRecentlyOpen()
+	{
+		return IsHeroPopupOpen() || Time.frameCount - _heroPopupFrame <= 1;
+	}
+
+	// 영웅 정보 창은 위쪽 CanvasGroup 을 투명·클릭 불가로 바꿔 숨긴다 → 위쪽이 모두 보이면 열린 것
+	private static bool IsHeroPopupOpen()
+	{
+		HeroPopup_UI popup = HeroPopup_UI.instance;
+
+		if (popup == null || !popup.isActiveAndEnabled)
+		{
+			return false;
+		}
+
+		CanvasGroup[] groups = popup.GetComponentsInParent<CanvasGroup>();
+
+		for (int i = 0; i < groups.Length; i++)
+		{
+			if (groups[i].alpha <= 0f || !groups[i].blocksRaycasts)
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public void Resume()

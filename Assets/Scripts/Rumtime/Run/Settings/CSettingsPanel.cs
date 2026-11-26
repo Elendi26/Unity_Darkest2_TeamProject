@@ -37,6 +37,8 @@ public class CSettingsPanel : MonoBehaviour
 	private TextMeshProUGUI _sfxValue;
 	private TextMeshProUGUI _resolutionText;
 	private Toggle _fullscreenToggle;
+	private Button _prevResolutionButton;
+	private Button _nextResolutionButton;
 	// 적용 전 고른 값
 	private int _resolutionIndex;
 	#endregion
@@ -102,19 +104,25 @@ public class CSettingsPanel : MonoBehaviour
 		_sfxSlider.SetValueWithoutNotify(CGameSettings.SfxVolume);
 		UpdateVolumeText();
 
-		// 적용해 둔 해상도부터 보여 준다 (목록에 없으면 목록에 넣는다)
+		// 적용해 둔 해상도부터 보여 준다 (목록에 없으면 가장 가까운 것)
 		Vector2Int applied = CGameSettings.GetAppliedResolution();
 
 		CGameSettings.GetResolutions(_resolutions);
 
-		if (!_resolutions.Contains(applied))
+		_resolutionIndex = _resolutions.IndexOf(applied);
+
+		if (_resolutionIndex < 0)
 		{
-			_resolutions.Add(applied);
-			_resolutions.Sort((a, b) => a.x != b.x ? a.x.CompareTo(b.x) : a.y.CompareTo(b.y));
+			_resolutionIndex = CGameSettings.FindNearestResolution(_resolutions, applied);
 		}
 
-		_resolutionIndex = _resolutions.IndexOf(applied);
 		_fullscreenToggle.SetIsOnWithoutNotify(CGameSettings.GetAppliedFullscreen());
+		UpdateResolutionText();
+	}
+
+	// 전체 화면은 모니터 해상도로 → 고르는 화살표를 잠근다
+	private void HandleFullscreenChanged(bool isOn)
+	{
 		UpdateResolutionText();
 	}
 
@@ -155,11 +163,17 @@ public class CSettingsPanel : MonoBehaviour
 
 		bool fullscreen = _fullscreenToggle.isOn;
 
-		if (_resolutionIndex >= 0 && _resolutionIndex < _resolutions.Count)
+		if (fullscreen)
+		{
+			Vector2Int monitor = CGameSettings.GetMonitorResolution();
+
+			CGameSettings.SetResolution(monitor.x, monitor.y, true);
+		}
+		else if (_resolutionIndex >= 0 && _resolutionIndex < _resolutions.Count)
 		{
 			Vector2Int size = _resolutions[_resolutionIndex];
 
-			CGameSettings.SetResolution(size.x, size.y, fullscreen);
+			CGameSettings.SetResolution(size.x, size.y, false);
 		}
 
 		CGameSettings.Save();
@@ -178,6 +192,27 @@ public class CSettingsPanel : MonoBehaviour
 
 	private void UpdateResolutionText()
 	{
+		bool fullscreen = _fullscreenToggle != null && _fullscreenToggle.isOn;
+
+		if (_prevResolutionButton != null)
+		{
+			_prevResolutionButton.interactable = !fullscreen;
+		}
+
+		if (_nextResolutionButton != null)
+		{
+			_nextResolutionButton.interactable = !fullscreen;
+		}
+
+		// 전체 화면 → 지금 모니터 해상도를 보여 준다
+		if (fullscreen)
+		{
+			Vector2Int monitor = CGameSettings.GetMonitorResolution();
+
+			_resolutionText.text = $"{monitor.x} x {monitor.y}";
+			return;
+		}
+
 		bool hasResolution = _resolutionIndex >= 0 && _resolutionIndex < _resolutions.Count;
 
 		_resolutionText.text = hasResolution ? $"{_resolutions[_resolutionIndex].x} x {_resolutions[_resolutionIndex].y}" : "-";
@@ -217,6 +252,7 @@ public class CSettingsPanel : MonoBehaviour
 		_resolutionText = CreateSelectRow(panel, "해상도", y, PrevResolution, NextResolution);
 		y -= ROW_HEIGHT + 20f;
 		_fullscreenToggle = CreateCheckboxRow(panel, "전체 화면", y);
+		_fullscreenToggle.onValueChanged.AddListener(HandleFullscreenChanged);
 
 		// 아래 버튼 → 적용 (모든 설정) / 닫기 (적용 안 한 선택은 버린다)
 		CreateButton("ApplyButton", panel, "적용", new Vector2(-130f, 0f), new Vector2(220f, 60f), Apply, true);
@@ -280,8 +316,8 @@ public class CSettingsPanel : MonoBehaviour
 		float centerX = LABEL_WIDTH - _panelSize.x * 0.5f + 40f + CONTROL_WIDTH * 0.5f;
 
 		// 글꼴에 화살표 기호가 없을 수 있어 < > 로
-		CreateButton("PrevButton", panel, "<", new Vector2(centerX - CONTROL_WIDTH * 0.5f + 30f, y), new Vector2(60f, 50f), onPrev, false);
-		CreateButton("NextButton", panel, ">", new Vector2(centerX + CONTROL_WIDTH * 0.5f - 30f, y), new Vector2(60f, 50f), onNext, false);
+		_prevResolutionButton = CreateButton("PrevButton", panel, "<", new Vector2(centerX - CONTROL_WIDTH * 0.5f + 30f, y), new Vector2(60f, 50f), onPrev, false);
+		_nextResolutionButton = CreateButton("NextButton", panel, ">", new Vector2(centerX + CONTROL_WIDTH * 0.5f - 30f, y), new Vector2(60f, 50f), onNext, false);
 
 		TextMeshProUGUI value = CreateText(label + "Value", panel, "-", 30f, TextAlignmentOptions.Center);
 

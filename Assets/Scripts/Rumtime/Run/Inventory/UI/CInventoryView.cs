@@ -96,6 +96,7 @@ public class CInventoryView : MonoBehaviour
 			_defaultUseLabel = _useLabel != null ? _useLabel.text : null;
 		}
 		AddListener(_dropButton, Drop);
+		SetupDropZone();
 		AddListener(_closeButton, Close);
 		AddListener(_openButton, Toggle);
 		BindTabs();
@@ -351,6 +352,7 @@ public class CInventoryView : MonoBehaviour
 
 			_slots[i].gameObject.SetActive(true);
 			_slots[i].Bind(stack, stackIndex >= 0 && stackIndex == _selected, () => Select(stackIndex));
+			_slots[i].SetDrag(stackIndex >= 0 ? () => MakeDragPayload(stackIndex) : (System.Func<CItemDragPayload>)null);
 		}
 
 		for (int i = count; i < _slots.Count; i++)
@@ -411,6 +413,71 @@ public class CInventoryView : MonoBehaviour
 
 		return string.IsNullOrEmpty(note) ? item.Description : $"{item.Description}\n\n{note}";
 	}
+
+	#region 끌어다 놓기
+	// 짐칸 칸에서 끌 때 드는 것
+	private CItemDragPayload MakeDragPayload(int stackIndex)
+	{
+		if (!_isOpen || _inventory == null || stackIndex < 0 || stackIndex >= _inventory.Stacks.Count)
+		{
+			return null;
+		}
+
+		return new CItemDragPayload
+		{
+			Source = EItemDragSource.Inventory,
+			Item = _inventory.Stacks[stackIndex].Item,
+			Inventory = _inventory,
+			InventoryIndex = stackIndex,
+		};
+	}
+
+	// 짐칸 패널 전체가 놓는 곳 → 마차 칸·영웅 장신구 칸에서 끌어와 놓으면 떼어 짐칸으로
+	private void SetupDropZone()
+	{
+		CItemDropZone zone = gameObject.AddComponent<CItemDropZone>();
+
+		zone.Setup(CanAcceptDrop, AcceptDrop);
+	}
+
+	private bool CanAcceptDrop(CItemDragPayload payload)
+	{
+		if (!_isOpen || _inventory == null)
+		{
+			return false;
+		}
+
+		switch (payload.Source)
+		{
+			case EItemDragSource.Coach:
+				return _controller != null && _controller.Stagecoach != null && _controller.Stagecoach.CanUnequipToInventory(payload.Item as CStagecoachUpgradeData);
+			case EItemDragSource.HeroTrinket:
+				return CHeroTrinkets.CanUnequipToInventory(payload.HeroId, payload.HeroSlot, _inventory);
+		}
+
+		return false;
+	}
+
+	private void AcceptDrop(CItemDragPayload payload)
+	{
+		bool done = false;
+
+		switch (payload.Source)
+		{
+			case EItemDragSource.Coach:
+				done = _controller.Stagecoach.TryUnequipToInventory(payload.Item as CStagecoachUpgradeData);
+				break;
+			case EItemDragSource.HeroTrinket:
+				done = CHeroTrinkets.TryUnequipToInventory(payload.HeroId, payload.HeroSlot, _inventory);
+				break;
+		}
+
+		if (done && _logState)
+		{
+			CPrint.Log($"CInventoryView : {payload.Item.DisplayName} 떼어 짐칸으로");
+		}
+	}
+	#endregion
 
 	private void Select(int index)
 	{

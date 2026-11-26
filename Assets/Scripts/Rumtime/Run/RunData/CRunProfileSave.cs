@@ -37,6 +37,9 @@ public static class CRunProfileSave
 	// 새 모험을 시작하면 지난 런을 지운다
 	public static void ClearRun(int slot)
 	{
+		CRunCarry.ClearPartyChosen();
+		CHeroTrinkets.Clear();
+
 		UserProfileData profile = LoadProfile(slot);
 
 		if (profile == null || profile.Run == null)

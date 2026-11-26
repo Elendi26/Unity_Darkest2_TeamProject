@@ -18,6 +18,7 @@ public class CGameModeDataSO : CGameDataSO
     [SerializeField] private AudioClip _bgmLoopClip;
     [SerializeField] private AudioClip _bgmOutroClip;
     [SerializeField] private bool _keepBgmIfSameLoop = false;
+    [SerializeField, Range(0f, 1f)] private float _bgmVolumeScale = 1f;
     #endregion
 
     #region 프로퍼티
@@ -67,6 +68,14 @@ public class CGameModeDataSO : CGameDataSO
         get
         {
             return _keepBgmIfSameLoop;
+        }
+    }
+    // 모드별 배경음 크기 (설정 음량에 곱한다) / 경태
+    public float BgmVolumeScale
+    {
+        get
+        {
+            return _bgmVolumeScale;
         }
     }
     #endregion
