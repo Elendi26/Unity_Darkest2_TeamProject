@@ -109,23 +109,22 @@ public class CTokenStatus
         return default (int);
     }
 
-    public void AddToken(params ETokenBitMask[] tokens)
+    public void AddToken(ETokenBitMask token, int stack = 1)
     {
-        foreach (var token in tokens)
+
+        if ((_tokenBitMask & token) == 0)
         {
-            if ((_tokenBitMask & token) == 0)
-            {
-                _tokenBitMask |= token;
-            }
-
-            else
-            {
-                int i = TryGetTokenStruct (token);
-
-                _tokenData[i].IncreaseStack();
-                _tokenData[i].ResetTurn();
-            }
+            _tokenBitMask |= token;
         }
+
+        else
+        {
+            int i = TryGetTokenStruct(token);
+
+            _tokenData[i].IncreaseStack(stack);
+            _tokenData[i].ResetTurn();
+        }
+
     }
 
     public void RemoveToken(params ETokenBitMask[] tokens)
