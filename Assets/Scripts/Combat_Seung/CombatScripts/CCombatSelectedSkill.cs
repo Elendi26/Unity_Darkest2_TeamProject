@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Timeline;
 using static UnityEngine.GraphicsBuffer;
 
 public class CCombatSelectedSkill : MonoBehaviour
@@ -336,17 +337,19 @@ public class CCombatSelectedSkill : MonoBehaviour
 
     private void SkillExcute(List<CEntityRuntimeData> targets)
     {
+        Coroutine[] coroutines = new Coroutine[targets.Count];
+
         for (int i = 0; i < targets.Count; i++)
         {
-            StartCoroutine(UseSkillCoroutine (targets[i]));
+            coroutines[i] = StartCoroutine(UseSkillCoroutine (targets[i]));
         }
 
         for (int i = 0; i < targets.Count; i++)
         {
+            StopCoroutine(coroutines[i]);
 
+            _animation.IdleAnimate(targets[i].GetAnimator());
         }
-
-        _animation.IdleAnimate();
     }
 
     private IEnumerator UseSkillCoroutine(CEntityRuntimeData target)
@@ -361,6 +364,7 @@ public class CCombatSelectedSkill : MonoBehaviour
         // 애니메이션이 해당 Delay를 참조해서 해당 시간동안 작동하기 때문에 해당 Delay를 참조하면 동일한 시간동안 움직일 수 있습니다
         // 추천하는 형태는 UseSkillAnimationCoroutine F12로 따라가셔서 확인해보시면 될 것 같습니다
 
+        Coroutine animationA = StartCoroutine(UseSkillCoroutine(target));
         Coroutine targetAnimation = hit ? StartCoroutine(_animation.HitAnimationCoroutine(target.GetAnimator(), _skillData.UseSkillDelay, _skillData.AfterSkillDelay)) : StartCoroutine(_animation.DodgeAnimationCoroutine(target.GetAnimator(), _skillData.UseSkillDelay, _skillData.AfterSkillDelay));
 
         yield return animationA;
