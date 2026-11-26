@@ -10,24 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bce350e4230aa349ab9a623eb6f02f0, type: 3}
-  m_Name: LostSoul_skill2
+  m_Name: Widow_skill2
   m_EditorClassIdentifier: 
-  _heroName: Lost_soul
-  _skillID: Fifty Morse
-  _skillName: "\uCD94\uC7A1\uD55C \uC2DD\uD0D0"
+  _heroName: Widow
+  _skillID: Gruesome Reflection
+  _skillName: "\uC12C\uB729\uD55C \uBAB0\uACE8"
   _skillExplain: 
-  _skillType: 
+  _skillType: range
   _skillDetail: 
-  _index: 1
-  _rank: 12
-  _target: 3
-  _type: 0
+  _index: 0
+  _rank: 14
+  _target: 7
+  _type: 1
   _areaOfEffect: 0
   _critical: 0
   _cooldown: -1
   _charges: -1
   _skillEffect:
-  - rid: 6238335920434053121
+  - rid: 6238335920434053120
   _skillSelfEffect: 0
   _skillEffectForSelf: []
   _skillIcon: {fileID: 0}
@@ -36,12 +36,16 @@ MonoBehaviour:
   _testAnimation: {fileID: 0}
   _activeImage: {fileID: 0}
   _inactiveImage: {fileID: 0}
+  _baseWeight: 30
+  _lowHpWeight: 30
+  _useSkillDelay: 1.08
+  _afterSkillDelay: 1.08
   references:
     version: 2
     RefIds:
-    - rid: 6238335920434053121
+    - rid: 6238335920434053120
       type: {class: CSkillDamage, ns: , asm: Assembly-CSharp}
       data:
-        _minDamage: 2
-        _maxDamage: 3
+        _minDamage: 3
+        _maxDamage: 6
         _combo: 0
