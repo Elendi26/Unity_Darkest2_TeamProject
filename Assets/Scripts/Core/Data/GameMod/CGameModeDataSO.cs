@@ -12,6 +12,12 @@ public class CGameModeDataSO : CGameDataSO
     [SerializeField] private LoadSceneMode _loadMode = LoadSceneMode.Single;
     [SerializeField] private bool _useFade = true;
     [SerializeField] private bool _isActiveMode = false;
+
+    [Header("BGM 설정")]
+    [SerializeField] private AudioClip _bgmIntroClip;
+    [SerializeField] private AudioClip _bgmLoopClip;
+    [SerializeField] private AudioClip _bgmOutroClip;
+    [SerializeField] private bool _keepBgmIfSameLoop = false;
     #endregion
 
     #region 프로퍼티
@@ -34,6 +40,35 @@ public class CGameModeDataSO : CGameDataSO
     public LoadSceneMode LoadMode => _loadMode;
     public bool UseFade => _useFade;
     public bool IsActiveMode => _isActiveMode;
+
+    public AudioClip BgmIntroClip
+    {
+        get
+        {
+            return _bgmIntroClip;
+        }
+    }
+    public AudioClip BgmLoopClip
+    {
+        get
+        {
+            return _bgmLoopClip;
+        }
+    }
+    public AudioClip BgmOutroClip
+    {
+        get
+        {
+            return _bgmOutroClip;
+        }
+    }
+    public bool KeepBgmIfSameLoop
+    {
+        get
+        {
+            return _keepBgmIfSameLoop;
+        }
+    }
     #endregion
 
     protected override void OnValidate()

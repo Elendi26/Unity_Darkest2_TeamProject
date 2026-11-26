@@ -23,3 +23,7 @@ MonoBehaviour:
   _loadMode: 0
   _useFade: 1
   _isActiveMode: 1
+  _bgmIntroClip: {fileID: 8300000, guid: c7a08c7b9c4bcc44f87aa0a236e95371, type: 3}
+  _bgmLoopClip: {fileID: 8300000, guid: c9974c1d45735164ab6179e63071cd8c, type: 3}
+  _bgmOutroClip: {fileID: 0}
+  _keepBgmIfSameLoop: 0

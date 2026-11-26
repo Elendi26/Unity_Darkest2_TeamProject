@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-// 짐칸에서 바로 쓰는 소모품 (횃불 기름·수리 도구·장갑 덧판 등)
+// 짐칸에서 바로 쓰는 소모품
 [CreateAssetMenu(menuName = "Item/Consumable_")]
 public class CConsumableItemData : CItemDataBase
 {

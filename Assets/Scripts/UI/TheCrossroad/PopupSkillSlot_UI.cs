@@ -17,9 +17,11 @@ public class PopupSkillSlot_UI : MonoBehaviour, IPointerClickHandler
     [Header("선택 하이라이트")]
     [SerializeField] private GameObject _frameHL;
 
-
-
     #endregion
+
+    // 내부 변수
+
+    private bool _isLock;
 
     // 프로퍼티
     public GameObject FrameHL => _frameHL;

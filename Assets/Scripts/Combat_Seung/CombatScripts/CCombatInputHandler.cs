@@ -70,7 +70,8 @@ public class CCombatInputHandler : MonoBehaviour
 
     private void OnClick(InputAction.CallbackContext context)
     {
-        if (_mainCamera == null) return;
+        if (_mainCamera == null || _combatManager.OnPopup == true) return;
+
 
         Vector2 mousePosition = Mouse.current.position.ReadValue();
         Ray ray = _mainCamera.ScreenPointToRay(mousePosition);
@@ -144,7 +145,7 @@ public class CCombatInputHandler : MonoBehaviour
     {
         if (entityData.IsHero())
         {
-            // HeroPopup_UI.instance.OpenPopup(entityData); // 일단 만들어만둠
+            _combatManager.HeroRightClicked(entityData);
         }
     }
 

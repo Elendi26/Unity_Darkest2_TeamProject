@@ -55,6 +55,10 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 		_isBusy = true;
 		_isOpenedByMode = false;
 
+		// 씬이 올라오는 즉시 주행 쪽을 숨긴다 → 페이드 도중 AudioListener 가 둘씩 겹치지 않게
+		SceneManager.sceneLoaded -= HandleSceneLoaded;
+		SceneManager.sceneLoaded += HandleSceneLoaded;
+
 		// 팀 공용 게임 매니저로 연다 (페이드·Additive 핸들 관리 포함)
 		CGameManager gameManager = FindGameManager(mode => mode.InnModeId);
 
@@ -84,6 +88,7 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 
 			if (load == null)
 			{
+				SceneManager.sceneLoaded -= HandleSceneLoaded;
 				Finish();
 				yield break;
 			}
@@ -91,18 +96,25 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 			yield return load;
 		}
 
+		SceneManager.sceneLoaded -= HandleSceneLoaded;
+
 		_inn = FindLoadedInnScene();
 		_innScene = _inn != null ? _inn.gameObject.scene : default;
 
 		if (_inn == null)
 		{
 			CPrint.Error($"CInnNodeHandler : 열린 여관 씬에 CInnScene 이 없습니다. ({_innScenePath})");
+			ShowDrivingScene();
 			yield return UnloadInnScene();
 			Finish();
 			yield break;
 		}
 
-		HideDrivingScene();
+		// 로드 콜백에서 이미 숨겼으면 다시 숨기지 않는다 (숨긴 목록을 잃지 않게)
+		if (_hidden.Count == 0)
+		{
+			HideDrivingScene();
+		}
 
 		_session = new CInnSession(_inn, _node, GetRunContext(), GetStagecoach(), FindShopView(), _shopData, _garageData);
 		_session.Begin(Leave, SaveAndQuit);
@@ -127,6 +139,38 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 
 		return SceneManager.LoadSceneAsync(_innScenePath, LoadSceneMode.Additive);
 #endif
+	}
+
+	// CInnScene 이 든 씬이 Additive 로 올라오면 → 첫 프레임 전에 주행 쪽을 숨긴다
+	private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+	{
+		if (mode != LoadSceneMode.Additive || scene == gameObject.scene || _hidden.Count > 0)
+		{
+			return;
+		}
+
+		GameObject[] roots = scene.GetRootGameObjects();
+		bool hasInn = false;
+
+		for (int i = 0; i < roots.Length; i++)
+		{
+			if (roots[i] != null && roots[i].GetComponentInChildren<CInnScene>(true) != null)
+			{
+				hasInn = true;
+				break;
+			}
+		}
+
+		if (!hasInn)
+		{
+			return;
+		}
+
+		SceneManager.sceneLoaded -= HandleSceneLoaded;
+
+		// 숨길 때 여관 씬 것은 건너뛰어야 하니 먼저 기억한다
+		_innScene = scene;
+		HideDrivingScene();
 	}
 
 	// 어드레서블로 열면 씬 경로를 알 수 없다 → 주행 씬이 아닌 곳의 CInnScene 을 찾는다
@@ -276,6 +320,32 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 		}
 	}
 
+	// 곧 내릴 여관 씬의 AudioListener 를 끈다 (씬과 함께 사라지니 되돌리지 않는다)
+	private void MuteInnScene()
+	{
+		if (!_innScene.IsValid() || !_innScene.isLoaded)
+		{
+			return;
+		}
+
+		GameObject[] roots = _innScene.GetRootGameObjects();
+
+		for (int i = 0; i < roots.Length; i++)
+		{
+			if (roots[i] == null)
+			{
+				continue;
+			}
+
+			AudioListener[] listeners = roots[i].GetComponentsInChildren<AudioListener>();
+
+			for (int j = 0; j < listeners.Length; j++)
+			{
+				listeners[j].enabled = false;
+			}
+		}
+	}
+
 	private void ShowDrivingScene()
 	{
 		for (int i = 0; i < _hidden.Count; i++)
@@ -300,6 +370,9 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 	private IEnumerator LeaveRoutine()
 	{
 		EndSession();
+
+		// 여관 쪽 리스너를 먼저 끄고 주행 쪽을 켠다 → 언로드 동안 둘씩 겹치지 않게
+		MuteInnScene();
 		ShowDrivingScene();
 
 		yield return UnloadInnScene();
@@ -380,6 +453,7 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 
 	private void OnDestroy()
 	{
+		SceneManager.sceneLoaded -= HandleSceneLoaded;
 		EndSession();
 	}
 }

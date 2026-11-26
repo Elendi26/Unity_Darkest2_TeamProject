@@ -87,6 +87,8 @@ public class ProfileCreate_UI : MonoBehaviour
         CloseCreateUI();
 
 
+		_profileSP.SelectCreateProfile(_selectSlotIndex);
+
     }
 
 	/// <summary>

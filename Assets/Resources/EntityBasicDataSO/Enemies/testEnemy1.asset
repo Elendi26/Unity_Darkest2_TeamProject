@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: testEnemy1
   m_EditorClassIdentifier: 
   _heroID: Lost_soul1
-  _name: "\uC78A\uD78C \uC601\uD63C"
+  _name: "\uC78A\uD78C \uC601\uD63C1"
   _jobTitle: "\uCB49\uC815\uC774"
   _heroSmallTalk: 
   _heroSpecs: []
@@ -38,3 +38,4 @@ MonoBehaviour:
   _heroModel: {fileID: 1709254077376921, guid: fa19557b04eca444ea05ee62c13fcc5d, type: 3}
   _heroPortrait: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
   _heroRank: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
+  _animator: {fileID: 0}

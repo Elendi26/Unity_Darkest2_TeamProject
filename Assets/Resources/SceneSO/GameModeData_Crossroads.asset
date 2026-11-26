@@ -19,7 +19,11 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  _sceneAddress: The_Crossroads_Test
+  _sceneAddress: Assets/Scenes/UI/The_Crossroads_Test.unity
   _loadMode: 1
   _useFade: 1
   _isActiveMode: 0
+  _bgmIntroClip: {fileID: 8300000, guid: 75f39873ca6db4a499d581b18f9f3f51, type: 3}
+  _bgmLoopClip: {fileID: 8300000, guid: ebd7a6551794107478056f603f3f7bbe, type: 3}
+  _bgmOutroClip: {fileID: 0}
+  _keepBgmIfSameLoop: 0

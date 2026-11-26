@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-// 고물상 상품 칸 하나 → 바탕·테두리·아이콘·개수·가격·상태를 그리고, 올리면 알리고 누르면 산다
+// 바탕·테두리·아이콘·개수·가격·상태를 그리고, 올리면 알리고 누르면 산다
 public class CShopSlotView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
 	#region 내부 변수
