@@ -32,7 +32,6 @@ public enum ERank
 
 #endregion
 
-
 [System.Serializable]
 [CreateAssetMenu (menuName = "2D3D/SO/SkillDataSO", fileName = "SkillData_")]
 public class CSkillDataSO : ScriptableObject, ICombatData
