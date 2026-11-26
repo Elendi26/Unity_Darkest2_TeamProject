@@ -121,3 +121,5 @@ public class CStagecoachController : MonoBehaviour, IRoadTravelProvider, IRunCon
         return new CAutoRoadEventResolver();
     }
 }
+
+// 컨트롤러 잘붙는지 확인용 주석
