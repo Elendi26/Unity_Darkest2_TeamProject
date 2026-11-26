@@ -201,11 +201,11 @@ public class CCombatCurrentTurn : MonoBehaviour
         // Play -> 광역 여부 어떻게 되는지 잘 모르겠습니다.
         if (decision.SelectedSkill.AOE)
         {
-            decision.SelectedSkill.SkillExcute(decision.TargetUnits);
+            decision.SelectedSkill.UseSKill(_entity, decision.TargetUnits[0], false, true);
         }
         else
         {
-            decision.SelectedSkill.SkillExcute(decision.TargetUnits[0]);
+            decision.SelectedSkill.UseSKill(_entity, decision.TargetUnits[0], false, true);
         }
 
         // 대기한번 걸고 (0.5초)
