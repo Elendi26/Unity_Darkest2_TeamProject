@@ -404,6 +404,11 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         return _dead;
     }
 
+    public void InputAnimator(Animator animator)
+    {
+        _animator = animator;
+    }
+
     public Animator GetAnimator()
     {
         return _animator;
