@@ -147,7 +147,7 @@ public class CCombatSelectedSkill : MonoBehaviour
         {
             if(_currentTurn.SelectType != ECombatSelectType.Move)
             {
-                if(!target.IsDead())
+                if (!target.IsCorpse)
                 {
                     for (int i = 0; i < _teamRanks.Length; i++)
                     {
@@ -348,7 +348,7 @@ public class CCombatSelectedSkill : MonoBehaviour
 
         Coroutine animationA = StartCoroutine(_animation.UseSkillAnimationCoroutine());
 
-        Coroutine targetAnimation = hit ? StartCoroutine(_animation.HitAnimationCoroutine(target.GetAnimator())) : StartCoroutine(_animation.DodgeAnimationCoroutine(target.GetAnimator()));
+        Coroutine targetAnimation = hit ? StartCoroutine(_animation.HitAnimationCoroutine(target.GetAnimator(), _skillData.UseSkillDelay, _skillData.AfterSkillDelay)) : StartCoroutine(_animation.DodgeAnimationCoroutine(target.GetAnimator(), _skillData.UseSkillDelay, _skillData.AfterSkillDelay));
 
         yield return animationA;
         yield return targetAnimation;

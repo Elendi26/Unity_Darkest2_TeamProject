@@ -3312,6 +3312,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4386943702330414}
   - component: {fileID: 95066778049879928}
+  - component: {fileID: -6798727035510468434}
   m_Layer: 0
   m_Name: mdl_grave_robber
   m_TagString: Untagged
@@ -3361,6 +3362,27 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!65 &-6798727035510468434
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.61, y: 1.94, z: 1}
+  m_Center: {x: 0, y: 0.94, z: 0}
 --- !u!1 &1709867586078768
 GameObject:
   m_ObjectHideFlags: 0
