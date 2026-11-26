@@ -48,7 +48,7 @@ public class TurnOrder_UI : MonoBehaviour
         List<CEntityRuntimeData> entityList = new List<CEntityRuntimeData>(4);
 
         // 턴을 진행 중이고 살아있는 엔티티라면 맨앞에 넣고 
-        if(currentEntity != null && !currentEntity.IsDead())
+        if (currentEntity != null && !currentEntity.IsDead() && !currentEntity.IsCorpse)
         {
             entityList.Add(currentEntity);
         }
@@ -85,8 +85,8 @@ public class TurnOrder_UI : MonoBehaviour
             {   
                 _portraitSlots[i].gameObject.SetActive(true);
 
-                // SO데이터의 초상화를 가져와야하는데
-                //_portraitSlots[i].sprite = entityList[i]._heroPortrait;
+                // SO데이터의 초상화 가져오기
+                _portraitSlots[i].sprite = entityList[i].TurnPortrait;
             }
 
             else

@@ -4,6 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using System;
+using UnityEditor.Experimental.GraphView;
 
 public enum ECombatPhase
 {
@@ -29,6 +30,9 @@ public class CCombatManager : MonoBehaviour
 
     [Header("현재 턴 영웅 이름 텍스트")]
     [SerializeField] private TextMeshProUGUI _heroNameText;
+
+    [Header("연출용 스크립트 연결된 프리팹")]
+    [SerializeField] private CombatDirection_UI _directPrefab;
 
     [Header("아군 영웅 스포너 참조")]
     [SerializeField] private CombatHeroSpawner _heroSpawner;
@@ -75,6 +79,7 @@ public class CCombatManager : MonoBehaviour
 
     public bool OnPopup => _onPopup;
     public GameObject CorpsePrefab => _corpsePrefab;
+    public CombatDirection_UI DirectPrefab => _directPrefab;
     #endregion
 
     // 이벤트
@@ -414,10 +419,107 @@ public class CCombatManager : MonoBehaviour
             _orderedTurn.Remove(deadEntity);
         }
 
-        //UpdateTurnOrder?.Invoke(_currentTurn.Entity, _orderedTurn);
+        UpdateTurnOrder?.Invoke(_currentTurn.Entity, _orderedTurn);
             
     }
 
+    public void PlaySkillDirection(CEntityRuntimeData skillUser, List<CEntityRuntimeData> targets, List<float> damages, CSkillDataSO skillData)
+    {
+        StartCoroutine(PlaySkillDirectionCoroutine(skillUser, targets, damages, skillData));
+    }
+
+    /// <summary>
+    /// 1. 스킬 시전시작
+    /// 2. 스킬 시전자 및 스킬 대상 제외 다른 엔티티들 애니메이션 정지
+    /// 3. 스킬 시전자 및 스킬 대상 애니메이션 출력 및 대미지 UI 출력
+    /// 4. 스킬 시전 끝나면 코루틴 종료
+    /// </summary>
+    /// <param name="skillUser"></param>
+    /// <param name="targets"></param>
+    /// <param name="damages"></param>
+    /// <param name="skillData"></param>
+    /// <returns></returns>
+    private IEnumerator PlaySkillDirectionCoroutine
+        (
+        CEntityRuntimeData skillUser, List<CEntityRuntimeData> targets, List<float> damages, CSkillDataSO skillData
+        )
+    {
+        // 현재 전투의 엔티티들 순회 돌려서
+        for (int i = 0; i < _onCombatEntities.Count; i++)
+        {
+            // 엔티티 하나하나 변수에 넣고
+            CEntityRuntimeData entity = _onCombatEntities[i];
+            if(entity == null)
+            {
+                continue;
+            }
+            // 변수와 스킬 사용 엔티티가 같거나 스킬 대상에 포함되어있으면 true / 아니면 false 처리하고
+            bool isTarget = (entity == skillUser) || (targets != null && targets.Contains(entity));
+            // true인 엔티티들만 애니메이션 출력한다.
+            entity.ManageLocalTimescale(isTarget ? 1f : 0f);
+        }
+
+        // 스킬 사용자 애니메이션 코루틴 실행하기
+        Coroutine skillCoroutine = null;
+
+        if(skillUser != null && skillUser.EntityAnimation != null && skillUser.Animator != null && skillData != null)
+        {
+            skillUser.EntityAnimation.InputAnimationData(skillUser.Animator, skillData);
+            skillCoroutine = StartCoroutine(skillUser.EntityAnimation.UseSkillAnimationCoroutine());
+        }
+
+        // 대미지 결과에 따른 애니메이션 및 텍스트 출력하기
+        if(targets != null && damages != null)
+        {
+            float useDelay = skillData != null ? skillData.UseSkillDelay : 0.5f;
+            float afterDelay = skillData != null ? skillData.AfterSkillDelay : 0.5f;
+
+            for(int i = 0; i < targets.Count; i++)
+            {
+                CEntityRuntimeData target = targets[i];
+                if(target == null)
+                {
+                    continue;
+                }
+
+                float damage = (i < damages.Count) ? damages[i] : 0f;
+
+                // 엔티티에 대미지 UI 출력하고
+                target.ShowDamageTextUI(damage);
+
+                if(target.EntityAnimation != null && target.Animator != null)
+                {
+                    // 대미지가 0이면 회피 애니메이션 출력
+                    if( damage <= 0f)
+                    {
+                        StartCoroutine(target.EntityAnimation.DodgeAnimationCoroutine(target.Animator, useDelay, afterDelay));
+                    }
+
+                    // 대미지가 1이상이면 피격 애니메잇녀 출력하기
+                    else
+                    {
+                        StartCoroutine(target.EntityAnimation.HitAnimationCoroutine(target.Animator, useDelay, afterDelay));
+                    }
+                }
+            }
+        }
+        // 스킬 사용자 코루틴 실행 및 대기
+        if (skillUser != null)
+        {
+            yield return skillCoroutine;
+        }
+
+        for (int j = 0; j < _onCombatEntities.Count; j++)
+        {
+            if (_onCombatEntities[j] != null)
+            {
+             _onCombatEntities[j].ManageLocalTimescale(1f);
+            }
+        }
+
+        // 다음턴
+        TurnOver();
+    }
 
 }
 

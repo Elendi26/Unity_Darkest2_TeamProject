@@ -26,6 +26,7 @@ public class CCombatCurrentTurn : MonoBehaviour
     private ECombatSelectType _selectType = ECombatSelectType.None;
 
     #region 프로퍼티
+    public CEntityRuntimeData Entity => _entity;
     public ECombatSelectType SelectType => _selectType;
     public CCombatSelectedSkill SelectedSkill => _seletedSkill;
 
@@ -58,6 +59,11 @@ public class CCombatCurrentTurn : MonoBehaviour
     public void InputCurrentTurnEntity(CEntityRuntimeData entity)
     {
         _entity = entity;
+
+        if(_entity != null)
+        {
+            _entityAnimation = _entity.GetComponentInChildren<CEntityAnimation>();
+        }
 
         CurrentTurnMechanism();
     }
@@ -197,6 +203,7 @@ public class CCombatCurrentTurn : MonoBehaviour
             )
         {
             // Pass 처리 (턴 넘김, 대기 연출 등)
+            _isExecutingEnemyTurn = false;
             CPrint.Log("턴 종료");
             stateManager?.TurnOver();
             //return;
