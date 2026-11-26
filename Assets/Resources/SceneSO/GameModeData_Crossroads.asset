@@ -19,7 +19,7 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  _sceneAddress: The_Crossroads_Test
+  _sceneAddress: Assets/Scenes/UI/The_Crossroads_Test.unity
   _loadMode: 1
   _useFade: 1
   _isActiveMode: 0

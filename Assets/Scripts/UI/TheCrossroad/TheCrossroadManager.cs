@@ -8,6 +8,9 @@ public class TheCrossroadManager : MonoBehaviour
 {
     public static TheCrossroadManager instance;
 
+    // 출정 완료 알림 → 주행 쪽(교차로 노드 처리기)이 받아서 교차로 씬을 닫고 다음 길로 간다 / 경태
+    public static event System.Action OnDeparted;
+
     #region 인스펙터
     [Header("파티 슬롯")]
     [SerializeField] private PartySlot_UI[] _partySlots;
@@ -482,7 +485,8 @@ public class TheCrossroadManager : MonoBehaviour
 
         CPrint.Log("파티 결정 및 데이터 저장 완료");
 
-        // TODO : 역마차 씬으로 이동하는 씬 매니저 발동
+        // 역마차 씬 복귀는 교차로 노드 처리기가 맡는다 → 출정만 알린다 / 경태
+        OnDeparted?.Invoke();
 
 
     }
