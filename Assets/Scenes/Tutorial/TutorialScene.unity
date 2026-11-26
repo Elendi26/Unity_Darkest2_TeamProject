@@ -6844,10 +6844,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3808460b5e98e242838342561bf6153, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _config: {fileID: 0}
-  _fixedMap: {fileID: 0}
-  _travelSource: {fileID: 0}
-  _handlerSources: []
+  _config: {fileID: 11400000, guid: 622b3645e4875894cbc253bd4abe599c, type: 2}
+  _fixedMap: {fileID: 11400000, guid: e87ce6fca13f47c2bf96f2c2a406374f, type: 2}
+  _travelSource: {fileID: 83572737}
+  _handlerSources:
+  - {fileID: 910000003}
+  - {fileID: 994000003}
   _seed: 0
   _eventPopup: {fileID: 0}
   _shopView: {fileID: 0}
