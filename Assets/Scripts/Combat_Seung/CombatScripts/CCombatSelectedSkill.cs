@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class CCombatSelectedSkill : MonoBehaviour
 {
@@ -30,14 +31,40 @@ public class CCombatSelectedSkill : MonoBehaviour
         _currentTurn.StateReset();
     }
 
-    public void InputSelectedSkill(CEntityRuntimeData entity, ICombatData combatData, CEntityAnimation animation, bool enemy = true)
+    public void InputSelectedSkill(CEntityRuntimeData entity, ICombatData combatData, CEntityAnimation animation)
     {
+        Debug.Log("영웅 스킬 사용");
+
         if (combatData is CSkillDataSO skillData)
         {
             _entity = entity;
             _skillData = skillData;
             _animation = animation;
+
             CheckTarget();
+        }
+
+        else
+        {
+            Debug.Log("CombatSelectedSkill/InputSelectedSkill : 스킬 데이터가 비었습니다");
+
+            return;
+        }
+    }
+
+    public void InputSelectedSkill(CEntityRuntimeData entity, ICombatData combatData, CEntityAnimation animation, CEntityRuntimeData target)
+    {
+        Debug.Log("적 스킬 사용");
+
+        if (combatData is CSkillDataSO skillData)
+        {
+            _entity = entity;
+            _skillData = skillData;
+            _animation = animation;
+
+            SkillExcute(target);
+
+            CCombatManager.Instance.TurnOver();
         }
 
         else
@@ -301,15 +328,30 @@ public class CCombatSelectedSkill : MonoBehaviour
 
     private void SkillExcute(CEntityRuntimeData target)
     {
-        _skillData.UseSKill(_entity, target, CheckCritical(target), CheckHit(target));
+        StartCoroutine(UseSkillCoroutine(target));
     }
 
     private void SkillExcute(List<CEntityRuntimeData> targets)
     {
         for (int i = 0; i < targets.Count; i++)
         {
-            _skillData.UseSKill(_entity, targets[i], CheckHit(targets[i]), CheckCritical(targets[i]));
-        }    
+            StartCoroutine(UseSkillCoroutine (targets[i]));
+        }
+    }
+
+    private IEnumerator UseSkillCoroutine(CEntityRuntimeData target)
+    {
+        bool critical = CheckCritical(target);
+        bool hit = CheckHit(target);
+
+        _skillData.UseSKill(_entity, target, critical, hit);
+
+        Coroutine animationA = StartCoroutine(_animation.UseSkillAnimationCoroutine());
+
+        Coroutine targetAnimation = hit ? StartCoroutine(_animation.HitAnimationCoroutine(target.GetAnimator())) : StartCoroutine(_animation.DodgeAnimationCoroutine(target.GetAnimator()));
+
+        yield return animationA;
+        yield return targetAnimation;
     }
     
     private void OffIndicator()
