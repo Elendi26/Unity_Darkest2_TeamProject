@@ -20,21 +20,39 @@ MonoBehaviour:
   _skillDetail: "\uC7AC\uC0AC\uC6A9 \uB300\uAE30 \uC2DC\uAC04: 1"
   _index: 2
   _rank: -1
-  _target: 0
+  _target: -1
   _type: 2
   _areaOfEffect: 0
   _critical: 0
   _cooldown: -1
   _charges: -1
-  _skillEffect: []
-  _skillSelfEffect: 0
-  _skillEffectForSelf: []
+  _skillEffect:
+  - rid: 7086014384210182154
+  _skillSelfEffect: 1
+  _skillEffectForSelf:
+  - rid: 7086014384210182155
   _skillIcon: {fileID: 21300000, guid: 843a67dfb7e50094b8b8b4b0567334c8, type: 2}
   _skillTypeIcon: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
   _skillRangeImage: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
   _testAnimation: {fileID: 0}
   _activeImage: {fileID: 0}
   _inactiveImage: {fileID: 0}
+  _baseWeight: 10
+  _lowHpWeight: 10
+  _useSkillDelay: 1.08
+  _afterSkillDelay: 1.08
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 7086014384210182154
+      type: {class: CAddToken, ns: , asm: Assembly-CSharp}
+      data:
+        _combo: 0
+        _token: 128
+        _stack: 2
+    - rid: 7086014384210182155
+      type: {class: CAddToken, ns: , asm: Assembly-CSharp}
+      data:
+        _combo: 0
+        _token: 64
+        _stack: 2
