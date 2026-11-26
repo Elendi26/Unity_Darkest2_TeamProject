@@ -16,6 +16,7 @@ public class CCombatInputHandler : MonoBehaviour
     // 내부 변수
 
     // 마우스로 감지할 적
+
     CEntityRuntimeData _currentPointerEntity = null;
 
     // 이벤트

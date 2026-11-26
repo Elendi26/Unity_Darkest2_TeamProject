@@ -328,7 +328,10 @@ public class CCombatSelectedSkill : MonoBehaviour
 
     private void SkillExcute(CEntityRuntimeData target)
     {
-        StartCoroutine(UseSkillCoroutine(target));
+        Coroutine coroutine = StartCoroutine(UseSkillCoroutine(target));
+        StopCoroutine(coroutine);
+
+        _animation.IdleAnimate();
     }
 
     private void SkillExcute(List<CEntityRuntimeData> targets)
@@ -337,6 +340,13 @@ public class CCombatSelectedSkill : MonoBehaviour
         {
             StartCoroutine(UseSkillCoroutine (targets[i]));
         }
+
+        for (int i = 0; i < targets.Count; i++)
+        {
+
+        }
+
+        _animation.IdleAnimate();
     }
 
     private IEnumerator UseSkillCoroutine(CEntityRuntimeData target)
@@ -346,8 +356,12 @@ public class CCombatSelectedSkill : MonoBehaviour
 
         _skillData.UseSKill(_entity, target, critical, hit);
 
-        Coroutine animationA = StartCoroutine(_animation.UseSkillAnimationCoroutine());
+        // 여기 앞이나 뒤에 연출 코드를 넣으시면 됩니다
+        // 만약 코루틴으로 연출을 넣으실 땐 CSkillDataSO의 Delay를 참조해서 사용해주세요
+        // 애니메이션이 해당 Delay를 참조해서 해당 시간동안 작동하기 때문에 해당 Delay를 참조하면 동일한 시간동안 움직일 수 있습니다
+        // 추천하는 형태는 UseSkillAnimationCoroutine F12로 따라가셔서 확인해보시면 될 것 같습니다
 
+        Coroutine animationA = StartCoroutine(_animation.UseSkillAnimationCoroutine());
         Coroutine targetAnimation = hit ? StartCoroutine(_animation.HitAnimationCoroutine(target.GetAnimator())) : StartCoroutine(_animation.DodgeAnimationCoroutine(target.GetAnimator()));
 
         yield return animationA;
