@@ -34,6 +34,10 @@ public class CCombatManager : MonoBehaviour
     [Header("적 스포너 참조")]
     [SerializeField] private CombatEnemySpawner _enemyspawner;
 
+    [Header("시체 프리펩")]
+    [SerializeField] private GameObject _corpsePrefab;
+
+
     [Header("영웅 팝업 UI 캔버스")]
     [SerializeField] private CanvasGroup _heroPopupCanvasG;
 
@@ -41,6 +45,8 @@ public class CCombatManager : MonoBehaviour
     #endregion
 
     #region 내부변수
+
+    private int _currentRound = 0;
 
     private List<CEntityRuntimeData> _orderedTurn = new List<CEntityRuntimeData>();
 
@@ -51,6 +57,8 @@ public class CCombatManager : MonoBehaviour
     private bool _isStartCombat = false;
 
     private bool _onPopup;
+
+
 
     #endregion
 
@@ -65,7 +73,7 @@ public class CCombatManager : MonoBehaviour
     public CCombatCurrentTurn CombatCurrentTurn => _currentTurn;
 
     public bool OnPopup => _onPopup;
-
+    public GameObject CorpsePrefab => _corpsePrefab;
     #endregion
 
     private void Awake()
@@ -182,8 +190,6 @@ public class CCombatManager : MonoBehaviour
 
     private void CombatStart()
     {
-        // 데이터 로딩
-        // -> 여기서 데이터 로드하는 것도 좋지만, 스포너 스크립트가 존재하기 때문에 따로 함수를 만들어서 먼저 스폰할거 스폰시키고 전투 시작하는게 나아 보입니다.
 
         ChangePhase(ECombatPhase.RoundStart);
     }
@@ -191,6 +197,8 @@ public class CCombatManager : MonoBehaviour
 
     private void RoundStart()
     {
+        _currentRound++;
+        CPrint.Log($"라운드{_currentRound}를 시작합니다");
         // 정렬된 턴을 실제로 담아야 다음턴으로 넘어간다.
         _orderedTurn = OrderTurn();
 
@@ -201,6 +209,14 @@ public class CCombatManager : MonoBehaviour
     {
         var entities = _onCombatEntities;
         int[] extraSpeed = new int[entities.Count];
+
+        for (int i = 0; i < entities.Count; i++)
+        {
+            if (entities[i].IsDead())
+            {
+                entities.RemoveAt(i);
+            }
+        }
 
         for (int i = 0; i < extraSpeed.Length; i++)
         {
@@ -263,8 +279,8 @@ public class CCombatManager : MonoBehaviour
         {
             ChangePhase(ECombatPhase.TurnStart);
         }
-        
-        if (_orderedTurn.Count <= 0)
+
+        else if (_orderedTurn.Count <= 0)
         {
             ChangePhase(ECombatPhase.RoundOver);
         }
@@ -273,7 +289,17 @@ public class CCombatManager : MonoBehaviour
 
     public void RoundOver()
     {
+        // 시체상태인거 찾아서 1턴만에 시체 오브젝트 소멸
+        for(int i = 0; i < OnCombatEntities.Count;  i++)
+        {
+           if(_onCombatEntities[i] != null && _onCombatEntities[i].IsCorpse)
+           {
+               _onCombatEntities[i].DestroyCorpse();
+           }
+        }
 
+        CPrint.Log("다음 라운드로");
+        ChangePhase(ECombatPhase.RoundStart);
     }
 
     public void CombatOver()
@@ -352,6 +378,26 @@ public class CCombatManager : MonoBehaviour
             _heroPopupCanvasG.interactable = false;
         }
     }
+
+    /// <summary>
+    /// 라운드 중 죽은 몹의 턴이 남았다면 해당 라운드 턴을 제거한다.
+    /// </summary>
+    /// <param name="deadEntity"></param>
+    public void RemoveDeadEntityTurn(CEntityRuntimeData deadEntity)
+    {
+        if(deadEntity == null)
+        {
+            return;
+        }
+        
+        // 턴 대기열에 남아있다면 제거한다.
+        if(_orderedTurn.Contains(deadEntity))
+        {
+            _orderedTurn.Remove(deadEntity);
+        }
+            
+    }
+
 
 }
 

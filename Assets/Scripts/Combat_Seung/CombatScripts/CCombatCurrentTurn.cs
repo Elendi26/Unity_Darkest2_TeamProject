@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.ComponentModel;
 
 public enum ECombatSelectType
 {
@@ -79,11 +80,9 @@ public class CCombatCurrentTurn : MonoBehaviour
         else
         {
             CPrint.Log($"적 몬스터 턴 진입 {_entity.EntityName}");
-            // 임시로 일단 적군 턴은 넘기기
-            //CCombatManager.Instance.TurnOver();
-            // 적 AI 행동패턴 추가
 
-            ExecuteEnemyTurn();
+            StartCoroutine(ExecuteEnemyTurn());
+
         }
     }
 
@@ -155,11 +154,13 @@ public class CCombatCurrentTurn : MonoBehaviour
         _selectType = ECombatSelectType.None;
     }
 
-    private void ExecuteEnemyTurn()
+    // 코루틴으로 바꾸고, 행동 패턴전 딜레이를 준다.
+    private IEnumerator ExecuteEnemyTurn()
     {
         if(_isExecutingEnemyTurn)
         {
-            return;
+            //return;
+            yield break;
         }
 
         _isExecutingEnemyTurn = true;
@@ -171,11 +172,15 @@ public class CCombatCurrentTurn : MonoBehaviour
         if (brain == null || combatEntities == null || combatEntities.Count == 0)
         {
             _isExecutingEnemyTurn = false;
+            CPrint.Log("턴 종료");
             stateManager?.TurnOver();
-            return;
+            //return;
+            yield break;
         }
 
-        // 여기서부터 ai 반영 
+        // 여기서부터 ai 반영
+        // 여기서 한번 대기 추가 (0.5초)
+        yield return new WaitForSeconds(0.5f);
         CMonsterBrainDecision decision = brain.Decide(_entity, combatEntities);
 
         // 사용 가능 스킬이 없거나 판단 실패 시 Pass -> 즉시 턴 종료
@@ -189,7 +194,8 @@ public class CCombatCurrentTurn : MonoBehaviour
             // Pass 처리 (턴 넘김, 대기 연출 등)
             CPrint.Log("턴 종료");
             stateManager?.TurnOver();
-            return;
+            //return;
+            yield break;
         }
 
         // Play -> 광역 여부 어떻게 되는지 잘 모르겠습니다.
@@ -202,6 +208,8 @@ public class CCombatCurrentTurn : MonoBehaviour
             decision.SelectedSkill.SkillExcute(decision.TargetUnits[0]);
         }
 
+        // 대기한번 걸고 (0.5초)
+        yield return new WaitForSeconds(0.5f);
         _isExecutingEnemyTurn = false;
         CPrint.Log("턴 종료");
         stateManager?.TurnOver();
