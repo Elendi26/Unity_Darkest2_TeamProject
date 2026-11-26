@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using System;
 
 public enum ECombatPhase
 {
@@ -75,6 +76,11 @@ public class CCombatManager : MonoBehaviour
     public bool OnPopup => _onPopup;
     public GameObject CorpsePrefab => _corpsePrefab;
     #endregion
+
+    // 이벤트
+
+    public event Action<CEntityRuntimeData, List<CEntityRuntimeData>> UpdateTurnOrder;
+
 
     private void Awake()
     {
@@ -220,7 +226,7 @@ public class CCombatManager : MonoBehaviour
 
         for (int i = 0; i < extraSpeed.Length; i++)
         {
-            extraSpeed[i] = Random.Range(0, 6);
+            extraSpeed[i] = UnityEngine.Random.Range(0, 6);
         }
 
         for (int i = 0; i < entities.Count; i++)
@@ -256,9 +262,17 @@ public class CCombatManager : MonoBehaviour
 
     private void InputToCurrentTurn()
     {
+        // 사망한 엔티티가 맨 앞에 있다면 제거한다.
+        while(_orderedTurn.Count > 0 && (_orderedTurn[0] == null || _orderedTurn[0].IsDead()))
+        {
+            _orderedTurn.RemoveAt(0);
+        }
+
+
         if (_orderedTurn.Count <= 0)
         {
             _roundOver = true;
+            UpdateTurnOrder?.Invoke(null, _orderedTurn);
             return;
         }
 
@@ -267,9 +281,13 @@ public class CCombatManager : MonoBehaviour
             _roundOver = false;
         }
 
-        _currentTurn.InputCurrentTurnEntity(_orderedTurn.First());
-
+        CEntityRuntimeData nextEntity = _orderedTurn.First();
+        _currentTurn.InputCurrentTurnEntity(nextEntity);
         _orderedTurn.RemoveAt(0);
+
+        // 턴 순서 UI 갱신 이벤트 호출
+        UpdateTurnOrder?.Invoke(nextEntity, _orderedTurn);
+
     }
 
 
@@ -395,6 +413,8 @@ public class CCombatManager : MonoBehaviour
         {
             _orderedTurn.Remove(deadEntity);
         }
+
+        //UpdateTurnOrder?.Invoke(_currentTurn.Entity, _orderedTurn);
             
     }
 

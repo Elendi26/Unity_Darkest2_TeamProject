@@ -8,6 +8,7 @@ public interface ISkillEffect
 
 public enum EDamageoverTime
 {
+    None,
     Bleed,
     Blight,
     Burn
@@ -120,6 +121,7 @@ public class CAddToken : ISkillEffect // 토큰 적용
 {
     [SerializeField] private EInteractCombo _combo;
     [SerializeField] private ETokenBitMask _token;
+    [SerializeField] private int _stack = 1;
 
     public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
     {
@@ -139,7 +141,7 @@ public class CAddToken : ISkillEffect // 토큰 적용
 
         if (rand <= p)
         {
-            target._tokenStatus.AddToken(_token);
+            target._tokenStatus.AddToken(_token, _stack);
 
             Debug.Log($"토큰 적용 성공 : {_token}");
 
@@ -207,6 +209,10 @@ public class CAddTokenDamageoveTime : ISkillEffect
 
         switch (_dotName)
         {
+            case EDamageoverTime.None : 
+                
+                break;
+
             case EDamageoverTime.Bleed:
 
                 p -= target.GetStat(EEntityStat.BleedRes);
@@ -275,9 +281,16 @@ public class CChangeHitRate : ISkillEffect
 public class CAddComboToken : ISkillEffect
 {
     [SerializeField] private EInteractCombo _combo;
+    [SerializeField, Range(0, 100)] private float _accuracy;
 
     public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
     {
+        float p = Random.Range(0, 100);
+
+        if (p <= _accuracy)
+        {
+            target._tokenStatus.AddToken(ETokenBitMask.Combo);
+        }
 
         return;
     }

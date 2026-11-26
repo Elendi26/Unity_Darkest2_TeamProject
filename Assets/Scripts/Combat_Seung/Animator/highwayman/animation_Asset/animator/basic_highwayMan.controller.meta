@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scripts/Combat_Seung/Animator/highwayman/animation_Asset/animator/basic_highwayMan.controller.meta
 guid: 45f89b87707474e429b036332ed51233
+========
+guid: 61463b2ff17152e49a8090342eb47952
+>>>>>>>> main:Assets/Scripts/Combat_Seung/Animator/Lost_Soul/animation/lost_attack_bite_anm.anim.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 0
