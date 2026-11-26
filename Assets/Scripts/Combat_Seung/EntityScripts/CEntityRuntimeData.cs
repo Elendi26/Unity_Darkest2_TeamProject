@@ -140,8 +140,6 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
 
         _relationships = new Dictionary<string, int>();
 
-        _animator = _heroBasicData.Animator;
-
         _tokenStatus.LoadTokenData();
 
         Debug.Log($"[{_name}] 런타임 데이터 초기화 완료 (MaxHP: {_currentHP}, Speed: {_speed})");

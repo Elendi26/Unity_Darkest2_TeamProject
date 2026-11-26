@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: mat_cultist_evangelist
+  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _GLOSSYREFLECTIONS_OFF
+  m_InvalidKeywords:
+  - DISSOLVE
+  - _COLOR_CONTROL
+  - _FAKE_LIGHT
+  - _GRADIENT
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Base:
+        m_Texture: {fileID: 2800000, guid: 64f6413d7f84d7247b6dfb8c3f6d6cf6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Ink:
+        m_Texture: {fileID: 2800000, guid: 12e46deaebafd7245822b0f8b0b7b82b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 4e23b33f1060b984398e01b150296cec, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - Dissolve_Amount: 1
+    - Dissolve_Mask: 1
+    - Dissolve_NoiseScale: 100
+    - Dissolve_Width: 0.02
+    - Real_Light_Blend_Mode: 0
+    - Real_Light_Clamping_Value: 1
+    - Real_Light_Toggle: 0
+    - _AlbedoShadowThreshold: 0.5
+    - _AlphaClip: 0
+    - _ArgPower: 0.5
+    - _ArgSoftness: 0.1
+    - _BackPointDistance: 1
+    - _BackPointFalloff: 1
+    - _BackPointIntensity: 0
+    - _Blend: 0
+    - _Brightness: 0
+    - _BumpScale: 1
+    - _ColorTintIntensity: 5
+    - _ColorTintOpacity: 0
+    - _Cull: 2
+    - _Cutoff: 0.5
+    - _DebugNormal: 0
+    - _DepthOffset: 0
+    - _DetailNormalMapScale: 1
+    - _Dissolve: 0
+    - _DissolveScale: 100
+    - _DstBlend: 0
+    - _EnvironmentReflections: 1
+    - _FakeLight: 1
+    - _FakePointLights: 0
+    - _FlipShadow: 0
+    - _Fresnel_Power: 3
+    - _Fresnel_Scale: 0.2
+    - _GlossMapScale: 0
+    - _Glossiness: 0
+    - _GlossyReflections: 0
+    - _GradientCeiling: 2
+    - _GradientFalloff: 0.5
+    - _GradientOffset: 0.3
+    - _GradientOpacity: 0.6
+    - _GradientSpread: 1
+    - _KeyPointDistance: 1
+    - _KeyPointFalloff: 1
+    - _KeyPointIntensity: 0
+    - _Metallic: 0
+    - _Mode: 0
+    - _NoReceiveShadows: 0
+    - _NoTex: 0
+    - _OcclusionStrength: 1
+    - _OffsetFactor: 0
+    - _OffsetUnits: 0
+    - _Opacity: 1
+    - _Parallax: 0.02
+    - _Perlin: 0
+    - _QueueOffset: 0
+    - _RealLight: 0
+    - _ReceiveShadows: 1
+    - _RimFlip: 0
+    - _RimLight: 0
+    - _RimSize: 0.85
+    - _Saturation: 1
+    - _ShadowRotation: 4
+    - _ShadowSmooth: 1
+    - _ShadowThickness: 0.65
+    - _ShadowThreshold: 0.5
+    - _ShowAdvanced: 0
+    - _ShowColorControl: 0
+    - _ShowDissolve: 0
+    - _ShowFakeLight: 0
+    - _ShowFakePoints: 0
+    - _ShowGradient: 0
+    - _ShowMain: 1
+    - _ShowOptions: 0
+    - _ShowRealLight: 0
+    - _ShowRim: 0
+    - _ShowSoftRim: 0
+    - _Smoothness: 0.5
+    - _SmoothnessTextureChannel: 0
+    - _Soft_Rim_Blend: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _StatusFresnel: 0
+    - _Surface: 0
+    - _UVSec: 0
+    - _UseColorControl: 1
+    - _UseDissolve: 1
+    - _UseGradient: 1
+    - _UseRim: 0
+    - _Use_Soft_Rim: 0
+    - _Use_alpha_Channel_To_Tint: 0
+    - _Vertical_Gradient_Offset: -0.65
+    - _Vertical_Gradient_Scale: 0.4
+    - _WorkflowMode: 1
+    - _ZWrite: 1
+    m_Colors:
+    - Dissolve_Color: {r: 0, g: 0, b: 0, a: 0}
+    - _ArgColor: {r: 1, g: 0, b: 0, a: 1}
+    - _BackPointColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BackPointPos: {r: 0, g: 0, b: 0, a: 0}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorTintColor: {r: 1, g: 1, b: 1, a: 0}
+    - _Color_High_Intensity: {r: 0, g: 0, b: 0, a: 0}
+    - _Color_Low_Intensity: {r: 0, g: 0, b: 0, a: 0}
+    - _CoreOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _DissolveChannel: {r: 1, g: 0, b: 0, a: 0}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FakeLight0: {r: 0, g: 0, b: 0, a: 0}
+    - _FakeLight1: {r: 0, g: 0, b: 0, a: 0}
+    - _FakeLightColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Forward: {r: 0, g: 0, b: 1, a: 0}
+    - _KeyPointColor: {r: 1, g: 1, b: 1, a: 1}
+    - _KeyPointPos: {r: 0, g: 0, b: 0, a: 0}
+    - _Origin: {r: 0, g: 0, b: 0, a: 0}
+    - _RimColour: {r: 1, g: 0.42352942, b: 0, a: 1}
+    - _RimDir: {r: 0, g: 0, b: 0, a: 0}
+    - _RimDir1: {r: 0, g: 0, b: 0, a: 0}
+    - _ShadowColour: {r: 0.46274495, g: 0.7137255, b: 0.8313726, a: 0}
+    - _Soft_Rim_Dir: {r: 0, g: 30, b: 30, a: 0}
+    - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+  m_BuildTextureStacks: []
