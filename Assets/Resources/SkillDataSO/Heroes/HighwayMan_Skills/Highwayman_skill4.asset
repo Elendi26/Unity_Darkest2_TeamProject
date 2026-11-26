@@ -26,7 +26,10 @@ MonoBehaviour:
   _critical: 0
   _cooldown: -1
   _charges: -1
-  _skillEffect: []
+  _skillEffect:
+  - rid: 7086014384210182148
+  - rid: 7086014384210182150
+  - rid: 7086014384210182151
   _skillSelfEffect: 0
   _skillEffectForSelf: []
   _skillIcon: {fileID: 21300000, guid: 4f720017ec35f7548b459235edff4830, type: 2}
@@ -35,6 +38,27 @@ MonoBehaviour:
   _testAnimation: {fileID: 0}
   _activeImage: {fileID: 0}
   _inactiveImage: {fileID: 0}
+  _baseWeight: 10
+  _lowHpWeight: 10
+  _useSkillDelay: 1.08
+  _afterSkillDelay: 1.08
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 7086014384210182148
+      type: {class: CAddComboToken, ns: , asm: Assembly-CSharp}
+      data:
+        _combo: 0
+        _accuracy: 100
+    - rid: 7086014384210182150
+      type: {class: CRemoveToken, ns: , asm: Assembly-CSharp}
+      data:
+        _combo: 0
+        _token: 4
+        _dot: 0
+    - rid: 7086014384210182151
+      type: {class: CRemoveToken, ns: , asm: Assembly-CSharp}
+      data:
+        _combo: 0
+        _token: 1024
+        _dot: 0
