@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3bf3fda9b2387046b060585d3b5d713, type: 3}
+  m_Name: Widow
+  m_EditorClassIdentifier: 
+  _heroID: Widow
+  _name: "\uACFC\uBD80"
+  _jobTitle: "\uCB49\uC815\uC774"
+  _heroSmallTalk: 
+  _heroSpecs: []
+  _maxHP: 13
+  _currentHP: 13
+  _maxStress: 0
+  _speed: 2
+  _bleedRes: 10
+  _blightRes: 20
+  _burnRes: 20
+  _diseaseRes: 0
+  _stunRes: 10
+  _moveRes: 10
+  _debuffRes: 20
+  _deathblowRes: 0
+  _currentStress: 0
+  _hero: 0
+  _movement: 1
+  _heroSkills:
+  - {fileID: 11400000, guid: 21b10e93b30ce75459cbb7a6819dd957, type: 2}
+  - {fileID: 11400000, guid: 9856475b51bfad94d9060caf4c5f4cd8, type: 2}
+  _heroModel: {fileID: 1709254077376921, guid: 8f16ef9d169c85c44b345193da755ebb, type: 3}
+  _heroPortrait: {fileID: 21300000, guid: 3386c14056aae2444b2ab74dc677e28b, type: 3}
+  _heroRank: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
