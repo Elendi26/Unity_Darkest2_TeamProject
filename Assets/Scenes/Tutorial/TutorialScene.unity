@@ -1722,6 +1722,73 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &482744290
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 482744291}
+  - component: {fileID: 482744292}
+  m_Layer: 5
+  m_Name: PartyBar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &482744291
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 482744290}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &482744292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 482744290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49c59ebf82e34d71954d83348f1f809d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _heroDataPath: EntityBasicDataSO
+  _sortingOrder: 4
+  _bottomMargin: 14
+  _slotSize: {x: 250, y: 72}
+  _slotSpacing: 14
+  _portraitSize: 70
+  _infoOverlap: 10
+  _hpBarSize: {x: 150, y: 7}
+  _pipSize: {x: 9, y: 9}
+  _pipGap: 3
+  _nameFontSize: 24
+  _shadeHeight: 150
+  _shadeColor: {r: 0, g: 0, b: 0, a: 0.75}
+  _nameColor: {r: 0.94, g: 0.9, b: 0.8, a: 1}
+  _outlineColor: {r: 0, g: 0, b: 0, a: 0.95}
+  _hpBackColor: {r: 0.12, g: 0.03, b: 0.02, a: 0.9}
+  _hpFillColor: {r: 0.72, g: 0.09, b: 0.07, a: 1}
+  _stressOnColor: {r: 0.96, g: 0.95, b: 0.92, a: 1}
+  _stressOffColor: {r: 0.22, g: 0.2, b: 0.19, a: 0.9}
+  _portraitColor: {r: 0.82, g: 0.82, b: 0.82, a: 1}
+  _portraitHoverColor: {r: 1, g: 1, b: 1, a: 1}
+  _hideUnderOverlayScene: 1
+  _logState: 1
 --- !u!1 &491726556
 GameObject:
   m_ObjectHideFlags: 0
@@ -6777,12 +6844,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3808460b5e98e242838342561bf6153, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _config: {fileID: 11400000, guid: 622b3645e4875894cbc253bd4abe599c, type: 2}
-  _fixedMap: {fileID: 11400000, guid: e87ce6fca13f47c2bf96f2c2a406374f, type: 2}
-  _travelSource: {fileID: 83572737}
-  _handlerSources:
-  - {fileID: 910000003}
-  - {fileID: 994000003}
+  _config: {fileID: 0}
+  _fixedMap: {fileID: 0}
+  _travelSource: {fileID: 0}
+  _handlerSources: []
   _seed: 0
   _eventPopup: {fileID: 0}
   _shopView: {fileID: 0}
@@ -10275,6 +10340,8 @@ MonoBehaviour:
   _forkAutoThrottle: 0.6
   _debugAlwaysDrive: 0
   _logInput: 0
+  _useIntroFade: 1
+  _introFade: {fileID: 0}
 --- !u!4 &2016997092
 Transform:
   m_ObjectHideFlags: 0
@@ -17967,50 +18034,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!1 &482744290
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 482744291}
-  - component: {fileID: 482744292}
-  m_Layer: 5
-  m_Name: PartyBar
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &482744291
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 482744290}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &482744292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 482744290}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49c59ebf82e34d71954d83348f1f809d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
