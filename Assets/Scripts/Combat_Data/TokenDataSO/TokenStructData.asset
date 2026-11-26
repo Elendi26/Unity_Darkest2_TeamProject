@@ -1,0 +1,189 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f3c04be7fdd3a2419c170ab5d789cc5, type: 3}
+  m_Name: TokenStructData
+  m_EditorClassIdentifier: 
+  _tokens:
+  - rid: 1669732193333936131
+  - rid: 1669732193333936132
+  - rid: 1669732193333936133
+  - rid: 1669732193333936134
+  - rid: 1669732193333936135
+  - rid: 1669732193333936136
+  - rid: 1669732193333936137
+  - rid: 1669732193333936138
+  - rid: 1669732193333936139
+  - rid: 1669732193333936140
+  - rid: 1669732193333936141
+  - rid: 1669732193333936142
+  - rid: 1669732193333936143
+  - rid: 1669732193333936144
+  - rid: 1669732193333936145
+  - rid: 1669732193333936146
+  - rid: 1669732193333936147
+  - rid: 1669732193333936148
+  - rid: 1669732193333936149
+  references:
+    version: 2
+    RefIds:
+    - rid: 1669732193333936131
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Critical
+        _tokenIndex: 0
+        _tokenTriggerPoint: 1
+        _tokenMaxStack: 2
+        _tokenDuration: 3
+    - rid: 1669732193333936132
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Riposte
+        _tokenIndex: 1
+        _tokenTriggerPoint: 0
+        _tokenMaxStack: 3
+        _tokenDuration: 3
+    - rid: 1669732193333936133
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Dodge
+        _tokenIndex: 2
+        _tokenTriggerPoint: 4
+        _tokenMaxStack: 3
+        _tokenDuration: 3
+    - rid: 1669732193333936134
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: DodgeE
+        _tokenIndex: 3
+        _tokenTriggerPoint: 4
+        _tokenMaxStack: 3
+        _tokenDuration: 3
+    - rid: 1669732193333936135
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Block
+        _tokenIndex: 4
+        _tokenTriggerPoint: 6
+        _tokenMaxStack: 3
+        _tokenDuration: 3
+    - rid: 1669732193333936136
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: BlockE
+        _tokenIndex: 5
+        _tokenTriggerPoint: 6
+        _tokenMaxStack: 3
+        _tokenDuration: 3
+    - rid: 1669732193333936137
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Guard
+        _tokenIndex: 6
+        _tokenTriggerPoint: 2
+        _tokenMaxStack: 3
+        _tokenDuration: 3
+    - rid: 1669732193333936138
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Guarded
+        _tokenIndex: 7
+        _tokenTriggerPoint: 2
+        _tokenMaxStack: 3
+        _tokenDuration: 3
+    - rid: 1669732193333936139
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Strength
+        _tokenIndex: 8
+        _tokenTriggerPoint: 5
+        _tokenMaxStack: 2
+        _tokenDuration: 3
+    - rid: 1669732193333936140
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Speed
+        _tokenIndex: 9
+        _tokenTriggerPoint: 7
+        _tokenMaxStack: 1
+        _tokenDuration: -1
+    - rid: 1669732193333936141
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Stealth
+        _tokenIndex: 10
+        _tokenTriggerPoint: 0
+        _tokenMaxStack: 2
+        _tokenDuration: -1
+    - rid: 1669732193333936142
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Daze
+        _tokenIndex: 11
+        _tokenTriggerPoint: 8
+        _tokenMaxStack: 1
+        _tokenDuration: -1
+    - rid: 1669732193333936143
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Stun
+        _tokenIndex: 12
+        _tokenTriggerPoint: 8
+        _tokenMaxStack: 1
+        _tokenDuration: -1
+    - rid: 1669732193333936144
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Blind
+        _tokenIndex: 13
+        _tokenTriggerPoint: 3
+        _tokenMaxStack: 2
+        _tokenDuration: 3
+    - rid: 1669732193333936145
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Weak
+        _tokenIndex: 14
+        _tokenTriggerPoint: 5
+        _tokenMaxStack: 2
+        _tokenDuration: 3
+    - rid: 1669732193333936146
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Vulnerable
+        _tokenIndex: 15
+        _tokenTriggerPoint: 6
+        _tokenMaxStack: 2
+        _tokenDuration: 3
+    - rid: 1669732193333936147
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Taunt
+        _tokenIndex: 16
+        _tokenTriggerPoint: 4
+        _tokenMaxStack: 3
+        _tokenDuration: 3
+    - rid: 1669732193333936148
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Immobilize
+        _tokenIndex: 17
+        _tokenTriggerPoint: 9
+        _tokenMaxStack: 3
+        _tokenDuration: 1
+    - rid: 1669732193333936149
+      type: {class: CTokenData, ns: , asm: Assembly-CSharp}
+      data:
+        _tokenName: Combo
+        _tokenIndex: 18
+        _tokenTriggerPoint: 10
+        _tokenMaxStack: 1
+        _tokenDuration: 3

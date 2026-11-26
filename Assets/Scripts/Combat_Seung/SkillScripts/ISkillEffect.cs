@@ -28,9 +28,8 @@ public class CSkillDamage : ISkillEffect
     {
         if (!hit)
         {
-            // 빗나감
-
             return;
+            // 빗나감
         }
 
         switch (_combo)
@@ -42,15 +41,14 @@ public class CSkillDamage : ISkillEffect
                     float CriticalDamage = _maxDamage * 1.5f;
 
                     target.ModifyStat(EEntityStat.HP, -CriticalDamage);
-
-                    return;
                 }
 
-                float Damage = Random.Range(0, _maxDamage - _minDamage + 1);
+                float Damage = Random.Range(_minDamage, _maxDamage + 1);
 
                 target.ModifyStat(EEntityStat.HP, -Damage);
 
                 break;
+
             case EInteractCombo.True:
 
                 int checkCombo = 0;
@@ -63,15 +61,15 @@ public class CSkillDamage : ISkillEffect
                 }
 
                 break;
+
             case EInteractCombo.False:
 
 
                 break;
+
             default:
                 break;
         }
-
-
     }
 }
 
@@ -93,12 +91,12 @@ public class CSkillHeal : ISkillEffect
             return;
         }
 
-        if ((target.GetStat(EEntityStat.HP) / target.GetStat(EEntityStat.MaxHP)) >= (_hpBelow / 100))
+        if ((target.GetStat(EEntityStat.HP) / target.GetStat(EEntityStat.MaxHP)) >= (_hpBelow * 0.01f))
         {
             return;
         }
 
-        float heal = target.GetStat(EEntityStat.MaxHP) * (_healPercent / 100);
+        float heal = target.GetStat(EEntityStat.MaxHP) * (_healPercent * 0.01f);
 
         if (critical)
         {
@@ -110,6 +108,8 @@ public class CSkillHeal : ISkillEffect
         }
 
         target.ModifyStat(EEntityStat.HP, heal);
+
+        return;
     }
 
 
@@ -132,7 +132,7 @@ public class CAddToken : ISkillEffect // 토큰 적용
 
         if (critical)
         {
-            p = p - 20f;
+            p = p + 20f;
         }
 
         float rand = Random.Range(0, 100);
@@ -142,6 +142,8 @@ public class CAddToken : ISkillEffect // 토큰 적용
             target._tokenStatus.AddToken(_token);
 
             Debug.Log($"토큰 적용 성공 : {_token}");
+
+            return;
         }
 
         else
@@ -149,6 +151,8 @@ public class CAddToken : ISkillEffect // 토큰 적용
             // 저항
 
             Debug.Log($"토큰 적용 실패 : {_token}");
+
+            return;
         }
     }
 }
@@ -167,7 +171,11 @@ public class CRemoveToken : ISkillEffect
         if ((target._tokenStatus.TokenBitMask & _token) != 0)
         {
             target._tokenStatus.RemoveToken(_token);
+
+            return;
         }
+
+        return;
     }
 }
 
@@ -235,11 +243,15 @@ public class CAddTokenDamageoveTime : ISkillEffect
             target.AddDamageoverTime(dot);
 
             Debug.Log($"도트 대미지 적용 성공 {_dotName}");
+
+            return;
         }
 
         else
         {
             Debug.Log($"도트 대미지 적용 실패 {_dotName}");
+
+            return;
         }
 
 
@@ -254,6 +266,8 @@ public class CChangeHitRate : ISkillEffect
     public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
     {
         // 아직 미정
+
+        return;
     }
 }
 
@@ -265,5 +279,6 @@ public class CAddComboToken : ISkillEffect
     public void SkillEffect(CEntityRuntimeData target, bool critical, bool hit)
     {
 
+        return;
     }
 }

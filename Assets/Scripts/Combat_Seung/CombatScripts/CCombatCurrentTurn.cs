@@ -16,6 +16,7 @@ public enum ECombatSelectType
 public class CCombatCurrentTurn : MonoBehaviour
 {
     private CEntityRuntimeData _entity;
+    private CEntityAnimation _entityAnimation;
 
     [SerializeField] private CCombatSelectedSkill _seletedSkill;
     [SerializeField] private CombatSkillbar_UI _combatSkillbar;
@@ -136,7 +137,11 @@ public class CCombatCurrentTurn : MonoBehaviour
                 _selectType = ECombatSelectType.Entity;
             }
 
-            _seletedSkill.InputSelectedSkill(_entity, skillData);
+            _entityAnimation.InputAnimationData(_entity.GetAnimator(), skillData);
+
+            _entityAnimation.AnticAnimation();
+
+            _seletedSkill.InputSelectedSkill(_entity, skillData, _entityAnimation);
         }
     
     }
@@ -203,6 +208,7 @@ public class CCombatCurrentTurn : MonoBehaviour
         {
             decision.SelectedSkill.UseSKill(_entity, decision.TargetUnits[0], false, true);
         }
+
         else
         {
             decision.SelectedSkill.UseSKill(_entity, decision.TargetUnits[0], false, true);

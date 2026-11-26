@@ -147,7 +147,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         Debug.Log($"[{_name}] 런타임 데이터 초기화 완료 (MaxHP: {_currentHP}, Speed: {_speed})");
     }
 
-    public void ModifyStat(EEntityStat statType, float amount)
+    public float ModifyStat(EEntityStat statType, float amount)
     {
         switch (statType)
         {
@@ -203,6 +203,8 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         }
 
         Debug.Log($"[{_name}] 스탯 변경됨 -> {statType} : {amount}");
+
+        return amount;
     }
 
     public float GetStat(EEntityStat statType)
@@ -402,6 +404,11 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     public bool IsDead()
     {
         return _dead;
+    }
+
+    public Animator GetAnimator()
+    {
+        return _animator;
     }
 
     public void AddDamageoverTime(SDamageoverTime dot)
