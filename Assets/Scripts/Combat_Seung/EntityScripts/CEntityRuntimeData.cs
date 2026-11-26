@@ -69,6 +69,9 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     private bool _dead = false;
     private bool _hero = true;
     private float _extraCritical = 0f;
+    private bool _isCorpse = false;
+    private int _corpseTurn = 1;
+    private GameObject _entityModel;
 
     private CMonsterBrain _monsterBrain;
 
@@ -76,14 +79,22 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
 
     public string EntityName => _name;
     public string Race => _race;
+    public bool IsCorpse => _isCorpse;
+    public int CorpseTurn => _corpseTurn;
+   
+    
 
     public CMonsterBrain MonsterBrain { get; set; }
+
+    public CEntityBasicDataSO HeroBasicData => _heroBasicData;
 
 
 
     // 이벤트
 
     public event Action<float, float> ChangedHP;
+
+    public event Action<float, float> ChangedStress;
 
     private void Awake()
     {
@@ -153,6 +164,8 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             case EEntityStat.Stress:
                 _currentStress += Mathf.RoundToInt(amount);
                 _currentStress = Mathf.Clamp(_currentStress, 0, 10);
+                ChangedStress?.Invoke(GetStat(EEntityStat.Stress), GetStat(EEntityStat.MaxStress));
+
                 if (_currentStress >= 10) OnMeltdown();
                 break;
             case EEntityStat.MaxStress:
@@ -316,8 +329,12 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             _skillData.InputSkillData(basicData.HeroSkills);
         }
 
-        InitializeRank(rank);    
-    
+        InitializeRank(rank);
+
+        Animator tempGM = GetComponentInChildren<Animator>();
+        _entityModel = tempGM.gameObject;
+
+
     }
 
     public void InitializeRank(ERank rank)
@@ -347,7 +364,39 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
 
     public void EntityDead()
     {
+        // 이미 시체인데 체력이 0이하인 경우 파괴
+        if(_isCorpse)
+        {
+            DestroyCorpse();
+            return;
+        }
+
         _dead = true;
+        _isCorpse = true;
+        _corpseTurn = 1;
+        //모델링 비활성화하고
+        if(_entityModel != null)
+        {
+            _entityModel.SetActive(false);
+        }
+
+        // 시체 소환
+        GameObject Corpse = Instantiate(CCombatManager.Instance.CorpsePrefab, transform.position, Quaternion.Euler(0,45f,0), transform.parent);
+        Corpse.transform.localPosition = new Vector3(0, 1, 0);
+        Corpse.transform.localScale = _entityModel.transform.localScale;
+        
+
+        // 시체 체력을 죽은 엔티티의 최대 체력으로 다시 부여 및 체력바 갱신
+        float maxHP = GetStat(EEntityStat.MaxHP);
+        ModifyStat(EEntityStat.HP, maxHP);
+        ChangedHP?.Invoke(GetStat(EEntityStat.HP), maxHP);
+
+        // 아무 행동도 할 수 없기 때문에 턴 대기열에서는 제거
+        if (CCombatManager.Instance != null)
+        {
+            CCombatManager.Instance.RemoveDeadEntityTurn(this);
+        }
+
     }
 
     public bool IsDead()
@@ -393,6 +442,31 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     public void AnimateTrigger(string trigger)
     {
         _animator.SetTrigger(trigger);
+    }
+
+    public void DestroyCorpse()
+    {
+        if(_isCorpse == false)
+        {
+            return;
+        }
+
+        // 시간 줄이고
+        _corpseTurn--;
+
+        // 전투 라인업에서 제외
+        if( _corpseTurn <= 0 )
+        {
+            if (CCombatManager.Instance != null)
+            {
+                CCombatManager.Instance.OnCombatEntities.Remove(this);
+            }
+        }
+
+        // TODO : 랭크 앞으로 당기는 함수 추가해야한다.
+
+        // 모델링 파괴
+        Destroy(gameObject);
     }
 
 }

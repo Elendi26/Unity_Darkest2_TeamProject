@@ -10,6 +10,8 @@ public class CRunPauseMenu : MonoBehaviour
 	#region 인스펙터
 	[SerializeField] private InputAction _toggleAction = new InputAction("TogglePause", InputActionType.Button, "<Keyboard>/escape");
 	[SerializeField] private CanvasGroup _menuGroup;
+	// 게임 설정 창 (비우면 설정 버튼은 아무것도 안 한다)
+	[SerializeField] private CSettingsPanel _settingsPanel;
 	// 원정 포기 때 다시 시작할 튜토리얼 게임 모드 ID
 	[SerializeField] private string _tutorialModeId = "Tutorial";
 	[SerializeField] private string _title = "일시정지";
@@ -88,6 +90,13 @@ public class CRunPauseMenu : MonoBehaviour
 
 	private void HandleTogglePerformed(InputAction.CallbackContext context)
 	{
+		// 설정 창이 열려 있으면 ESC 는 설정 창만 닫는다
+		if (_isPaused && _settingsPanel != null && _settingsPanel.IsOpen)
+		{
+			_settingsPanel.Close();
+			return;
+		}
+
 		if (_isPaused)
 		{
 			Resume();
@@ -104,8 +113,8 @@ public class CRunPauseMenu : MonoBehaviour
 			return;
 		}
 
-		// 여관 등 다른 씬이 겹쳐 열려 있으면 그쪽 화면이 우선
-		if (SceneManager.sceneCount > 1)
+		// 여관·교차로 등 씬이 겹쳐 열려 있으면 맨 위(마지막에 연) 씬의 일시정지만 연다
+		if (!IsTopScene())
 		{
 			return;
 		}
@@ -127,6 +136,24 @@ public class CRunPauseMenu : MonoBehaviour
 		}
 	}
 
+	private bool IsTopScene()
+	{
+		for (int i = SceneManager.sceneCount - 1; i >= 0; i--)
+		{
+			Scene scene = SceneManager.GetSceneAt(i);
+
+			// 아직 불러오는 중인 씬은 건너뛴다
+			if (!scene.isLoaded)
+			{
+				continue;
+			}
+
+			return scene == gameObject.scene;
+		}
+
+		return true;
+	}
+
 	private static bool IsShopOpen()
 	{
 		CShopView[] views = FindObjectsByType<CShopView>(FindObjectsSortMode.None);
@@ -134,6 +161,17 @@ public class CRunPauseMenu : MonoBehaviour
 		for (int i = 0; i < views.Length; i++)
 		{
 			if (views[i] != null && views[i].IsOpen)
+			{
+				return true;
+			}
+		}
+
+		// 여관 마차 정비공 화면도 ESC 로 닫힌다
+		CGarageView[] garages = FindObjectsByType<CGarageView>(FindObjectsSortMode.None);
+
+		for (int i = 0; i < garages.Length; i++)
+		{
+			if (garages[i] != null && garages[i].IsOpen)
 			{
 				return true;
 			}
@@ -153,13 +191,28 @@ public class CRunPauseMenu : MonoBehaviour
 		Time.timeScale = _prevTimeScale;
 		SetMenuVisible(false);
 
+		if (_settingsPanel != null)
+		{
+			_settingsPanel.Close();
+		}
+
 		if (_logState)
 		{
 			CPrint.Log("CRunPauseMenu : 계속하기");
 		}
 	}
 
-	#region 메인 메뉴로 / 게임 종료
+	// 게임 설정 버튼
+	public void OpenSettings()
+	{
+		if (!_isPaused || _settingsPanel == null)
+		{
+			return;
+		}
+
+		_settingsPanel.Open();
+	}
+
 	public void QuitToMainMenu()
 	{
 		CGameManager gameManager = FindGameManager();
@@ -278,9 +331,9 @@ public class CRunPauseMenu : MonoBehaviour
 			return;
 		}
 
-		CRunCarry.Save(controller.RunData, controller.Stagecoach, gameObject.scene.path);
+		// 여관·교차로에서 저장해도 이어하기는 역마차가 있는 주행 씬으로
+		CRunCarry.Save(controller.RunData, controller.Stagecoach, controller.gameObject.scene.path);
 	}
-	#endregion
 
 	private void SetMenuVisible(bool visible)
 	{

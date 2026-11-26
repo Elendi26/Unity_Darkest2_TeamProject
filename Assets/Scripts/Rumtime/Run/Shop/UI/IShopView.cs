@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 상점 처리기(CShopNodeHandler)가 쓰는 화면 → 고물상·보급상(CShopView)
+// 상점 처리기(CShopNodeHandler)가 쓰는 화면
 public interface IShopView
 {
 	// 화면이 열려 있는지

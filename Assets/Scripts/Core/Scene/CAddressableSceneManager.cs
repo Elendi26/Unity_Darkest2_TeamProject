@@ -55,7 +55,8 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
             return false;
         }
 
-        return await LoadSceneInternalAsync(
+        return await LoadSceneInternalAsync
+        (
             sceneKey: sceneAddress,
             loadSceneFunc: mode => Addressables.LoadSceneAsync(sceneAddress, mode),
             sourceLabel: "Address",
@@ -85,7 +86,8 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
         }
 
         string sceneKey = sceneRef.RuntimeKey.ToString();
-        return await LoadSceneInternalAsync(
+        return await LoadSceneInternalAsync
+        (
             sceneKey: sceneKey,
             loadSceneFunc: mode => Addressables.LoadSceneAsync(sceneRef, mode),
             sourceLabel: "AssetReference",

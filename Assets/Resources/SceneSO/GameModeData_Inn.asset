@@ -15,11 +15,15 @@ MonoBehaviour:
   _id: Inn
   _modeName: Inn Mod
   _sceneReference:
-    m_AssetGUID: 
+    m_AssetGUID: 35b53634d4dd74c4b9dd1673ae2ac956
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  _sceneAddress: Inn
+  _sceneAddress: Assets/Scenes/Inn/Inn.unity
   _loadMode: 1
   _useFade: 1
   _isActiveMode: 0
+  _bgmIntroClip: {fileID: 0}
+  _bgmLoopClip: {fileID: 8300000, guid: 09ed0fa08fd44364bb8fea6d7c9feeb1, type: 3}
+  _bgmOutroClip: {fileID: 0}
+  _keepBgmIfSameLoop: 1

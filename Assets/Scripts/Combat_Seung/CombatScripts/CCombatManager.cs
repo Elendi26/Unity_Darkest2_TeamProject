@@ -34,9 +34,19 @@ public class CCombatManager : MonoBehaviour
     [Header("적 스포너 참조")]
     [SerializeField] private CombatEnemySpawner _enemyspawner;
 
+    [Header("시체 프리펩")]
+    [SerializeField] private GameObject _corpsePrefab;
+
+
+    [Header("영웅 팝업 UI 캔버스")]
+    [SerializeField] private CanvasGroup _heroPopupCanvasG;
+
+
     #endregion
 
     #region 내부변수
+
+    private int _currentRound = 0;
 
     private List<CEntityRuntimeData> _orderedTurn = new List<CEntityRuntimeData>();
 
@@ -45,6 +55,10 @@ public class CCombatManager : MonoBehaviour
     private bool _roundOver = false;
 
     private bool _isStartCombat = false;
+
+    private bool _onPopup;
+
+
 
     #endregion
 
@@ -58,6 +72,8 @@ public class CCombatManager : MonoBehaviour
     }
     public CCombatCurrentTurn CombatCurrentTurn => _currentTurn;
 
+    public bool OnPopup => _onPopup;
+    public GameObject CorpsePrefab => _corpsePrefab;
     #endregion
 
     private void Awake()
@@ -71,9 +87,24 @@ public class CCombatManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
 
-        // 먼저 스포너가 영웅과 적을 스폰하게 하고, 매커니즘 함수를 호출하는 순서가 필요할 것 같아서 주석으로 처리하고 수정합니다.
-        //CombatMechanism();
+    private void Start()
+    {
+
+        if (_heroPopupCanvasG == null && HeroPopup_UI.instance != null)
+        {
+            _heroPopupCanvasG = HeroPopup_UI.instance.GetComponent<CanvasGroup>();
+        }
+
+        _onPopup = false;
+        if(_heroPopupCanvasG != null)
+        {
+            _heroPopupCanvasG.alpha = 0f;
+            _heroPopupCanvasG.interactable = false;
+            _heroPopupCanvasG.blocksRaycasts = false;
+        }
+
     }
 
     private void OnEnable()
@@ -159,8 +190,6 @@ public class CCombatManager : MonoBehaviour
 
     private void CombatStart()
     {
-        // 데이터 로딩
-        // -> 여기서 데이터 로드하는 것도 좋지만, 스포너 스크립트가 존재하기 때문에 따로 함수를 만들어서 먼저 스폰할거 스폰시키고 전투 시작하는게 나아 보입니다.
 
         ChangePhase(ECombatPhase.RoundStart);
     }
@@ -168,6 +197,8 @@ public class CCombatManager : MonoBehaviour
 
     private void RoundStart()
     {
+        _currentRound++;
+        CPrint.Log($"라운드{_currentRound}를 시작합니다");
         // 정렬된 턴을 실제로 담아야 다음턴으로 넘어간다.
         _orderedTurn = OrderTurn();
 
@@ -186,7 +217,6 @@ public class CCombatManager : MonoBehaviour
                 entities.RemoveAt(i);
             }
         }
-
 
         for (int i = 0; i < extraSpeed.Length; i++)
         {
@@ -249,8 +279,8 @@ public class CCombatManager : MonoBehaviour
         {
             ChangePhase(ECombatPhase.TurnStart);
         }
-        
-        if (_orderedTurn.Count <= 0)
+
+        else if (_orderedTurn.Count <= 0)
         {
             ChangePhase(ECombatPhase.RoundOver);
         }
@@ -259,6 +289,16 @@ public class CCombatManager : MonoBehaviour
 
     public void RoundOver()
     {
+        // 시체상태인거 찾아서 1턴만에 시체 오브젝트 소멸
+        for(int i = 0; i < OnCombatEntities.Count;  i++)
+        {
+           if(_onCombatEntities[i] != null && _onCombatEntities[i].IsCorpse)
+           {
+               _onCombatEntities[i].DestroyCorpse();
+           }
+        }
+
+        CPrint.Log("다음 라운드로");
         ChangePhase(ECombatPhase.RoundStart);
     }
 
@@ -305,6 +345,60 @@ public class CCombatManager : MonoBehaviour
     {
         _heroNameText.text = data.EntityName;
     }
+
+    /// <summary>
+    /// 영웅 모델링 우클릭했을 경우 팝업 ui 켜기
+    /// </summary>
+    /// <param name="data"></param>
+    public void HeroRightClicked(CEntityRuntimeData data)
+    {
+        _heroSpawner.SpawnedHeroData.IndexOf(data);
+
+        HeroPopup_UI.instance.OpenPopupinCombatScene(_heroSpawner.SpawnedHeroData, _heroSpawner.SpawnedHeroData.IndexOf(data));
+
+        if (_heroPopupCanvasG != null)
+        {
+            _onPopup = true;
+            _heroPopupCanvasG.alpha = 1f;
+            _heroPopupCanvasG.blocksRaycasts = true;
+            _heroPopupCanvasG.interactable = true;
+        }
+    }
+
+    /// <summary>
+    /// 팝업 창 닫고 닫기 전 마지막으로 띄워놓은 영웅 데이터로 리셋
+    /// </summary>
+    public void ExitPopup()
+    {
+        if (_heroPopupCanvasG != null)
+        {
+            _onPopup = false;
+            _heroPopupCanvasG.alpha = 0f;
+            _heroPopupCanvasG.blocksRaycasts = false;
+            _heroPopupCanvasG.interactable = false;
+        }
+    }
+
+    /// <summary>
+    /// 라운드 중 죽은 몹의 턴이 남았다면 해당 라운드 턴을 제거한다.
+    /// </summary>
+    /// <param name="deadEntity"></param>
+    public void RemoveDeadEntityTurn(CEntityRuntimeData deadEntity)
+    {
+        if(deadEntity == null)
+        {
+            return;
+        }
+        
+        // 턴 대기열에 남아있다면 제거한다.
+        if(_orderedTurn.Contains(deadEntity))
+        {
+            _orderedTurn.Remove(deadEntity);
+        }
+            
+    }
+
+
 }
 
 

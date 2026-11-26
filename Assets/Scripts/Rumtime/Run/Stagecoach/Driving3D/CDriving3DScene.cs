@@ -946,12 +946,17 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 		_eventBanner.Show(GetEventTitle(type), type != null ? type.Icon : null, onDone);
 	}
 
-	// 상점이 이벤트보다 먼저 열린다 → 이름도 같은 순서로 고르고, 둘 다 없으면 노드 이름
+	// 상점 → 은닉처 → 이벤트 순으로 열린다 → 이름도 같은 순서로 고르고, 모두 없으면 노드 이름
 	private static string GetEventTitle(CNodeTypeData type)
 	{
 		if (type != null && type.Shop != null && !string.IsNullOrEmpty(type.Shop.Title))
 		{
 			return type.Shop.Title;
+		}
+
+		if (type != null && type.Cache != null && !string.IsNullOrEmpty(type.Cache.Title))
+		{
+			return type.Cache.Title;
 		}
 
 		if (type != null && type.Event != null && !string.IsNullOrEmpty(type.Event.Title))

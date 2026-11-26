@@ -151,6 +151,12 @@ public class CCacheNodeHandler : INodeHandler
 				continue;
 			}
 
+			// 범주마다 먼저 나올지 굴린다 → 아이템이 하나도 안 나올 수도 있다
+			if (_random.NextDouble() >= pool.Chance)
+			{
+				continue;
+			}
+
 			PickKinds(pool, Roll(pool.MinKinds, pool.MaxKinds));
 
 			for (int p = 0; p < _picks.Count; p++)
