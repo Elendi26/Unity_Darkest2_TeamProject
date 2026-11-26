@@ -179,6 +179,15 @@ public class CCombatManager : MonoBehaviour
         var entities = _onCombatEntities;
         int[] extraSpeed = new int[entities.Count];
 
+        for (int i = 0; i < entities.Count; i++)
+        {
+            if (entities[i].IsDead())
+            {
+                entities.RemoveAt(i);
+            }
+        }
+
+
         for (int i = 0; i < extraSpeed.Length; i++)
         {
             extraSpeed[i] = Random.Range(0, 6);
@@ -250,7 +259,7 @@ public class CCombatManager : MonoBehaviour
 
     public void RoundOver()
     {
-
+        ChangePhase(ECombatPhase.RoundStart);
     }
 
     public void CombatOver()

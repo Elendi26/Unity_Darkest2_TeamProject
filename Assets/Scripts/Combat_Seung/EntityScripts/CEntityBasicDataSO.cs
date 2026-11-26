@@ -97,7 +97,6 @@ public class CEntityBasicDataSO : ScriptableObject
     public Sprite HeroRank => _heroRank;
     public List<CSkillDataSO> HeroSkills => _heroSkills;
     public GameObject HeroModel => _heroModel;
-
     public Animator Animator => _animator;
 
     #endregion

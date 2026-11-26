@@ -21,6 +21,7 @@ public class CCombatSelectedSkill : MonoBehaviour
 
     private CEntityRuntimeData _entity;
     private CSkillDataSO _skillData;
+    private CEntityAnimation _animation;
 
     private void Awake()
     {
@@ -29,17 +30,20 @@ public class CCombatSelectedSkill : MonoBehaviour
         _currentTurn.StateReset();
     }
 
-    public void InputSelectedSkill(CEntityRuntimeData entity, ICombatData combatData)
+    public void InputSelectedSkill(CEntityRuntimeData entity, ICombatData combatData, CEntityAnimation animation, bool enemy = true)
     {
         if (combatData is CSkillDataSO skillData)
         {
             _entity = entity;
             _skillData = skillData;
+            _animation = animation;
             CheckTarget();
         }
 
         else
         {
+            Debug.Log("CombatSelectedSkill/InputSelectedSkill : 스킬 데이터가 비었습니다");
+
             return;
         }
     }
@@ -255,7 +259,7 @@ public class CCombatSelectedSkill : MonoBehaviour
             hit *= 0.5f;
         }
 
-        else if (target._tokenStatus.CheckToken(ETokenBitMask.DodgeE))
+        if (target._tokenStatus.CheckToken(ETokenBitMask.DodgeE))
         {
             hit *= 0.25f;
         }

@@ -84,6 +84,10 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     [SerializeField, Min(0f)] private float _baseWeight = 10f;
     [SerializeField, Min(0f)] private float _lowHpWeight = 10f;
 
+    [Header("애니메이션 딜레이")]
+    [SerializeField] private float _useSkillDelay = 1.08f;
+    [SerializeField] private float _afterSkillDelay = 1.08f;
+
 
     #endregion
 
@@ -119,6 +123,8 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     public Sprite ActiveImage => _activeImage;
     public Sprite InactiveImage => _inactiveImage;
 
+    public float UseSkillDelay => _useSkillDelay;
+    public float AfterSkillDelay => _afterSkillDelay;
 
     #endregion
 
