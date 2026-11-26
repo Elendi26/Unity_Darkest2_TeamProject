@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-// 고물상 화면 (DD2 상점 구성) → 왼쪽 상인 그림·제목, 가운데 분류 탭·상품 칸 격자·설명 줄, 오른쪽은 짐칸 패널
+// 왼쪽 상인 그림·제목, 가운데 분류 탭·상품 칸 격자·설명 줄, 오른쪽은 짐칸 패널
 public class CShopView : MonoBehaviour, IShopView
 {
 	#region 인스펙터
@@ -105,9 +105,6 @@ public class CShopView : MonoBehaviour, IShopView
 		OpenInventory();
 	}
 
-	/// <summary>
-	/// 상점마다 다른 상인 그림·제목 문장·오른쪽 위 장식을 정한다 (그림이 null 이면 기본 그림, 나머지는 숨김) / 경태
-	/// </summary>
 	public void SetLook(Sprite portrait, Sprite crest, Sprite banner)
 	{
 		Sprite shown = portrait != null ? portrait : _portrait;
@@ -252,9 +249,6 @@ public class CShopView : MonoBehaviour, IShopView
 		_detail.text = $"<b>{info.Name}</b>  <color=#c9b27a>{info.Price}</color>{state}\n<size=18>{info.Description}</size>";
 	}
 
-	/// <summary>
-	/// 상품 상태를 화면에 띄울 글자로 바꾼다 (살 수 있으면 빈 글자) / 경태
-	/// </summary>
 	private Sprite GetPriceIcon(ERunValue currency)
 	{
 		switch (currency)
