@@ -414,7 +414,7 @@ public class CCombatManager : MonoBehaviour
             _orderedTurn.Remove(deadEntity);
         }
 
-        UpdateTurnOrder?.Invoke(_currentTurn.Entity, _orderedTurn);
+        //UpdateTurnOrder?.Invoke(_currentTurn.Entity, _orderedTurn);
             
     }
 
