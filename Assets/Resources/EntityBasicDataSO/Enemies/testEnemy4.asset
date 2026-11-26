@@ -36,6 +36,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 481e255e7faba9c4e8338f4581f5cd3d, type: 2}
   - {fileID: 11400000, guid: 5177841e0df54354c8175160fef8f763, type: 2}
   _heroModel: {fileID: 1709254077376921, guid: fa19557b04eca444ea05ee62c13fcc5d, type: 3}
-  _heroPortrait: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
+  _heroPortrait: {fileID: 21300000, guid: c321427c720ec8c449cdaccb977ae2d1, type: 3}
   _heroRank: {fileID: 21300000, guid: 0bb81cde29a1cad47949df0bb1210c5e, type: 3}
-  _animator: {fileID: 0}
