@@ -72,26 +72,26 @@ public class CEntityAnimation : MonoBehaviour
         yield return new WaitForSeconds(_afterSkillDelay);
     }
 
-    public IEnumerator HitAnimationCoroutine(Animator target)
+    public IEnumerator HitAnimationCoroutine(Animator target, float useDelay, float afterDelay)
     {
         target.SetTrigger("Hit");
 
-        yield return new WaitForSeconds(_useSkillDelay);
+        yield return new WaitForSeconds(useDelay);
 
         target.SetTrigger($"Hit_Recovery");
 
-        yield return new WaitForSeconds(_afterSkillDelay);
+        yield return new WaitForSeconds(afterDelay);
     }
 
-    public IEnumerator DodgeAnimationCoroutine(Animator target)
+    public IEnumerator DodgeAnimationCoroutine(Animator target, float useDelay, float afterDelay)
     {
         target.SetTrigger("Dodge");
 
-        yield return new WaitForSeconds(_useSkillDelay);
+        yield return new WaitForSeconds(useDelay);
 
         target.SetTrigger($"Dodge_Recovery");
 
-        yield return new WaitForSeconds(_afterSkillDelay);
+        yield return new WaitForSeconds(afterDelay);
     }
 
     public void MoveAnimation()
