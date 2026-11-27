@@ -53,6 +53,12 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 	[SerializeField] private bool _logInput = false;
 	[SerializeField] private bool _useIntroFade = true;
 	[SerializeField] private CDriveIntroFade _introFade;
+
+	[Header("바퀴 소리 (마차가 움직일 때만)")]
+	// 이 속도(m/s)를 넘으면 소리를 켜고, 이 값의 절반 아래로 떨어지면 끈다
+	[SerializeField] private float _wheelSoundMinSpeed = 0.5f;
+	// 멈춰 갈 때 ~ 최고 속도일 때의 음 높이
+	[SerializeField] private Vector2 _wheelPitchRange = new Vector2(0.8f, 1.15f);
 	#endregion
 
 	#region 내부 변수
@@ -176,6 +182,7 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 		CheckFallen();
 		TickDrive();
 		TickArrivalFocus();
+		TickWheelSound();
 	}
 
 	private void FixedUpdate()
@@ -728,25 +735,50 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 		}
 	}
 
-	// 출발할 때 채찍질·말 울음 → 달리는 동안(Driving)만 바퀴 소리를 돌린다 (사건·도착으로 멈추면 끈다)
+	// 출발할 때만 채찍질·말 울음 (길 위 사건을 마치고 다시 달릴 때는 없음)
 	private void UpdateDrivingSound(ETravelState prev, ETravelState next)
 	{
-		if (next != ETravelState.Driving)
+		if (prev == ETravelState.Departing && next == ETravelState.Driving)
+		{
+			CSoundManager.Instance?.PlaySfxGroup(CRunSound.DRIVING_WHIP, CRunSound.DRIVING_HORSE);
+		}
+	}
+
+	// 바퀴 소리는 실제로 굴러갈 때만 → 빠를수록 음이 높아진다 (일시정지 중에는 끈다)
+	private void TickWheelSound()
+	{
+		float speed = Mathf.Abs(_physics.ForwardSpeed);
+		bool isPaused = Time.timeScale <= 0f;
+
+		// 사운드 매니저가 따로 거둬 갔으면(모든 소리 끄기 등) 그 소리는 이미 다른 데 쓰일 수 있다 → 놓아준다
+		if (_drivingLoop != null && (!_drivingLoop.isPlaying || !_drivingLoop.loop))
+		{
+			_drivingLoop = null;
+		}
+
+		if (_drivingLoop == null)
+		{
+			if (!isPaused && speed > _wheelSoundMinSpeed)
+			{
+				_drivingLoop = CSoundManager.Instance?.PlaySfxLoop(CRunSound.DRIVING_LOOP);
+			}
+
+			if (_drivingLoop == null)
+			{
+				return;
+			}
+		}
+
+		// 켜고 끄는 기준을 벌려 둔다 → 그 근처 속도에서 소리가 깜빡이지 않게
+		if (isPaused || speed < _wheelSoundMinSpeed * 0.5f)
 		{
 			StopDrivingLoop();
 			return;
 		}
 
-		// 길 위 사건을 마치고 다시 달릴 때는 채찍질 없이 바퀴 소리만
-		if (prev == ETravelState.Departing)
-		{
-			CSoundManager.Instance?.PlaySfxGroup(CRunSound.DRIVING_WHIP, CRunSound.DRIVING_HORSE);
-		}
+		float max = Mathf.Max(0.1f, _physics.MaxSpeed);
 
-		if (_drivingLoop == null)
-		{
-			_drivingLoop = CSoundManager.Instance?.PlaySfxLoop(CRunSound.DRIVING_LOOP);
-		}
+		_drivingLoop.pitch = Mathf.Lerp(_wheelPitchRange.x, _wheelPitchRange.y, Mathf.Clamp01(speed / max));
 	}
 
 	private void StopDrivingLoop()
@@ -756,6 +788,8 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 			return;
 		}
 
+		// 풀로 돌아가는 소리 → 다른 효과음이 바뀐 음 높이로 나지 않게 되돌린다
+		_drivingLoop.pitch = 1f;
 		CSoundManager.Instance?.StopSfxLoop(_drivingLoop);
 		_drivingLoop = null;
 	}

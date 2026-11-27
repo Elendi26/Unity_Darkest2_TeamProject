@@ -88,6 +88,8 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	private readonly CCombatBackdrop _backdrop = new CCombatBackdrop();
 	private CRunPauseMenu _pauseMenu;
 	private Action _onComplete;
+	// 바퀴·장갑이 다 닳아 벌어진 길 위 전투 → 이기면 그 값을 하나 되돌린다 (그 밖의 전투는 None)
+	private ERunValue _repairOnWin;
 	private Scene _combatScene;
 	private CombatHeroSpawner _heroSpawner;
 	private CombatEnemySpawner _enemySpawner;
@@ -159,10 +161,30 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	{
 		ECombatKind kind = roadEvent != null ? roadEvent.CombatKind : ECombatKind.Ambush;
 
-		Begin(kind, ENodeType.None, roadEvent != null ? roadEvent.CombatId : null, roadEvent != null ? roadEvent.Title : null, onFinished);
+		Begin(kind, ENodeType.None, roadEvent != null ? roadEvent.CombatId : null, roadEvent != null ? roadEvent.Title : null, onFinished, GetRepairOnWin(roadEvent, ctx));
 	}
 
-	private void Begin(ECombatKind kind, ENodeType nodeType, string combatId, string place, Action onComplete)
+	// 바퀴·장갑이 0 이라 벌어진 전투인지 (길을 막아 늘 벌어지는 전투는 값이 남아 있으면 아니다)
+	private static ERunValue GetRepairOnWin(CRoadEventData roadEvent, CRunContext ctx)
+	{
+		if (roadEvent == null)
+		{
+			return ERunValue.None;
+		}
+
+		ERunValue type = roadEvent.CombatWhenEmpty;
+
+		if (type != ERunValue.Wheels && type != ERunValue.Armor)
+		{
+			return ERunValue.None;
+		}
+
+		CRunValue value = ctx != null && ctx.RunData != null ? ctx.RunData.Get(type) : null;
+
+		return value != null && value.Current <= 0 ? type : ERunValue.None;
+	}
+
+	private void Begin(ECombatKind kind, ENodeType nodeType, string combatId, string place, Action onComplete, ERunValue repairOnWin = ERunValue.None)
 	{
 		string combatName = string.IsNullOrEmpty(combatId) ? $"{CCombatKindText.GetName(kind)} / {place}" : $"{CCombatKindText.GetName(kind)} / {combatId}";
 
@@ -181,6 +203,7 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 		}
 
 		_combatName = combatName;
+		_repairOnWin = repairOnWin;
 		// 전투 씬이 올라오기 전에 채운다 → 적 스포너가 Start 에서 읽을 수 있게
 		CCombatContext.Set(kind, nodeType, combatId, place);
 		_onComplete = onComplete;
@@ -870,10 +893,27 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 		List<string> lines = _result != null ? _result.Rewards : new List<string>();
 
 		_victoryReward.Give(controller.RunData, controller.Stagecoach != null ? controller.Stagecoach.Inventory : null, _tokenRandom, lines);
+		RepairOnWin(controller.RunData, lines);
 
 		if (_logState && lines.Count > 0)
 		{
 			CPrint.Log($"CCombatNodeHandler : 전투 보상 → {string.Join(", ", lines)}");
+		}
+	}
+
+	// 바퀴·장갑이 다 닳아 벌어진 전투에서 이기면 그 값을 하나 되돌린다
+	private void RepairOnWin(CRunData runData, List<string> lines)
+	{
+		if (_repairOnWin == ERunValue.None || runData == null || runData.Get(_repairOnWin) == null)
+		{
+			return;
+		}
+
+		int added = runData.Add(_repairOnWin, 1);
+
+		if (added > 0)
+		{
+			lines.Add($"{(_repairOnWin == ERunValue.Wheels ? "바퀴" : "장갑")} +{added}");
 		}
 	}
 
@@ -939,6 +979,7 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	{
 		_isBusy = false;
 		_isFighting = false;
+		_repairOnWin = ERunValue.None;
 		CCombatContext.Clear();
 		_combatScene = default;
 		_heroSpawner = null;
