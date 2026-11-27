@@ -486,6 +486,7 @@ public class TheCrossroadManager : MonoBehaviour
 
         CPrint.Log("파티 결정 및 데이터 저장 완료");
 
+        CSoundManager.Instance?.PlaySfxOneShot("OnStart");
         // 역마차 씬 복귀는 교차로 노드 처리기가 맡는다 → 출정만 알린다 / 경태
         OnDeparted?.Invoke();
 
