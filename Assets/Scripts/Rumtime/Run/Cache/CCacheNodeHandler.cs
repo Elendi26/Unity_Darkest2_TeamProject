@@ -152,7 +152,7 @@ public class CCacheNodeHandler : INodeHandler
 			}
 
 			// 범주마다 먼저 나올지 굴린다 → 아이템이 하나도 안 나올 수도 있다
-			if (_random.NextDouble() >= pool.Chance)
+			if (_random.NextDouble() >= GetPoolChance(pool))
 			{
 				continue;
 			}
@@ -164,6 +164,32 @@ public class CCacheNodeHandler : INodeHandler
 				AddItem(_picks[p], Roll(pool.MinCount, pool.MaxCount));
 			}
 		}
+	}
+
+	// 장신구가 든 범주는 마차 업그레이드(장신구 정리)만큼 더 잘 나온다 (확률 × (1 + 보정))
+	private float GetPoolChance(CCacheData.CLootPool pool)
+	{
+		if (_stagecoach == null || pool.Items == null)
+		{
+			return pool.Chance;
+		}
+
+		float bonus = _stagecoach.GetStat(ERunStat.TrinketLootPercent);
+
+		if (bonus <= 0f)
+		{
+			return pool.Chance;
+		}
+
+		for (int i = 0; i < pool.Items.Length; i++)
+		{
+			if (pool.Items[i] is CTrinketItemData)
+			{
+				return UnityEngine.Mathf.Clamp01(pool.Chance * (1f + bonus));
+			}
+		}
+
+		return pool.Chance;
 	}
 
 	private void AddItem(CItemDataBase item, int count)

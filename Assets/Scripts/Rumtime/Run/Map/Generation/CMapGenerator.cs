@@ -10,11 +10,14 @@ public class CMapGenerator
     private readonly List<CNodeTypeData> _nodeCandidates = new List<CNodeTypeData>();
     private readonly HashSet<CNodeTypeData> _rowTypes = new HashSet<CNodeTypeData>();
     private System.Random _random;
+    // 마차 업그레이드 정찰 보정 (0.2 = 미리 보일 확률 +20%)
+    private readonly float _scoutBonus;
     #endregion
 
-    public CMapGenerator(CMapConfig config)
+    public CMapGenerator(CMapConfig config, float scoutBonus = 0f)
     {
         _config = config;
+        _scoutBonus = scoutBonus;
     }
 
     public CMapGraph Generate(int seed)
@@ -72,7 +75,7 @@ public class CMapGenerator
                 continue;
             }
 
-            if ((node.TypeData != null && node.TypeData.AlwaysRevealed) || _random.NextDouble() < _config.NodeScoutChance)
+            if ((node.TypeData != null && node.TypeData.AlwaysRevealed) || _random.NextDouble() < _config.NodeScoutChance + _scoutBonus)
             {
                 node.IsRevealed = true;
                 scoutedNodes++;
@@ -84,7 +87,7 @@ public class CMapGenerator
             CNodeLink link = graph.Links[i];
 
             // 고정 길(출발→교차로, 성채→여관)은 늘 같은 길이라 처음부터 보인다
-            if (IsFixedEdgeLink(link, lastRow) || _random.NextDouble() < _config.RouteScoutChance)
+            if (IsFixedEdgeLink(link, lastRow) || _random.NextDouble() < _config.RouteScoutChance + _scoutBonus)
             {
                 link.IsRevealed = true;
                 scoutedRoutes++;

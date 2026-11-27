@@ -15,8 +15,7 @@ public class CInnHeroPose
 	public AnimationClip Clip;
 }
 
-// 여관 파티 → 지금 파티 영웅을 의자에 앉히고(여관 앉기 애니메이션), 의자 아래에 이름·체력·스트레스를 띄운다
-//  ㄴ 이름표는 여관 메뉴 UI 아래에 붙인다 → 상점·정비공 화면이 열려 메뉴가 숨으면 함께 숨는다
+// 여관 파티 → 지금 파티 영웅을 의자에 앉히고 의자 아래에 이름·체력·스트레스를 띄운다
 public class CInnPartyView : MonoBehaviour
 {
 	#region 상수
@@ -35,7 +34,6 @@ public class CInnPartyView : MonoBehaviour
 	// 의자 자리에서 영웅을 옮기는 양 (자리 기준 → y 위로, z 의자 앞쪽으로) → 발은 바닥에, 등은 등받이에 박히지 않게
 	[SerializeField] private Vector3 _seatOffset = new Vector3(0f, 0f, 0.12f);
 	// 영웅 재질을 여관 방에 맞춘다 → 영웅은 광택 0.5(회색으로 번들거림), 방은 광택 0 + 따뜻한 불빛
-	//  ㄴ 원본 재질은 건드리지 않고 이 씬에서만 덮어쓴다 (MaterialPropertyBlock)
 	[SerializeField] private bool _blendWithRoom = true;
 	[SerializeField, Range(0f, 1f)] private float _heroGlossiness = 0f;
 	// 영웅 색에 곱하는 색 → 어둡고 따뜻하게 (흰색이면 원래 색)
@@ -113,7 +111,7 @@ public class CInnPartyView : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		// 해상도가 바뀌어도 의자 아래를 따라가게 매 프레임 맞춘다 (4명뿐이라 가볍다)
+		// 해상도가 바뀌어도 의자 아래를 따라가게 매 프레임 맞춘다
 		for (int i = 0; i < _seated.Count; i++)
 		{
 			PlaceLabel(_seated[i]);
@@ -273,7 +271,7 @@ public class CInnPartyView : MonoBehaviour
 			model.name = data.HeroID;
 			model.transform.localPosition = _seatOffset;
 			model.transform.localRotation = Quaternion.identity;
-			model.transform.localScale = model.transform.localScale * _modelScale;
+			model.transform.localScale = Vector3.one * _modelScale;
 			SetLayerRecursive(model.transform, seat.gameObject.layer);
 			KeepRendered(model);
 			BlendWithRoom(model);
@@ -291,7 +289,6 @@ public class CInnPartyView : MonoBehaviour
 		PlaceLabel(seated);
 	}
 
-	// 앉은 자세는 묶음 상자(본 포즈 기준)를 벗어나기 쉽다 → 화면 밖으로 오판해 안 그리거나 애니메이션을 멈추지 않게
 	private static void KeepRendered(GameObject model)
 	{
 		SkinnedMeshRenderer[] skins = model.GetComponentsInChildren<SkinnedMeshRenderer>(true);
@@ -309,7 +306,7 @@ public class CInnPartyView : MonoBehaviour
 		}
 	}
 
-	// 재질마다 광택을 낮추고 색을 곱한다 (무기 등 재질별 원래 색은 살린다)
+	// 재질마다 광택을 낮추고 색을 곱한다
 	private void BlendWithRoom(GameObject model)
 	{
 		if (!_blendWithRoom)
@@ -454,7 +451,6 @@ public class CInnPartyView : MonoBehaviour
 
 	#region 마우스 올리기·누르기
 	// 테두리용 재질을 끼운 목록을 미리 만들어 둔다 → 올릴 때마다 배열을 만들지 않게
-	//  ㄴ 재질을 하나 더 끼우면 마지막 부분 메시를 한 번 더 그린다 (영웅 모델은 렌더러마다 메시 하나)
 	private void PrepareOutline(CSeated seated)
 	{
 		if (_outlineMaterial == null)

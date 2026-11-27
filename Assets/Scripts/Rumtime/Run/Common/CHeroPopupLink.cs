@@ -4,13 +4,12 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // 교차로 밖(주행 파티 줄·여관)에서 영웅 정보 창(HeroPopup_UI)을 열고 닫는다
-//  ㄴ 창은 교차로 씬에 놓여 있고, 팀원 코드가 씬을 넘어 남게(DontDestroyOnLoad) 해 둔다 → 교차로를 거친 뒤에만 쓸 수 있다
-//  ㄴ 창의 닫기 버튼은 교차로 매니저(ExitPopup)에 묶여 있다 → 교차로가 닫혀 있으면 눌러도 아무 일이 없으니 대신 닫아 준다
+
 public static class CHeroPopupLink
 {
 	#region 상수
 	private const string CROSSROAD_CLOSE_METHOD = "ExitPopup";
-	// 정보 창(300) 위로 짐칸을 올린다 → 여관에서는 여관 화면이 짐칸을 덮고 있어서
+	// 정보 창(300) 위로 짐칸을 올린다
 	private const int INVENTORY_SORTING_ORDER = 310;
 	#endregion
 
@@ -121,7 +120,7 @@ public static class CHeroPopupLink
 	}
 
 	#region 짐칸
-	// 정보 창 옆(오른쪽)에 짐칸을 열고 창보다 위로 올린다 → 짐칸에서 장신구 칸으로 끌어다 놓을 수 있게
+	// 정보 창 옆(오른쪽)에 짐칸을 열고 창보다 위로 올린다
 	private static void ShowInventory()
 	{
 		_inventory = UnityEngine.Object.FindFirstObjectByType<CInventoryView>(UnityEngine.FindObjectsInactive.Include);
@@ -180,7 +179,7 @@ public static class CHeroPopupLink
 	}
 	#endregion
 
-	// 교차로 매니저가 숨기던 방식 그대로 (창 루트의 CanvasGroup)
+	// 교차로 매니저가 숨기던 방식 그대로
 	private static void SetVisible(HeroPopup_UI popup, bool visible)
 	{
 		UnityEngine.CanvasGroup group = popup.GetComponent<UnityEngine.CanvasGroup>();

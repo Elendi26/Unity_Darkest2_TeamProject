@@ -4,7 +4,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 // 아이템을 놓는 곳 → 받을 수 있는지·받았을 때 할 일은 붙인 쪽이 알려 준다
-//  ㄴ 끌고 위에 올라오면 받을 수 있을 때만 강조 그림을 켠다
 public class CItemDropZone : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
 	#region 내부 변수

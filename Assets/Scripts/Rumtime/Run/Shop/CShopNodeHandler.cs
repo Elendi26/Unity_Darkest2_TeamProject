@@ -10,13 +10,15 @@ public class CShopNodeHandler : INodeHandler
 		public CShopItemData Service;
 		public CItemDataBase Item;
 		public int Left;
+		// 아이템 값 배율 (마차 업그레이드 할인 등)
+		public float PriceScale = 1f;
 
 		public string Name => Item != null ? Item.DisplayName : Service.DisplayName;
-		public string Description => Item != null ? Item.Description : Service.Description;
+		public string Description => Item != null ? Item.FullDescription : Service.Description;
 		public UnityEngine.Sprite Icon => Item != null ? Item.Icon : Service.Icon;
 		// 아이템은 아이템이 정한 재화로 산다 (기본 유물, 장신구·마차는 패물)
 		public ERunValue CostType => Item != null ? Item.BuyCurrency : Service.CostType;
-		public int Cost => Item != null ? Item.BuyPrice : Service.Cost;
+		public int Cost => Item != null ? UnityEngine.Mathf.Max(1, UnityEngine.Mathf.RoundToInt(Item.BuyPrice * PriceScale)) : Service.Cost;
 		// 분류 → 서비스는 횃불을 채우면 횃불, 나머지(수리·보강·교환)는 마차
 		public EItemCategory Category => Item != null ? Item.Category : (Service.BlockWhenFull == ERunValue.Torch ? EItemCategory.Torch : EItemCategory.Coach);
 		public EItemRarity Rarity => Item != null ? Item.Rarity : EItemRarity.Common;
@@ -189,10 +191,33 @@ public class CShopNodeHandler : INodeHandler
 		{
 			int picked = PickWeighted(random);
 
-			_entries.Add(new CShopEntry { Item = _itemCandidates[picked], Left = _shop.ItemStock });
+			_entries.Add(new CShopEntry { Item = _itemCandidates[picked], Left = _shop.ItemStock, PriceScale = GetPriceScale(_itemCandidates[picked]) });
 			_itemCandidates.RemoveAt(picked);
 			_weights.RemoveAt(picked);
 		}
+	}
+
+	// 마차 업그레이드(상인 길드 인장 등) 할인 → 장신구·전투·마차 아이템과 여관 상점 물건에만
+	private float GetPriceScale(CItemDataBase item)
+	{
+		if (_stagecoach == null || item == null)
+		{
+			return 1f;
+		}
+
+		bool isDiscounted = _type == ENodeType.Inn
+			|| item.Category == EItemCategory.Trinket
+			|| item.Category == EItemCategory.Combat
+			|| item.Category == EItemCategory.Coach;
+
+		if (!isDiscounted)
+		{
+			return 1f;
+		}
+
+		float discount = UnityEngine.Mathf.Clamp01(_stagecoach.GetStat(ERunStat.ShopDiscountPercent));
+
+		return 1f - discount;
 	}
 
 	private bool HasService(CShopItemData service)

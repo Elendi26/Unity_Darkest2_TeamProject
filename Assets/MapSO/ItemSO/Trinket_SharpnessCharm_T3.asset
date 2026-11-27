@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4354b4f8882039e4d1846f2253f47454, type: 3}
+  m_Name: Trinket_SharpnessCharm_T3
+  m_EditorClassIdentifier: 
+  _id: 
+  _displayName: 지울 수 없는 예리한 부적
+  _description: 칼날은 날카로워지지만 정신이 흐려지기 쉽다.
+  _icon: {fileID: 21300000, guid: 86d18ba6a0a079247ac593d2846271fa, type: 3}
+  _category: 3
+  _rarity: 3
+  _maxStack: 1
+  _buyPrice: 50
+  _sellPrice: 25
+  _statModifiers: []
+  _tokenGrants:
+  - Timing: 1
+    Token: 256
+    Count: 2
+    Chance: 100
+  _allowDuplicate: 0

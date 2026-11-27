@@ -436,11 +436,6 @@ public class CRoadPath : MonoBehaviour
 
 		_straightZones.Add(new Vector2(from, to));
 
-		if (_logFork)
-		{
-			CPrint.Log($"CRoadPath : {from:F0}m ~ {to:F0}m 곧은 길 예약");
-		}
-
 		float followArc = _followArc;
 
 		if (_follow != null && TryProject(_follow.position, out float arc, out _, out _))

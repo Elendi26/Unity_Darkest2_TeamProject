@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4354b4f8882039e4d1846f2253f47454, type: 3}
+  m_Name: Trinket_AnchoringCharm_T3
+  m_EditorClassIdentifier: 
+  _id: 
+  _displayName: 지울 수 없는 가시 돋친 부적
+  _description: 몸을 땅에 묶어 밀려나지도 쓰러지지도 않게 한다.
+  _icon: {fileID: 21300000, guid: bf3a95b294158594583614273346902b, type: 3}
+  _category: 3
+  _rarity: 3
+  _maxStack: 1
+  _buyPrice: 50
+  _sellPrice: 25
+  _statModifiers:
+  - Stat: 12
+    Value: 50
+    IsPercent: 0
+    Extra: 0
+  - Stat: 11
+    Value: 25
+    IsPercent: 0
+    Extra: 0
+  _allowDuplicate: 0

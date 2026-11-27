@@ -25,7 +25,6 @@ public class CItemDragPayload
 }
 
 // 아이템 끌어다 놓기 → 지금 끄는 아이템 하나 + 마우스를 따라다니는 아이콘
-//  ㄴ 놓기는 유니티 이벤트(IDropHandler)가 마우스 아래 놓는 곳에 알려 준다 → 여기서는 들고 있기·그리기만
 public static class CItemDrag
 {
 	#region 상수

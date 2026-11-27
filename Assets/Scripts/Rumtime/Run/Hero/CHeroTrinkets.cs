@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // 영웅이 끼운 장신구 (영웅마다 2칸) → 런 동안 들고 있다가 런 세이브에 함께 넣는다
-//  ㄴ 영웅 세이브(팀 데이터)는 건드리지 않고 런 쪽에 둔다 → 장신구도 짐칸처럼 런 아이템이라서
-//  ㄴ 능력치 반영(전투 쪽)은 아직 연결하지 않았다 → GetEquipped 로 꺼내 쓰면 된다
+//  능력치 반영은 아직 연결하지 않았다 → GetEquipped 로 꺼내 쓰면 된다
 public static class CHeroTrinkets
 {
 	#region 상수
@@ -79,7 +78,7 @@ public static class CHeroTrinkets
 		return true;
 	}
 
-	// 짐칸의 장신구를 끼운다 → 칸에 이미 있던 것은 짐칸으로 돌아간다 (빠진 자리에 들어가므로 자리는 늘 있다)
+	// 짐칸의 장신구를 끼운다 → 칸에 이미 있던 것은 짐칸으로 돌아간다
 	public static bool TryEquipFromInventory(string heroId, int slot, CInventory inventory, int index)
 	{
 		if (inventory == null || index < 0 || index >= inventory.Stacks.Count)

@@ -54,7 +54,6 @@ public class CCrossroadNodeHandler : MonoBehaviour, INodeHandler
 		_isLeaving = false;
 		_isOpenedByMode = false;
 
-		// 씬이 올라오는 즉시 주행 쪽을 숨긴다 → 페이드 도중 카메라·EventSystem 이 둘씩 겹치지 않게
 		SceneManager.sceneLoaded -= HandleSceneLoaded;
 		SceneManager.sceneLoaded += HandleSceneLoaded;
 
@@ -109,7 +108,7 @@ public class CCrossroadNodeHandler : MonoBehaviour, INodeHandler
 
 		_crossroadScene = manager.gameObject.scene;
 
-		// 로드 콜백에서 이미 숨겼으면 다시 숨기지 않는다 (숨긴 목록을 잃지 않게)
+		// 로드 콜백에서 이미 숨겼으면 다시 숨기지 않는다
 		if (_hidden.Count == 0)
 		{
 			HideDrivingScene();

@@ -17,8 +17,7 @@ MonoBehaviour:
   _portrait: {fileID: 21300000, guid: 1bae38e233e8a1e419968223752c265c, type: 3}
   _crest: {fileID: 0}
   _banner: {fileID: 21300000, guid: 65f577fb4f6e8e9419f848e79b866b31, type: 3}
-  _fixedItems:
-  - {fileID: 11400000, guid: b0b59a16c35463d6907de5b41d321b65, type: 2}
+  _fixedItems: []
   _pool: []
   _randomCount: 0
   _itemPool: {fileID: 11400000, guid: b0875cabfe6ad60c029650995fa5ca2a, type: 2}

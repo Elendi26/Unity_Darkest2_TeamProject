@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
@@ -40,6 +41,15 @@ public class CRunPauseMenu : MonoBehaviour
 	private bool _isLeaving;
 	// 영웅 정보 창이 마지막으로 열려 있던 프레임
 	private int _heroPopupFrame = -10;
+
+	// 전투처럼 주행 씬 위에 다른 씬이 덮여 있는 동안 (그 위에서 이 메뉴를 연다)
+	private bool _isOverlay;
+	private Canvas _overlayCanvas;
+	private bool _prevCanvasEnabled;
+	private int _prevCanvasOrder;
+	private Button _abandonButton;
+	private string _prevAbandonLabel;
+	private UnityAction _abandonOverride;
 	#endregion
 
 	private void Awake()
@@ -115,8 +125,8 @@ public class CRunPauseMenu : MonoBehaviour
 			return;
 		}
 
-		// 여관·교차로 등 씬이 겹쳐 열려 있으면 맨 위(마지막에 연) 씬의 일시정지만 연다
-		if (!IsTopScene())
+		// 여관·교차로 등 씬이 겹쳐 열려 있으면 맨 위(마지막에 연) 씬의 일시정지만 연다 (전투 중에는 이 메뉴를 쓴다)
+		if (!_isOverlay && !IsTopScene())
 		{
 			return;
 		}
@@ -285,6 +295,154 @@ public class CRunPauseMenu : MonoBehaviour
 
 		LeaveTo(gameManager, modeId, false);
 	}
+
+	#region 덮인 씬 (전투)
+	// 전투처럼 주행 씬 위에 다른 씬이 덮인 동안에도 이 메뉴를 연다 → 원정 포기 자리는 넘겨받은 동작(전투 포기)으로 바꾼다
+	//  ㄴ 메뉴 캔버스는 주행 화면 UI 와 함께 꺼져 있다 → 켜고 덮은 씬 UI 보다 위로 올린다 (EndOverlay 에서 되돌린다)
+	public void BeginOverlay(string abandonLabel, UnityAction onAbandon, int sortingOrder)
+	{
+		if (_isOverlay)
+		{
+			EndOverlay();
+		}
+
+		_isOverlay = true;
+		_overlayCanvas = FindRootCanvas();
+
+		if (_overlayCanvas != null)
+		{
+			_prevCanvasEnabled = _overlayCanvas.enabled;
+			_prevCanvasOrder = _overlayCanvas.sortingOrder;
+			_overlayCanvas.enabled = true;
+			_overlayCanvas.sortingOrder = sortingOrder;
+		}
+
+		_abandonButton = FindButton(nameof(AbandonRun));
+
+		if (_abandonButton == null || onAbandon == null)
+		{
+			return;
+		}
+
+		// 원정 포기(씬에 묶인 호출)는 끄고 넘겨받은 동작만 하게
+		SetPersistentCalls(_abandonButton, nameof(AbandonRun), UnityEventCallState.Off);
+		_abandonOverride = onAbandon;
+		_abandonButton.onClick.AddListener(_abandonOverride);
+		_prevAbandonLabel = SetButtonLabel(_abandonButton, abandonLabel);
+	}
+
+	public void EndOverlay()
+	{
+		if (!_isOverlay)
+		{
+			return;
+		}
+
+		_isOverlay = false;
+		Resume();
+
+		if (_overlayCanvas != null)
+		{
+			_overlayCanvas.enabled = _prevCanvasEnabled;
+			_overlayCanvas.sortingOrder = _prevCanvasOrder;
+			_overlayCanvas = null;
+		}
+
+		if (_abandonButton != null)
+		{
+			if (_abandonOverride != null)
+			{
+				_abandonButton.onClick.RemoveListener(_abandonOverride);
+			}
+
+			SetPersistentCalls(_abandonButton, nameof(AbandonRun), UnityEventCallState.RuntimeOnly);
+			SetButtonLabel(_abandonButton, _prevAbandonLabel);
+		}
+
+		_abandonButton = null;
+		_abandonOverride = null;
+		_prevAbandonLabel = null;
+	}
+
+	// 메뉴가 든 가장 바깥 캔버스 (꺼져 있어도 찾는다)
+	private Canvas FindRootCanvas()
+	{
+		if (_menu == null)
+		{
+			return null;
+		}
+
+		Canvas[] canvases = _menu.GetComponentsInParent<Canvas>(true);
+
+		return canvases.Length > 0 ? canvases[canvases.Length - 1] : null;
+	}
+
+	// 씬에서 이 메뉴의 함수를 부르도록 묶인 버튼
+	private Button FindButton(string method)
+	{
+		if (_menu == null)
+		{
+			return null;
+		}
+
+		Button[] buttons = _menu.GetComponentsInChildren<Button>(true);
+
+		for (int i = 0; i < buttons.Length; i++)
+		{
+			for (int j = 0; j < buttons[i].onClick.GetPersistentEventCount(); j++)
+			{
+				if (buttons[i].onClick.GetPersistentMethodName(j) == method)
+				{
+					return buttons[i];
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private static void SetPersistentCalls(Button button, string method, UnityEventCallState state)
+	{
+		for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+		{
+			if (button.onClick.GetPersistentMethodName(i) == method)
+			{
+				button.onClick.SetPersistentListenerState(i, state);
+			}
+		}
+	}
+
+	// 버튼 글자를 바꾸고 원래 글자를 돌려준다 (TMP·기본 Text 모두)
+	private static string SetButtonLabel(Button button, string label)
+	{
+		if (label == null)
+		{
+			return null;
+		}
+
+		TMP_Text tmp = button.GetComponentInChildren<TMP_Text>(true);
+
+		if (tmp != null)
+		{
+			string prev = tmp.text;
+
+			tmp.text = label;
+			return prev;
+		}
+
+		Text text = button.GetComponentInChildren<Text>(true);
+
+		if (text != null)
+		{
+			string prev = text.text;
+
+			text.text = label;
+			return prev;
+		}
+
+		return null;
+	}
+	#endregion
 
 	// 씬에 놓인 매니저만 찾는다 → Instance 로 빈 매니저를 새로 만들지 않는다
 	private static CGameManager FindGameManager()
