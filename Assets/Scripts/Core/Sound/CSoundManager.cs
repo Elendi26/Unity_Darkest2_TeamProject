@@ -39,6 +39,7 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
     private AudioClip _currentLoopClip;
     private float _modeBgmScale = 1f;
     private CancellationTokenSource _bgmCts;
+    private CancellationTokenSource _sfxGroupCts;
     #endregion
 
     #region 프로퍼티
@@ -104,6 +105,7 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
         {
             StopSoundAll();
             CancelBgmTask();
+            CancelSfxGroupTask();
         }
 
         base.OnDestroy();
@@ -219,8 +221,6 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
     /// <summary>
     /// 문자열 ID로 SFX 클립을 조회해 1회성으로 재생하고 종료 시 풀에 반환합니다.
     /// </summary>
-    /// <param name="id">CAudioClipSO에 등록된 SFX ID</param>
-    /// <returns>재생 중인 AudioSource 참조(실패 시 null)</returns>
     public AudioSource PlaySfxOneShot(string id)
     {
         AudioClip clip = GetSfxClip(id);
@@ -246,9 +246,48 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
     }
 
     /// <summary>
-    /// 여러 SFX ID를 전달해 동시에 겹쳐 재생합니다.
+    /// 문자열 ID로 SFX 클립을 루프 재생하며, 볼륨이 작아졌다 커졌다 하도록 파동 효과를 적용합니다.
     /// </summary>
-    /// <param name="clipIds">동시 재생할 SFX ID 목록</param>
+    public AudioSource PlaySfxLoop(string id)
+    {
+        AudioClip clip = GetSfxClip(id);
+        if (clip == null)
+        {
+            return null;
+        }
+
+        AudioSource source = _sfxSourcePool.GetItem();
+        if (source == null)
+        {
+            return null;
+        }
+
+        source.clip = clip;
+        source.loop = true;
+        source.volume = GetEffectiveSfxVolume();
+        source.Play();
+        _activeSfxList.Add(source);
+
+        PulseSfxLoopVolumeAsync(source, ResetSfxToken(source)).Forget();
+        return source;
+    }
+
+    /// <summary>
+    /// 재생 중인 루프 SFX를 정지하고 풀에 반환합니다.
+    /// </summary>
+    public void StopSfxLoop(AudioSource source)
+    {
+        if (source == null)
+        {
+            return;
+        }
+
+        ReleaseSfxSource(source);
+    }
+
+    /// <summary>
+    /// 여러 SFX ID를 전달해 첫 SFX 이후 0.6초 간격으로 다음 SFX를 순차 재생합니다.
+    /// </summary>
     public void PlaySfxGroup(params string[] clipIds)
     {
         if (clipIds == null || clipIds.Length == 0)
@@ -256,9 +295,69 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
             return;
         }
 
-        for (int i = 0; i < clipIds.Length; i++)
+        CancelSfxGroupTask();
+        _sfxGroupCts = new CancellationTokenSource();
+        PlaySfxGroupAsync(clipIds, _sfxGroupCts.Token).Forget();
+    }
+
+    private async UniTaskVoid PlaySfxGroupAsync(string[] clipIds, CancellationToken token)
+    {
+        const float stepDelaySeconds = 0.6f;
+        var delayMs = (int)(stepDelaySeconds * 1000f);
+
+        try
         {
-            PlaySfxOneShot(clipIds[i]);
+            for (int i = 0; i < clipIds.Length; i++)
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (i > 0)
+                {
+                    await UniTask.Delay(delayMs, DelayType.DeltaTime, PlayerLoopTiming.Update, token);
+                }
+
+                PlaySfxOneShot(clipIds[i]);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+    }
+
+    private async UniTaskVoid PulseSfxLoopVolumeAsync(AudioSource source, CancellationToken token)
+    {
+        const float pulseSpeed = 3.0f;
+        const float minScale = 0.35f;
+        const float maxScale = 1.0f;
+
+        float elapsed = 0f;
+
+        try
+        {
+            while (!token.IsCancellationRequested && source != null && source.isPlaying)
+            {
+                elapsed += Time.deltaTime * pulseSpeed;
+                float wave01 = (Mathf.Sin(elapsed) + 1f) * 0.5f;
+                float scale = Mathf.Lerp(minScale, maxScale, wave01);
+                source.volume = GetEffectiveSfxVolume() * scale;
+
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+    }
+
+    private void CancelSfxGroupTask()
+    {
+        if (_sfxGroupCts != null)
+        {
+            _sfxGroupCts.Cancel();
+            _sfxGroupCts.Dispose();
+            _sfxGroupCts = null;
         }
     }
 
@@ -323,7 +422,6 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
     /// 인트로가 있으면 인트로 -> 루프를 dspTime으로 예약 재생하며,
     /// KeepBgmIfSameLoop가 true이고 동일한 루프 클립이 재생 중이면 유지합니다.
     /// </summary>
-    /// <param name="modeData">대상 게임 모드 데이터 SO</param>
     public void PlayModeBgm(CGameModeDataSO modeData)
     {
         if (modeData == null)
@@ -379,7 +477,6 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
     /// <summary>
     /// CGameModeDataSO에 지정된 BGM 아웃트로를 재생합니다.
     /// </summary>
-    /// <param name="modeData">대상 게임 모드 데이터 SO</param>
     public void PlayModeBgmOutro(CGameModeDataSO modeData)
     {
         if (modeData == null)
@@ -409,6 +506,7 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
     public void StopSoundAll()
     {
         StopBgm();
+        CancelSfxGroupTask();
 
         for (int i = _activeSfxList.Count - 1; i >= 0; i--)
         {
