@@ -53,7 +53,6 @@ public class CInnPartyView : MonoBehaviour
 	[SerializeField] private Color _hpFillColor = new Color(0.72f, 0.1f, 0.08f, 1f);
 	[SerializeField] private Color _stressOnColor = new Color(0.92f, 0.9f, 0.86f, 1f);
 	[SerializeField] private Color _stressOffColor = new Color(0.3f, 0.28f, 0.26f, 0.8f);
-	[SerializeField] private bool _logState = true;
 	// 앉힌 영웅의 위치·크기·화면 좌표 로그 (자리 맞출 때만 켠다)
 	[SerializeField] private bool _logDetail = false;
 	// 영웅에 마우스를 올리면 두르는 테두리 (비우면 이름으로 찾는다)
@@ -165,11 +164,6 @@ public class CInnPartyView : MonoBehaviour
 			}
 
 			Seat(_seats[slot], data, save, slot);
-		}
-
-		if (_logState)
-		{
-			CPrint.Log($"CInnPartyView : 여관에 {_seated.Count}명 앉힘");
 		}
 
 		if (_logDetail)

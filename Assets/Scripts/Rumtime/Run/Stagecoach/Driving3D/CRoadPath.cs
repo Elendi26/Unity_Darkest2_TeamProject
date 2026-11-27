@@ -468,11 +468,6 @@ public class CRoadPath : MonoBehaviour
 		_forkArc = arc;
 		_forkCount = count;
 
-		if (_logFork)
-		{
-			CPrint.Log($"CRoadPath : {arc:F0}m 지점에 {count}갈래 갈림길 예약");
-		}
-
 		if (TruncateFrom(arc - _tileSet.CellSize * FORK_STRAIGHTEN_CELLS))
 		{
 			Extend();
@@ -985,11 +980,6 @@ public class CRoadPath : MonoBehaviour
 					filled++;
 				}
 			}
-		}
-
-		if (_logFork && filled > 0)
-		{
-			CPrint.Log($"CRoadPath : 갈래 사이 빈 땅 {filled}칸을 숲으로 채움");
 		}
 	}
 

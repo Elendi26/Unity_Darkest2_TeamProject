@@ -32,6 +32,9 @@ public class CRunSceneFlow : MonoBehaviour
 	private bool _isLoading;
 	#endregion
 
+	// 튜토리얼 씬의 흐름인지 (이 지도를 끝내면 튜토리얼을 마친다)
+	public bool CompletesTutorial => _completesTutorial;
+
 	private void Awake()
 	{
 		if (_mapController == null)

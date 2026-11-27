@@ -17,7 +17,6 @@ public class CDriveIntroFade : MonoBehaviour
 	[SerializeField] private Color _color = Color.black;
 	// 주행 UI 위, 일시정지 메뉴(100) 아래
 	[SerializeField] private int _sortingOrder = 90;
-	[SerializeField] private bool _logState = true;
 	#endregion
 
 	#region 내부 변수
@@ -105,16 +104,8 @@ public class CDriveIntroFade : MonoBehaviour
 			return;
 		}
 
-		EIntroState prev = _state;
-		float waited = _elapsed;
-
 		_state = next;
 		_elapsed = 0f;
-
-		if (_logState)
-		{
-			CPrint.Log($"CDriveIntroFade : {prev} → {_state} ({waited:0.00}초)");
-		}
 
 		switch (_state)
 		{

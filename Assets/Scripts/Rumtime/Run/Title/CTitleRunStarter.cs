@@ -28,6 +28,7 @@ public class CTitleRunStarter : MonoBehaviour
 		// 새 모험은 지난 런을 이어받지 않는다
 		CRunCarry.Take();
 		CRunProfileSave.ClearRun(slot);
+		CTutorialTipDirector.ResetSeen();
 
 		if (_logState)
 		{

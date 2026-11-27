@@ -22,7 +22,7 @@ MonoBehaviour:
   _buyPrice: 30
   _sellPrice: 15
   _statModifiers:
-  - Stat: 11
+  - Stat: 12
     Value: -10
     IsPercent: 0
   _tokenGrants:

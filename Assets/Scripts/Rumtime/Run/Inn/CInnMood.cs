@@ -21,7 +21,6 @@ public class CInnMood : MonoBehaviour
 	[SerializeField, Range(0f, 1f)] private float _vignetteStart = 0.35f;
 	// 메뉴 캔버스(40)보다 아래
 	[SerializeField] private int _sortingOrder = 30;
-	[SerializeField] private bool _logState = true;
 	#endregion
 
 	#region 내부 변수
@@ -41,11 +40,6 @@ public class CInnMood : MonoBehaviour
 		DimAmbient();
 
 		BuildOverlay();
-
-		if (_logState)
-		{
-			CPrint.Log($"CInnMood : 조명 {lightCount}개 x{_lightScale}, 주변광 x{_ambientScale}");
-		}
 	}
 
 	// 이 씬에 있는 조명만 낮춘다 (주행 씬 조명은 그대로)

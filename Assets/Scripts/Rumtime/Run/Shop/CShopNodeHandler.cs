@@ -191,10 +191,49 @@ public class CShopNodeHandler : INodeHandler
 		{
 			int picked = PickWeighted(random);
 
-			_entries.Add(new CShopEntry { Item = _itemCandidates[picked], Left = _shop.ItemStock, PriceScale = GetPriceScale(_itemCandidates[picked]) });
-			_itemCandidates.RemoveAt(picked);
-			_weights.RemoveAt(picked);
+			CItemDataBase item = _itemCandidates[picked];
+
+			_entries.Add(new CShopEntry { Item = item, Left = _shop.ItemStock, PriceScale = GetPriceScale(item) });
+			RemoveSameFamily(GetFamilyKey(item));
 		}
+	}
+
+	// 단계형 장신구(_T1·_T2·_T3)는 한 단계만 진열한다 → 뽑힌 것과 같은 묶음을 후보에서 모두 뺀다
+	//  ㄴ 희귀도 비중으로 뽑으니 낮은 단계가 더 자주 나온다
+	private void RemoveSameFamily(string familyKey)
+	{
+		for (int i = _itemCandidates.Count - 1; i >= 0; i--)
+		{
+			if (GetFamilyKey(_itemCandidates[i]) != familyKey)
+			{
+				continue;
+			}
+
+			_itemCandidates.RemoveAt(i);
+			_weights.RemoveAt(i);
+		}
+	}
+
+	// 아이템 키 끝의 _T숫자 를 뗀 이름 (예: Trinket_CleansingCenser_T2 → Trinket_CleansingCenser)
+	private static string GetFamilyKey(CItemDataBase item)
+	{
+		string id = item.Id;
+		int index = id.LastIndexOf("_T", System.StringComparison.Ordinal);
+
+		if (index <= 0 || index + 2 >= id.Length)
+		{
+			return id;
+		}
+
+		for (int i = index + 2; i < id.Length; i++)
+		{
+			if (!char.IsDigit(id[i]))
+			{
+				return id;
+			}
+		}
+
+		return id.Substring(0, index);
 	}
 
 	// 마차 업그레이드(상인 길드 인장 등) 할인 → 장신구·전투·마차 아이템과 여관 상점 물건에만

@@ -28,6 +28,7 @@ public class CSettingsPanel : MonoBehaviour
 	private const float ROW_HEIGHT = 60f;
 	private const float LABEL_WIDTH = 200f;
 	private const float CONTROL_WIDTH = 380f;
+	private const float MIN_PANEL_HEIGHT = 620f;
 
 	private readonly List<Vector2Int> _resolutions = new List<Vector2Int>();
 	private GameObject _root;
@@ -37,6 +38,7 @@ public class CSettingsPanel : MonoBehaviour
 	private TextMeshProUGUI _sfxValue;
 	private TextMeshProUGUI _resolutionText;
 	private Toggle _fullscreenToggle;
+	private Toggle _tutorialTipsToggle;
 	private Button _prevResolutionButton;
 	private Button _nextResolutionButton;
 	// 적용 전 고른 값
@@ -74,11 +76,6 @@ public class CSettingsPanel : MonoBehaviour
 		Refresh();
 		_root.SetActive(true);
 		_root.transform.SetAsLastSibling();
-
-		if (_logState)
-		{
-			CPrint.Log("CSettingsPanel : 게임 설정 열기");
-		}
 	}
 
 	public void Close()
@@ -90,11 +87,6 @@ public class CSettingsPanel : MonoBehaviour
 
 		_root.SetActive(false);
 		CGameSettings.Save();
-
-		if (_logState)
-		{
-			CPrint.Log("CSettingsPanel : 게임 설정 닫기");
-		}
 	}
 
 	// 지금 설정 값으로 화면을 맞춘다 (적용 안 하고 닫았던 선택은 버린다)
@@ -117,6 +109,7 @@ public class CSettingsPanel : MonoBehaviour
 		}
 
 		_fullscreenToggle.SetIsOnWithoutNotify(CGameSettings.GetAppliedFullscreen());
+		_tutorialTipsToggle.SetIsOnWithoutNotify(CGameSettings.TutorialTips);
 		UpdateResolutionText();
 	}
 
@@ -160,6 +153,7 @@ public class CSettingsPanel : MonoBehaviour
 	{
 		CGameSettings.SetBgmVolume(_bgmSlider.value);
 		CGameSettings.SetSfxVolume(_sfxSlider.value);
+		CGameSettings.SetTutorialTips(_tutorialTipsToggle.isOn);
 
 		bool fullscreen = _fullscreenToggle.isOn;
 
@@ -180,7 +174,7 @@ public class CSettingsPanel : MonoBehaviour
 
 		if (_logState)
 		{
-			CPrint.Log($"CSettingsPanel : 적용 → 배경음 {_bgmValue.text}, 효과음 {_sfxValue.text}, 해상도 {_resolutionText.text} {(fullscreen ? "전체 화면" : "창 모드")}");
+			CPrint.Log($"CSettingsPanel : 적용 → 배경음 {_bgmValue.text}, 효과음 {_sfxValue.text}, 해상도 {_resolutionText.text} {(fullscreen ? "전체 화면" : "창 모드")}, 튜토리얼 팁 {(_tutorialTipsToggle.isOn ? "켬" : "끔")}");
 		}
 	}
 
@@ -222,6 +216,9 @@ public class CSettingsPanel : MonoBehaviour
 	#region 창 만들기
 	private void Build()
 	{
+		// 튜토리얼 팁 줄이 늘었다 → 씬에 저장된 크기(520)가 작으면 늘린다
+		_panelSize.y = Mathf.Max(_panelSize.y, MIN_PANEL_HEIGHT);
+
 		// 화면 전체를 어둡게 덮어 뒤쪽 일시정지 버튼 클릭을 막는다
 		Image dim = CUIBuilder.CreateImage("SettingsPanel", _parent, null, _dimColor);
 
@@ -253,6 +250,8 @@ public class CSettingsPanel : MonoBehaviour
 		y -= ROW_HEIGHT + 20f;
 		_fullscreenToggle = CreateCheckboxRow(panel, "전체 화면", y);
 		_fullscreenToggle.onValueChanged.AddListener(HandleFullscreenChanged);
+		y -= ROW_HEIGHT + 20f;
+		_tutorialTipsToggle = CreateCheckboxRow(panel, "튜토리얼 팁", y);
 
 		// 아래 버튼 → 적용 (모든 설정) / 닫기 (적용 안 한 선택은 버린다)
 		CreateButton("ApplyButton", panel, "적용", new Vector2(-130f, 0f), new Vector2(220f, 60f), Apply, true);

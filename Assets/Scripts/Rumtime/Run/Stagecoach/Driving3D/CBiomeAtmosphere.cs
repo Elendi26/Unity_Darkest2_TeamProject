@@ -22,7 +22,6 @@ public class CBiomeAtmosphere : MonoBehaviour
 	[SerializeField] private Transform _follow;
 	[SerializeField] private Vector3 _skylineOffset = new Vector3(-40.18f, 15.48f, 164.27f);
 	[SerializeField] private float _skylineTurnSmooth = 0.6f;
-	[SerializeField] private bool _logState = true;
 	#endregion
 
 	#region 내부 변수
@@ -95,11 +94,6 @@ public class CBiomeAtmosphere : MonoBehaviour
 		{
 			RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
 			RenderSettings.ambientLight = _ambientColor;
-		}
-
-		if (_logState)
-		{
-			CPrint.Log($"CBiomeAtmosphere : 안개 {_fogStart:F0}~{_fogEnd:F0}m · 주변광 적용");
 		}
 	}
 

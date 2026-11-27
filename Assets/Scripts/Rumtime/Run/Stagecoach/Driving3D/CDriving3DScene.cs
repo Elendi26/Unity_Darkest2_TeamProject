@@ -230,7 +230,6 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 		if (_physics == null)
 		{
 			_physics = _coach.gameObject.AddComponent<CCoachPhysics>();
-			CPrint.Log("CDriving3DScene : 마차에 CCoachPhysics 를 붙였습니다.");
 		}
 
 		if (_path != null)
@@ -250,8 +249,6 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 				{
 					_chaseCamera = sceneCamera.gameObject.AddComponent<CChaseCamera>();
 				}
-
-				CPrint.Log($"CDriving3DScene : {sceneCamera.name} 카메라가 마차를 따라갑니다.");
 			}
 		}
 
