@@ -164,4 +164,27 @@ public class DataSaveManager : MonoBehaviour
         }
             
     }
+
+    public void SaveCombatState(UserProfileData.CombatSaveData combatData)
+    {
+        if(CurrentSlotIndex < 0)
+        {
+            CPrint.Warn("활성화된 프로필이 없다. 세이브 불가능");
+            return;
+        }
+
+        UserProfileData profile = LoadProfile(CurrentSlotIndex);
+        if (profile != null)
+        {
+            CPrint.Warn("프로필 데이터를 불러오지 못했다. 저장 불가");
+        }
+
+        // 전투 순간 저장 및 저장 시각 갱신하기
+        profile.CurrentCombat = combatData;
+        profile.LastSaveTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        SaveProfile(profile, CurrentSlotIndex);
+
+    }
+
+
 }
