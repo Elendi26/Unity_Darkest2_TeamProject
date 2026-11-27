@@ -164,12 +164,19 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         switch (statType)
         {
             case EEntityStat.HP:
+                // 대미지를 입기 전에 이미 죽음의 문턱에 진입하여 체력이 0인지 기록
+                bool isAlready0HP = (_currentHP <= 0);
+
                 _currentHP += Mathf.RoundToInt(amount);
                 _currentHP = Mathf.Clamp(_currentHP, 0, _heroBasicData != null ? _heroBasicData.MaxHP : _currentHP);
                 ChangedHP?.Invoke(GetStat(EEntityStat.HP), GetStat(EEntityStat.MaxHP));
 
-                if (_currentHP <= 0) OnDeathblow();
-                break;
+                if (_currentHP <= 0 && amount < 0) OnDeathblow(isAlready0HP);
+                else
+                {
+                    ShowDamageTextUI(Mathf.Abs(amount));
+                }
+                    break;
 
             case EEntityStat.MaxHP:
                 Debug.Log("최대체력값은 변경할 수 없습니다");
@@ -345,10 +352,10 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
 
         InitializeRank(rank);
 
-        // 기존 방식은 콜리더랑 런타임데이터까지 꺼지기 때문에 수정합니다.
+        // 기존 방식은 콜리더랑 런타임데이터까지 꺼지기 때문에 수정했습니다.
         _animator = GetComponentInChildren<Animator>();
         _entityAnimation = GetComponentInChildren<CEntityAnimation>();
-        _originRenderers = GetComponentsInChildren<Renderer>();
+        _originRenderers = GetComponentsInChildren<Renderer>(true);
 
 
     }
@@ -383,6 +390,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         // 이미 시체인데 체력이 0이하인 경우 파괴
         if(_isCorpse)
         {
+            _corpseTurn = 0;
             DestroyCorpse();
             return;
         }
@@ -391,7 +399,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         _isCorpse = true;
         _corpseTurn = 1;
 
-        // 몬스터의 렌더러만 비활성화
+        // 렌더러만 비활성화
         if(_originRenderers != null)
         {
             for(int i = 0; i < _originRenderers.Length; i++)
@@ -406,7 +414,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         // 시체 소환
         _corpseModel = Instantiate(CCombatManager.Instance.CorpsePrefab, transform.position, Quaternion.Euler(0,45f,0), transform.parent);
         _corpseModel.transform.localPosition = new Vector3(0, 1, 0);
-        _corpseModel.transform.localScale = _entityModel.transform.localScale;
+        _corpseModel.transform.localScale = transform.localScale;
         
 
         // 시체 체력을 죽은 엔티티의 최대 체력으로 다시 부여 및 체력바 갱신
@@ -463,13 +471,33 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         }
     }
 
-    private void OnDeathblow()
+    private void OnDeathblow(bool already0HP)
     {
-        Debug.Log($"{_name}이(가) 쓰러졌습니다!");
+        // 영웅일때는 죽음의 문턱 발생
+        if(_hero)
+        {
+            CPrint.Log("죽음의 문턱 도달!");
+            float value = UnityEngine.Random.Range(0, 100);
+
+            if(value <= _deathblowRes)
+            {
+                CPrint.Log("죽음의 일격 저항!");
+                ShowDeathsDoorTextUI(already0HP);
+            }
+
+            else
+            {
+                Debug.Log($"{_name}이(가) 쓰러졌습니다!");
+                ShowDeathblowImageUI();
+                EntityDead();
+            }
+        }
+
 
         // 적일때는 바로 사망판정으로
-        if(!_hero)
+        else if(!_hero)
         {
+            Debug.Log($"{_name}이(가) 쓰러졌습니다!");
             EntityDead();
         }
 
@@ -508,7 +536,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         }
 
         // 엔티티 머리 윗 부분에 UI 출력
-        Vector3 spawnPos = transform.position + new Vector3(3, 2, 0);
+        Vector3 spawnPos = transform.position + new Vector3(0.3f, 2, 0);
         CombatDirection_UI directionUI = Instantiate(CCombatManager.Instance.DirectPrefab, spawnPos, Quaternion.identity);
 
         directionUI.DamageDiretion(damage);
@@ -516,6 +544,41 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     }
 
 
+    /// <summary>
+    /// 죽음의 문턱 진입시 텍스트를 출력하는 함수
+    /// </summary>
+    /// <param name="aleady0hp"></param>
+    public void ShowDeathsDoorTextUI(bool aleady0hp)
+    {
+        if(CCombatManager.Instance == null || CCombatManager.Instance.DirectPrefab == null)
+        {
+            return;
+        }
+
+        Vector3 spawnPos = transform.position + new Vector3(0.3f, 1, 0);
+        CombatDirection_UI directionUI = Instantiate(CCombatManager.Instance.DirectPrefab, spawnPos, Quaternion.identity);
+
+        directionUI.OnDeathDoor(aleady0hp);
+    }
+
+    /// <summary>
+    /// 영웅이 죽음의 저항을 실패하여 결국 사망에 이르게 되었을 때, 죽음의 일격 이미지를 출력하는 함수
+    /// </summary>
+    public void ShowDeathblowImageUI()
+    {
+        if(CCombatManager.Instance == null || CCombatManager.Instance.DirectPrefab == null)
+        {
+            return;
+        }
+
+        Vector3 spawnPos = transform.position + new Vector3(0.3f, 1, 0);
+        CombatDirection_UI directionUI = Instantiate(CCombatManager.Instance.DirectPrefab, spawnPos, Quaternion.identity);
+        directionUI.OnDeathblow();
+    }
+
+    /// <summary>
+    /// 시체 체력이 0됐거나 라운드가 끝나서 시체 유지 라운드가 0이 되었을 대 파괴하는 함수
+    /// </summary>
     public void DestroyCorpse()
     {
         if(_isCorpse == false)
@@ -535,17 +598,33 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             }
         }
 
-        // TODO : 랭크 앞으로 당기는 함수 추가해야한다.
-
+        // 루트 HUD 찾아서 HUD 비활성화 하기
+        CombatEntityHUD rootHUD = GetComponentInChildren<CombatEntityHUD>(true);
+        if (rootHUD != null)
+        {
+            rootHUD.gameObject.SetActive(false);
+        }
 
         if(_corpseModel != null)
         {
+            CombatEntityHUD corpseHUD = _corpseModel.GetComponentInChildren<CombatEntityHUD>(true);
+            if(corpseHUD != null)
+            {
+                corpseHUD.gameObject.SetActive(false);
+            }
             // 모델링 파괴하고
-            Destroy(gameObject);
+            Destroy(_corpseModel);
 
             // 변수 비우기
             _corpseModel = null;
         }
+
+        if(CCombatManager.Instance != null)
+        {
+            CCombatManager.Instance.PullEnemyRankForward(this);
+        }
+
+        Destroy(gameObject);
     }
 
 }

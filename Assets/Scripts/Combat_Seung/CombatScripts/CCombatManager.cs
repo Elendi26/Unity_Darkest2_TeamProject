@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using System;
 using UnityEditor.Experimental.GraphView;
+using Newtonsoft.Json.Bson;
 
 public enum ECombatPhase
 {
@@ -48,6 +49,12 @@ public class CCombatManager : MonoBehaviour
     [Header("현재 라운드 표시 텍스트")]
     [SerializeField] private TextMeshProUGUI _roundText;
 
+    [Header("영웅 랭크 슬롯 4개")]
+    [SerializeField] private CCombatRank[] _teamRanks;
+
+    [Header("적 랭크 슬롯 4개")]
+    [SerializeField] private CCombatRank[] _enemyRanks;
+
 
     #endregion
 
@@ -65,7 +72,11 @@ public class CCombatManager : MonoBehaviour
 
     private bool _onPopup;
 
+    private Vector3[] _teamWorldPositions = new Vector3[4];
 
+    private Vector3[] _enemyWorldPositions = new Vector3[4];
+
+    private bool _hasPositions = false;
 
     #endregion
 
@@ -323,8 +334,8 @@ public class CCombatManager : MonoBehaviour
 
     public void RoundOver()
     {
-        // 시체상태인거 찾아서 1턴만에 시체 오브젝트 소멸
-        for(int i = 0; i < OnCombatEntities.Count;  i++)
+        // 역순으로 시체상태인거 찾아서 1턴만에 시체 오브젝트 소멸
+        for(int i = OnCombatEntities.Count -1; i >= 0; i--)
         {
            if(_onCombatEntities[i] != null && _onCombatEntities[i].IsCorpse)
            {
@@ -355,6 +366,9 @@ public class CCombatManager : MonoBehaviour
 
         if(_isStartCombat)
         {
+            // 월드 좌표 생성해서 넣기
+            InitialRankPosition();
+
             // 전투 시작하는 시작지점 호출
             ChangePhase(ECombatPhase.CombatStart);
         }
@@ -555,6 +569,149 @@ public class CCombatManager : MonoBehaviour
         // 마지막에 저장
         DataSaveManager.Instance.SaveCombatState(data);
     }
+
+    // 시체나 엔티티가 죽어서 사라졌을 때 랭크를 앞으로 당기는 함수
+    public void PullEnemyRankForward(CEntityRuntimeData destroyEntity)
+    {
+        if(destroyEntity == null)
+        {
+            return;
+        }
+
+        InitialRankPosition();
+
+        // 일단 전투에 참여 중인 멤버에서 제거
+        if (_onCombatEntities.Contains(destroyEntity))
+        {
+            _onCombatEntities.Remove(destroyEntity);
+        }
+
+        
+        // 사라진 시체가 아군 영웅인지, 적인지 판단하여 변수에 넣기
+        CCombatRank[] targetRanks = destroyEntity.IsHero() ? _teamRanks : _enemyRanks;
+        Vector3[] cachedPositions = destroyEntity.IsHero() ? _teamWorldPositions : _enemyWorldPositions;
+            
+        // 사라진 시체의 슬롯, 데이터, 트랜스폼 참조 비우고
+        for (int i = 0; i< targetRanks.Length; i++)
+        {
+            if(targetRanks[i] != null && targetRanks[i].GetEntityRuntimeData() == destroyEntity)
+            {
+                targetRanks[i].InputEntityData(null);
+                targetRanks[i].InputEntityTransform(null);
+                break;
+            }
+        }
+
+        // 랭크를 검사해서 빈 슬롯 있으면 뒤쪽 랭크에 있는 엔티티들 앞으로 당기기
+        for(int j = 0; j < targetRanks.Length; j++)
+        {
+            if (targetRanks[j] == null || targetRanks[j].GetEntityRuntimeData() != null)
+            {
+                continue;
+            }
+
+            for(int k = j + 1; k < targetRanks.Length; k++)
+            {
+                if (targetRanks[k] == null)
+                {
+                    continue;
+                }
+
+                CEntityRuntimeData backEntity = targetRanks[k].GetEntityRuntimeData();
+                if(backEntity == null)
+                {
+                    continue;
+                }
+
+                backEntity.ChangeRank((ERank)(1 << j));
+
+                // 오브젝트 이동
+                Transform moveTransform = targetRanks[k].EntityTransform != null ? targetRanks[k].EntityTransform : backEntity.transform;
+                moveTransform.position = backEntity.transform.position;
+
+                if (moveTransform != null  && cachedPositions[j] != Vector3.zero)
+                {
+                    moveTransform.position = cachedPositions[j];
+                }
+
+                // 앞으로 이동했으면 알아서 데이터 채우고, 비어있는 뒤 랭크는 데이터 비우고
+                targetRanks[j].InputEntityData(backEntity);
+                targetRanks[j].InputEntityTransform(moveTransform);
+
+                targetRanks[k].InputEntityData(null);
+                targetRanks[k].InputEntityTransform(null);
+
+                break;
+            }
+        }
+
+
+
+
+    }
+
+    private void InitialRankPosition()
+    {
+        if(_hasPositions)
+        {
+            return;
+        }
+
+        if (_teamRanks != null)
+        {
+            for (int i = 0; i < _teamRanks.Length && i < 4; i++)
+            {
+                if (_teamRanks[i] != null && _teamRanks[i].EntityTransform != null)
+                {
+                    _teamWorldPositions[i] = _teamRanks[i].EntityTransform.position;
+                }
+            }
+        }
+
+        if (_enemyRanks != null)
+        {
+            for (int i = 0; i < _enemyRanks.Length && i < 4; i++)
+            {
+                if (_enemyRanks[i] != null && _enemyRanks[i].EntityTransform != null)
+                {
+                    _enemyWorldPositions[i] = _enemyRanks[i].EntityTransform.position;
+                }
+            }
+        }
+
+        GameObject heroSpawnRoot = GameObject.Find("SpawnPoint_HEROES");
+        GameObject enemySpawnRoot = GameObject.Find("SpawnPoint_Enemies");
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (_teamWorldPositions[i] == Vector3.zero)
+            {
+                if (_teamRanks[i] != null && _teamRanks[i].GetEntityRuntimeData() != null)
+                {
+                    _teamWorldPositions[i] = _teamRanks[i].GetEntityRuntimeData().transform.position;
+                }
+                else if (heroSpawnRoot != null && heroSpawnRoot.transform.childCount > i)
+                {
+                    _teamWorldPositions[i] = heroSpawnRoot.transform.GetChild(i).position;
+                }
+            }
+
+            if (_enemyWorldPositions[i] == Vector3.zero)
+            {
+                if (_enemyRanks[i] != null && _enemyRanks[i].GetEntityRuntimeData() != null)
+                {
+                    _enemyWorldPositions[i] = _enemyRanks[i].GetEntityRuntimeData().transform.position;
+                }
+                else if (enemySpawnRoot != null && enemySpawnRoot.transform.childCount > i)
+                {
+                    _enemyWorldPositions[i] = enemySpawnRoot.transform.GetChild(i).position;
+                }
+            }
+        }
+
+        _hasPositions = true;
+    }
+
 
 }
 

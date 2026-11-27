@@ -73,6 +73,34 @@ public class CombatDirection_UI : MonoBehaviour
         StartCoroutine(FadeUICoroutine());
     }
 
+    public void OnDeathDoor(bool isDeathDoor)
+    {
+        if(_deathblowImage != null)
+        {
+            _deathblowImage.gameObject.SetActive(false);
+        }
+
+        if(_damageText != null)
+        {
+            _damageText.gameObject.SetActive(true);
+
+            if (isDeathDoor)
+            {
+                _damageText.text = "죽음의 일격 저항";
+                _damageText.color = Color.yellow;
+            }
+
+            else
+            {
+                _damageText.text = "죽음의 문턱!";
+                _damageText.color = Color.red;
+            }
+            StartCoroutine(FadeUICoroutine());
+        }
+    }
+
+
+
     /// <summary>
     /// _duration 시간까지 떠오르게 하면서 점점 투명도를 줄여가는 연출
     /// </summary>
