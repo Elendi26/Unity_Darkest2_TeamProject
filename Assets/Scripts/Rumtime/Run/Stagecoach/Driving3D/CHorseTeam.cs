@@ -148,11 +148,6 @@ public class CHorseTeam : MonoBehaviour
 		_rigidbody.inertiaTensorRotation = Quaternion.identity;
 
 		Teleport(transform.position, transform.rotation);
-
-		if (_logState)
-		{
-			CPrint.Log($"CHorseTeam : 말 분리 완료, 땅과의 높이 차 {_groundOffset:F2}");
-		}
 	}
 
 	private void CreateBodyCollider()

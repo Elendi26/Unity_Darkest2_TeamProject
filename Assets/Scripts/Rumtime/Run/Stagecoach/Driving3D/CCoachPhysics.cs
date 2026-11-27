@@ -322,11 +322,6 @@ public class CCoachPhysics : MonoBehaviour
 
 		_team.SetHitch(_hitchLocal);
 
-		if (_logState)
-		{
-			CPrint.Log($"CCoachPhysics : 말 분리, 연결점 {_hitchLocal}, 무게중심 {_rigidbody.centerOfMass}");
-		}
-
 		return true;
 	}
 
@@ -549,11 +544,6 @@ public class CCoachPhysics : MonoBehaviour
 		transform.position = position;
 		_rigidbody.position = position;
 		_rigidbody.velocity = Vector3.zero;
-
-		if (_logState)
-		{
-			CPrint.Log($"CCoachPhysics : 땅 위로 {lift:F2}m 올림");
-		}
 	}
 
 	private float GetWheelCenterZ()

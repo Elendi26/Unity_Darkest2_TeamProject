@@ -12,6 +12,7 @@ public static class CGameSettings
 	private const string KEY_WIDTH = "Settings.ResolutionWidth";
 	private const string KEY_HEIGHT = "Settings.ResolutionHeight";
 	private const string KEY_FULLSCREEN = "Settings.Fullscreen";
+	private const string KEY_TUTORIAL_TIPS = "Settings.TutorialTips";
 
 	// 설정 창에서 고를 수 있는 해상도
 	private static readonly Vector2Int[] RESOLUTIONS =
@@ -31,12 +32,15 @@ public static class CGameSettings
 	#region 이벤트
 	// 음량이 바뀌었을 때 → CAudioVolume 이 구독한다
 	public static event Action OnVolumeChanged;
+	// 튜토리얼 팁을 끄고 켰을 때 → CTutorialTipDirector 가 구독한다
+	public static event Action<bool> OnTutorialTipsChanged;
 	#endregion
 
 	#region 내부 변수
 	private static bool _isLoaded;
 	private static float _bgmVolume = 1f;
 	private static float _sfxVolume = 1f;
+	private static bool _tutorialTips = true;
 	#endregion
 
 	// 배경음 음량 (0~1)
@@ -56,6 +60,16 @@ public static class CGameSettings
 		{
 			EnsureLoaded();
 			return _sfxVolume;
+		}
+	}
+
+	// 튜토리얼 팁 카드를 띄울지
+	public static bool TutorialTips
+	{
+		get
+		{
+			EnsureLoaded();
+			return _tutorialTips;
 		}
 	}
 
@@ -105,6 +119,7 @@ public static class CGameSettings
 		_isLoaded = true;
 		_bgmVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(KEY_BGM, 1f));
 		_sfxVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(KEY_SFX, 1f));
+		_tutorialTips = PlayerPrefs.GetInt(KEY_TUTORIAL_TIPS, 1) == 1;
 	}
 
 	// 적용해 둔 해상도 → 없으면 지금 화면 크기 (에디터는 해상도를 바꿔도 Game 창 크기가 그대로라 저장 값을 믿는다)
@@ -150,6 +165,20 @@ public static class CGameSettings
 		PlayerPrefs.SetFloat(KEY_SFX, _sfxVolume);
 		SyncSoundManager();
 		OnVolumeChanged?.Invoke();
+	}
+
+	public static void SetTutorialTips(bool isOn)
+	{
+		EnsureLoaded();
+
+		if (_tutorialTips == isOn)
+		{
+			return;
+		}
+
+		_tutorialTips = isOn;
+		PlayerPrefs.SetInt(KEY_TUTORIAL_TIPS, isOn ? 1 : 0);
+		OnTutorialTipsChanged?.Invoke(isOn);
 	}
 
 	// 해상도를 바꾸고 저장한다

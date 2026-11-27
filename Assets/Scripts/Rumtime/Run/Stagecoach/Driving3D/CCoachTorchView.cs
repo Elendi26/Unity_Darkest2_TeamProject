@@ -178,11 +178,6 @@ public class CCoachTorchView : MonoBehaviour
 		transform.SetParent(anchor.parent, false);
 		transform.localPosition = anchor.localPosition + anchor.localRotation * _anchorOffset;
 		transform.localRotation = Quaternion.identity;
-
-		if (_logState)
-		{
-			CPrint.Log($"CCoachTorchView : 횃불 불빛을 {anchor.name} 에 붙임");
-		}
 	}
 
 	private static Transform FindChild(Transform root, string name)
