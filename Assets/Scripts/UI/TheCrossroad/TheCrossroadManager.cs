@@ -200,7 +200,7 @@ public class TheCrossroadManager : MonoBehaviour
             {
                 // 파티에 들어온 상태로 바꾸고
                 _heroRoster[j].inParty = true;
-
+                CSoundManager.Instance?.PlaySfxOneShot("AddList");
                 // 로스터 초상화의 색을 바꾼다.
                 _heroRoster[j].RosterStateUpdate();
             }
@@ -237,7 +237,7 @@ public class TheCrossroadManager : MonoBehaviour
             {
                 // 파티에 들어온 상태로 바꾸고
                 _heroRoster[j].inParty = false;
-
+                CSoundManager.Instance?.PlaySfxOneShot("RemoveList");
                 // 로스터 초상화의 색을 바꾼다.
                 _heroRoster[j].RosterStateUpdate();
 
@@ -293,6 +293,7 @@ public class TheCrossroadManager : MonoBehaviour
                         if (_heroRoster[j].HeroData == data)
                         {
                             _heroRoster[j].inParty = true;
+                            CSoundManager.Instance?.PlaySfxOneShot("AddList");
                             _heroRoster[j].RosterStateUpdate();
                             break;
                         }

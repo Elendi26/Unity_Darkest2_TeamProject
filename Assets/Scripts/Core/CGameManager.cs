@@ -59,13 +59,18 @@ public class CGameManager : CManagerSingleton<CGameManager>
 
     private void Start()
     {
-        // 시작 시 이미 타이틀 상태인 경우 초기 BGM 재생
         if (CurrentGameMode == null && !string.IsNullOrWhiteSpace(_titleModeId))
         {
             SetCurrentGameModeWithoutLoad(_titleModeId);
         }
     }
-
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            CSoundManager.Instance?.PlaySfxOneShot("OnClick");
+        }
+    }
     private void HandleGameModeChanged(CGameModeDataSO previousMode, CGameModeDataSO currentMode)
     {
         if (currentMode == null || CSoundManager.Instance == null)
@@ -152,6 +157,7 @@ public class CGameManager : CManagerSingleton<CGameManager>
             return false;
         }
 
+        CSoundManager.Instance?.PlaySfxOneShot("OnStart");
         bool loaded = false;
 
         if (nextModeData.HasValidSceneReference)
