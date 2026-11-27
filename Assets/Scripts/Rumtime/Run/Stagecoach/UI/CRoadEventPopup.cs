@@ -76,6 +76,8 @@ public class CRoadEventPopup : MonoBehaviour, IRoadEventResolver
 
 	public void Show(string title, string body, IReadOnlyList<string> labels, IReadOnlyList<bool> interactable, Action<int> onChoose)
 	{
+		bool wasOpen = IsOpen;
+
 		if (IsOpen && _onChoose != onChoose)
 		{
 			CPrint.Warn($"CRoadEventPopup : 열려 있는 팝업을 {title} 로 교체합니다.");
@@ -103,13 +105,26 @@ public class CRoadEventPopup : MonoBehaviour, IRoadEventResolver
 		}
 
 		HideButtonsFrom(count);
+
+		if (!wasOpen)
+		{
+			CRunSound.PlayOpenUI();
+		}
+
 		SetVisible(true);
 	}
 
 	public void Close()
 	{
+		bool wasOpen = IsOpen;
+
 		_onChoose = null;
 		SetVisible(false);
+
+		if (wasOpen)
+		{
+			CRunSound.PlayCloseUI();
+		}
 	}
 
 	private void SetupButton(int slot, string label, bool interactable)

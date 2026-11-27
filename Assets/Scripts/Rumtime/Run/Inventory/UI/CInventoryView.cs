@@ -303,6 +303,11 @@ public class CInventoryView : MonoBehaviour
 		{
 			_selected = -1;
 			Refresh();
+			CRunSound.PlayOpenUI();
+		}
+		else
+		{
+			CRunSound.PlayCloseUI();
 		}
 
 		SetVisible(isOpen);

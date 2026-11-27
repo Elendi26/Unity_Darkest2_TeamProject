@@ -76,6 +76,7 @@ public class CSettingsPanel : MonoBehaviour
 		Refresh();
 		_root.SetActive(true);
 		_root.transform.SetAsLastSibling();
+		CRunSound.PlayOpenUI();
 	}
 
 	public void Close()
@@ -87,6 +88,7 @@ public class CSettingsPanel : MonoBehaviour
 
 		_root.SetActive(false);
 		CGameSettings.Save();
+		CRunSound.PlayCloseUI();
 	}
 
 	// 지금 설정 값으로 화면을 맞춘다 (적용 안 하고 닫았던 선택은 버린다)

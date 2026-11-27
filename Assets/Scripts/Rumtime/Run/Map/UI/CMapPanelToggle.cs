@@ -98,6 +98,15 @@ public class CMapPanelToggle : MonoBehaviour
 
 		_isOpen = isOpen;
 
+		if (isOpen)
+		{
+			CRunSound.PlayOpenUI();
+		}
+		else
+		{
+			CRunSound.PlayCloseUI();
+		}
+
 		if (_logState)
 		{
 			CPrint.Log($"CMapPanelToggle : {(isOpen ? "열기" : "닫기")}");
