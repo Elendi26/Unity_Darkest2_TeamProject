@@ -63,7 +63,14 @@ public class CCombatSelectedSkill : MonoBehaviour
             _skillData = skillData;
             _animation = animation;
 
-            SkillExcute(target);
+            // 리스트로 한번 감싸서 전달 -> 타겟 자체를 범위공격 대비하여 리스트로 관리하게 만듬
+            List<CEntityRuntimeData> targets = new List<CEntityRuntimeData>();
+            if(target != null)
+            {
+                targets.Add(target);
+            }
+
+            SkillExcute(targets);
 
             CCombatManager.Instance.TurnOver();
         }
@@ -241,7 +248,7 @@ public class CCombatSelectedSkill : MonoBehaviour
 
         for (int i = 0; i < _teamRanks.Length; i++)
         {
-            if (_teamRanks[i].Targetable)
+            if (_teamRanks[i].Targetable && _teamRanks[i] != null)
             {
                 if(!_entity.IsDead())
                 {                
@@ -253,7 +260,7 @@ public class CCombatSelectedSkill : MonoBehaviour
 
         for (int j = 0; j < _enemyRanks.Length; j++)
         {
-            if (_enemyRanks[j].Targetable)
+            if (_enemyRanks[j].Targetable && _enemyRanks[j] != null)
             {
                 if (!_entity.IsDead())
                 {
@@ -367,7 +374,7 @@ public class CCombatSelectedSkill : MonoBehaviour
         Coroutine animationA = StartCoroutine(UseSkillCoroutine(target));
         Coroutine targetAnimation = hit ? StartCoroutine(_animation.HitAnimationCoroutine(target.GetAnimator(), _skillData.UseSkillDelay, _skillData.AfterSkillDelay)) : StartCoroutine(_animation.DodgeAnimationCoroutine(target.GetAnimator(), _skillData.UseSkillDelay, _skillData.AfterSkillDelay));
 
-        yield return animationA;
+        //yield return animationA;
         yield return targetAnimation;
     }
     

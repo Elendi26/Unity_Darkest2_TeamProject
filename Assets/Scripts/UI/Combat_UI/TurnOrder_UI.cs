@@ -9,16 +9,18 @@ public class TurnOrder_UI : MonoBehaviour
     [Header("초상화 슬롯 4개")]
     [SerializeField] private Image[] _portraitSlots = new Image[4];
 
-    [Header("팀표시용")]
-    [SerializeField] private Image _teamMark;
-
-    [Header("적 표시용")]
-    [SerializeField] private Image _enemyMark;
-
+    [Header("자식으로 들어갈 팀/적 마크 표시 이미지")]
+    [SerializeField] private Image[] _mark;
     #endregion
 
-    // 내부 변수
-    private bool _isHero;
+    private void Update()
+    {
+        // 현재 턴인 엔티티의 초상화 점멸효과로 턴 표시해주기
+        if (_portraitSlots[0] != null && _portraitSlots[0].gameObject.activeSelf)
+        {
+            _portraitSlots[0].color = new Color(1f, 1f, 1f, Mathf.Lerp(0.4f, 1f, Mathf.PingPong(Time.time * 2f, 1f)));
+        }
+    }
 
     private void OnEnable()
     {
@@ -64,7 +66,7 @@ public class TurnOrder_UI : MonoBehaviour
                 }
 
                 // 사망했거나 시체인 상태의 엔티티는 제외한다.
-                if (entities[i] != null && (entities[i].IsDead() || entities[i].IsCorpse))
+                if (entities[i] != null && (!entities[i].IsDead() || !entities[i].IsCorpse))
                 {
                     entityList.Add(entities[i]);
                 }
@@ -87,6 +89,17 @@ public class TurnOrder_UI : MonoBehaviour
 
                 // SO데이터의 초상화 가져오기
                 _portraitSlots[i].sprite = entityList[i].TurnPortrait;
+
+                if (entityList[i].IsHero())
+                {
+                    _mark[i].color = Color.yellow;
+                }
+
+                else
+                {
+                    _mark[i].color = Color.cyan;
+                }
+
             }
 
             else

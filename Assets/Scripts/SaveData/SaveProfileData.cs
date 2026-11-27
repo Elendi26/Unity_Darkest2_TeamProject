@@ -15,10 +15,6 @@ public class UserProfileData
     // 마지막 데이터 저장 시간
     public string LastSaveTime;
 
-    // 보유한 촛불 개수
-    public int CandleCount;
-
-
     // TODO : 맵 진행도, 노드 진행도, 역마차 상태, 영웅 데이터 변수 등 추가해야한다.
 
 
@@ -54,5 +50,35 @@ public class UserProfileData
 
     // 진행 중인 런 (역마차 자원, 짐칸, 장착품, 이어할 씬). 없으면 null
     public CRunSaveData Run;
+
+    /// <summary>
+    /// 전투에 배치된 영웅 또는 몬스터 전투 상태 저장
+    /// </summary>
+    [System.Serializable]
+    public class CombatEntitySaveData
+    {
+        public string EntityID;
+        public bool IsHero;
+        public ERank CurrentRank;
+        public int CurrentHP;
+        public int CurrentStress;
+
+        public bool Iscorpse;
+        public int CorpseTurn;
+    }
+
+    [System.Serializable]
+    public class CombatSaveData
+    {
+        public bool IsIncombat;
+        public int CurrentRound;
+        public string CurrentTurnEntityID;
+        public List<string> OrderedTurnEntityIDs = new List<string>();
+        public List<CombatEntitySavaData> CombatEntities = new List<CombatEntitySavaData>();
+
+    }
+
+    public CombatSavaDate CurrentCombat;
+
 
 }

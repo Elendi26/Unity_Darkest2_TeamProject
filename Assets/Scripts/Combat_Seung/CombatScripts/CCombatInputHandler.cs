@@ -177,7 +177,7 @@ public class CCombatInputHandler : MonoBehaviour
                 CEntityRuntimeData data = hit.collider.GetComponentInParent<CEntityRuntimeData>();
 
                 // 적 몬스터고 살아있을 때만 정보 가져오기
-                if (data != null && !data.IsHero() && !data.IsDead())
+                if (data != null && !data.IsHero() && (!data.IsDead() || data.IsCorpse))
                 {
                     rayEnemy = data;
                 }

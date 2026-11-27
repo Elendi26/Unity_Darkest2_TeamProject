@@ -75,7 +75,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
     private bool _isCorpse = false;
     private int _corpseTurn = 1;
     private float _entityTimeScale = 1f;
-    private Renderer _originRenderer;
+    private Renderer[] _originRenderers;
 
     private GameObject _entityModel;
     private GameObject _corpseModel;
@@ -348,7 +348,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         // 기존 방식은 콜리더랑 런타임데이터까지 꺼지기 때문에 수정합니다.
         _animator = GetComponentInChildren<Animator>();
         _entityAnimation = GetComponentInChildren<CEntityAnimation>();
-        _originRenderer = GetComponentInChildren<Renderer>();
+        _originRenderers = GetComponentsInChildren<Renderer>();
 
 
     }
@@ -390,16 +390,25 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         _dead = true;
         _isCorpse = true;
         _corpseTurn = 1;
-        //모델링 비활성화하고
-        if(_entityModel != null)
+
+        // 몬스터의 렌더러만 비활성화
+        if(_originRenderers != null)
         {
-            _entityModel.SetActive(false);
+            for(int i = 0; i < _originRenderers.Length; i++)
+            {
+                if( _originRenderers[i] != null )
+                {
+                    _originRenderers[i].enabled = false;
+                }
+            }
         }
 
         // 시체 소환
-        GameObject Corpse = Instantiate(CCombatManager.Instance.CorpsePrefab, transform.position, Quaternion.Euler(0,45f,0), transform.parent);
-        Corpse.transform.localPosition = new Vector3(0, 1, 0);
-        Corpse.transform.localScale = _entityModel.transform.localScale;
+
+
+        _corpseModel = Instantiate(CCombatManager.Instance.CorpsePrefab, transform.position, Quaternion.Euler(0,45f,0), transform.parent);
+        _corpseModel.transform.localPosition = new Vector3(0, 1, 0);
+        _corpseModel.transform.localScale = _entityModel.transform.localScale;
         
 
         // 시체 체력을 죽은 엔티티의 최대 체력으로 다시 부여 및 체력바 갱신
@@ -517,8 +526,15 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
 
         // TODO : 랭크 앞으로 당기는 함수 추가해야한다.
 
-        // 모델링 파괴
-        Destroy(gameObject);
+
+        if(_corpseModel != null)
+        {
+            // 모델링 파괴하고
+            Destroy(gameObject);
+
+            // 변수 비우기
+            _corpseModel = null;
+        }
     }
 
 }
