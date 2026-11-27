@@ -48,6 +48,11 @@ public class CombatEntityHUD : MonoBehaviour
     /// <param name="data"></param>
     public void RenewHUD(CEntityRuntimeData data)
     {
+        if(data == null)
+        {
+            return;
+        }
+
         // 구독 해제 하고
         if(_eRuntimeData != null)
         {
@@ -63,6 +68,7 @@ public class CombatEntityHUD : MonoBehaviour
             _eRuntimeData.ChangedHP += UpdateHPBar;
         }
 
+        float maxHP = data.GetStat(EEntityStat.MaxHP);
         float hpGauge = data.GetStat(EEntityStat.HP) / data.GetStat(EEntityStat.MaxHP);
 
         if (hpGauge <= 0)
@@ -72,8 +78,13 @@ public class CombatEntityHUD : MonoBehaviour
 
         _hpBar.fillAmount = hpGauge;
 
+        if (_turnIndicator != null && (data.IsCorpse || data.IsDead()))
+        {
+            _turnIndicator.SetActive(false);
+        }
+
         // 아군 영웅이 아닐때 (적일때 스트레스 칸 비활성화)
-        if(!data.IsHero())
+        if (!data.IsHero())
         {
             if(_stressBar != null)
             {

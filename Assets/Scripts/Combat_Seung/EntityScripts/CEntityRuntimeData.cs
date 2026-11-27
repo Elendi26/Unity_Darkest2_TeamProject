@@ -414,6 +414,19 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         ModifyStat(EEntityStat.HP, maxHP);
         ChangedHP?.Invoke(GetStat(EEntityStat.HP), maxHP);
 
+        // 시체 프리팹 찾아서 강제 연결하기
+        CombatEntityHUD rootHUD = GetComponentInChildren<CombatEntityHUD>(true);
+        if(rootHUD != null)
+        {
+            rootHUD.RenewHUD(this);
+        }
+
+        CombatEntityHUD corpseHUD = _corpseModel.GetComponentInChildren<CombatEntityHUD>(true);
+        if(corpseHUD != null)
+        {
+            corpseHUD.RenewHUD(this);
+        }
+
         // 아무 행동도 할 수 없기 때문에 턴 대기열에서는 제거
         if (CCombatManager.Instance != null)
         {
