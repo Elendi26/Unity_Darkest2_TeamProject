@@ -404,8 +404,6 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         }
 
         // 시체 소환
-
-
         _corpseModel = Instantiate(CCombatManager.Instance.CorpsePrefab, transform.position, Quaternion.Euler(0,45f,0), transform.parent);
         _corpseModel.transform.localPosition = new Vector3(0, 1, 0);
         _corpseModel.transform.localScale = _entityModel.transform.localScale;
