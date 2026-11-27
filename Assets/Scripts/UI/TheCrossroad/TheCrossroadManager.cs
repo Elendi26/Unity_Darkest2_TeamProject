@@ -330,7 +330,7 @@ public class TheCrossroadManager : MonoBehaviour
 
         int currentIndex = heroes.IndexOf(data);
 
-        HeroPopup_UI.instance.OpenPopup(heroes, currentIndex);
+        HeroPopup_UI.instance.OpenPopupinTheCrossRoad(heroes, currentIndex);
 
         if (_heroPopupCanvas != null)
         {
