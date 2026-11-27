@@ -6893,7 +6893,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _config: {fileID: 11400000, guid: 622b3645e4875894cbc253bd4abe599c, type: 2}
-  _fixedMap: {fileID: 11400000, guid: e87ce6fca13f47c2bf96f2c2a406374f, type: 2}
+  _fixedMap: {fileID: 0}
   _travelSource: {fileID: 83572737}
   _handlerSources:
   - {fileID: 910000003}
