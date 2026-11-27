@@ -74,11 +74,11 @@ public class UserProfileData
         public int CurrentRound;
         public string CurrentTurnEntityID;
         public List<string> OrderedTurnEntityIDs = new List<string>();
-        public List<CombatEntitySavaData> CombatEntities = new List<CombatEntitySavaData>();
+        public List<CombatEntitySaveData> CombatEntities = new List<CombatEntitySaveData>();
 
     }
 
-    public CombatSavaDate CurrentCombat;
+    public CombatSaveData CurrentCombat;
 
 
 }
