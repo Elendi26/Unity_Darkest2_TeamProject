@@ -36,6 +36,13 @@ MonoBehaviour:
   _testAnimation: {fileID: 0}
   _activeImage: {fileID: 0}
   _inactiveImage: {fileID: 0}
+  _baseWeight: 10
+  _lowHpWeight: 10
+  _useSkillDelay: 1.08
+  _afterSkillDelay: 1.08
+  _anticSfxId: HWM_RangeAntic
+  _useSfxId: HWM_RangeUse
+  _returnSfxId: HWM_RangeReturn
   references:
     version: 2
     RefIds:

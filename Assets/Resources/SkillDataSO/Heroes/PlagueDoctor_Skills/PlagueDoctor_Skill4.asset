@@ -40,6 +40,9 @@ MonoBehaviour:
   _lowHpWeight: 10
   _useSkillDelay: 1.08
   _afterSkillDelay: 1.08
+  _anticSfxId: PD_BuffAntic
+  _useSfxId: PD_BuffUse
+  _returnSfxId: PD_BuffReturn
   references:
     version: 2
     RefIds:

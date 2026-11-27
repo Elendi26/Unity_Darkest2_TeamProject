@@ -40,6 +40,9 @@ MonoBehaviour:
   _lowHpWeight: 10
   _useSkillDelay: 1.08
   _afterSkillDelay: 1.08
+  _anticSfxId: MAA_BuffAntic
+  _useSfxId: MAA_BuffUse
+  _returnSfxId: MAA_BuffReturn
   references:
     version: 2
     RefIds:

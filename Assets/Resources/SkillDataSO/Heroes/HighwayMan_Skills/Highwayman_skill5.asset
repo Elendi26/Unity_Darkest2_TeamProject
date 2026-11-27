@@ -41,6 +41,9 @@ MonoBehaviour:
   _lowHpWeight: 10
   _useSkillDelay: 1.08
   _afterSkillDelay: 1.08
+  _anticSfxId: HWM_BuffAntic
+  _useSfxId: HWM_BuffUse
+  _returnSfxId: HWM_BuffReturn
   references:
     version: 2
     RefIds:

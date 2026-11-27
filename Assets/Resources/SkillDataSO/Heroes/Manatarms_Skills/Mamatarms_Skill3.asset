@@ -41,6 +41,9 @@ MonoBehaviour:
   _lowHpWeight: 10
   _useSkillDelay: 1.08
   _afterSkillDelay: 1.08
+  _anticSfxId: MAA_MeleeAntic
+  _useSfxId: MAA_MeleeUse
+  _returnSfxId: MAA_MeleeReturn
   references:
     version: 2
     RefIds:

@@ -36,6 +36,13 @@ MonoBehaviour:
   _testAnimation: {fileID: 0}
   _activeImage: {fileID: 0}
   _inactiveImage: {fileID: 0}
+  _baseWeight: 10
+  _lowHpWeight: 10
+  _useSkillDelay: 1.08
+  _afterSkillDelay: 1.08
+  _anticSfxId: MAA_MeleeAntic
+  _useSfxId: MAA_MeleeUse
+  _returnSfxId: MAA_MeleeReturn
   references:
     version: 2
     RefIds:

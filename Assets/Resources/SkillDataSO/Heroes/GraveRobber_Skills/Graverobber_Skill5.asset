@@ -42,6 +42,9 @@ MonoBehaviour:
   _lowHpWeight: 10
   _useSkillDelay: 1.08
   _afterSkillDelay: 1.08
+  _anticSfxId: GR_BuffAntic
+  _useSfxId: GR_BuffUse
+  _returnSfxId: GR_BuffReturn
   references:
     version: 2
     RefIds:
