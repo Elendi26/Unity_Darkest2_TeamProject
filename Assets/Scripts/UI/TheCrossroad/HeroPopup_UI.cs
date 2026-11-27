@@ -82,6 +82,8 @@ public class HeroPopup_UI : MonoBehaviour
 
     private int _currentHeroIndex;
 
+    private bool _isTheCrossRoadScene;
+
     private bool _isCombatScene;
 
     private List<CEntityRuntimeData> _combatHeroes = new List<CEntityRuntimeData>();
@@ -97,6 +99,8 @@ public class HeroPopup_UI : MonoBehaviour
     // 프로퍼티
 
     public CEntityBasicDataSO CurrentHeroDataSO => _currentHeroDataSO;
+
+    public bool IsCombatScene => _isCombatScene;
 
     private void Awake()
     {
@@ -144,9 +148,9 @@ public class HeroPopup_UI : MonoBehaviour
         }
     }
 
-    public void OpenPopup(List<CEntityBasicDataSO> list, int startIndex)
+    public void OpenPopupinTheCrossRoad(List<CEntityBasicDataSO> list, int startIndex)
     {
-        _isCombatScene = false;
+        _isTheCrossRoadScene = true;
 
         if (_currentEntity != null)
         {
@@ -227,12 +231,12 @@ public class HeroPopup_UI : MonoBehaviour
     }
 
     /// <summary>
-    /// 전투씬에서 영웅 팝업UI를 켤경우
+    /// 교차로 씬이 아닌 곳에서 영웅 팝업UI를 켤경우
     /// </summary>
     /// <param name="data"></param>
-    public void OpenPopupinCombatScene(List<CEntityRuntimeData> list, int startIndex)
+    public void OpenPopupExceptTheCrossRoad(List<CEntityRuntimeData> list, int startIndex)
     {
-        _isCombatScene = true;
+        _isTheCrossRoadScene = false;
 
         if (_currentEntity != null)
         {
@@ -336,7 +340,7 @@ public class HeroPopup_UI : MonoBehaviour
 
     public void OnClickNextHero()
     {
-        if(_isCombatScene)
+        if(!_isTheCrossRoadScene)
         {
             _currentHeroIndex = (_currentHeroIndex + 1) % _combatHeroes.Count;
             CombatHeroDataUpdate(_combatHeroes[_currentHeroIndex]);
@@ -352,7 +356,7 @@ public class HeroPopup_UI : MonoBehaviour
 
     public void OnClickpreviousHero()
     {
-        if(_isCombatScene)
+        if(!_isTheCrossRoadScene)
         {
             _currentHeroIndex = (_currentHeroIndex - 1 + _combatHeroes.Count) % _combatHeroes.Count;
             CombatHeroDataUpdate(_combatHeroes[_currentHeroIndex]);
@@ -378,7 +382,7 @@ public class HeroPopup_UI : MonoBehaviour
         }
 
         // 현재 전투 씬일 경우 해당 함수는 사용 불가
-        if(_isCombatScene)
+        if (_isCombatScene)
         {
             return;
         }
