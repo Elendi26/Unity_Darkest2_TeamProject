@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2de66a3114acf7c458e414368a275052, type: 3}
   m_Name: AudioClipData_OnTrasure
   m_EditorClassIdentifier: 
-  _id: TurnHero
-  _clip: {fileID: 8300000, guid: aabeb559ce1ba7d45b9d2cdaceece634, type: 3}
+  _id: OnTrasure
+  _clip: {fileID: 8300000, guid: d8d6f6ab033466048988d816132c90f2, type: 3}
