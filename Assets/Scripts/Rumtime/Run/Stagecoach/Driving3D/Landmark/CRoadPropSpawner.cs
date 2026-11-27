@@ -13,7 +13,6 @@ public class CRoadPropSpawner : MonoBehaviour
 	[SerializeField] private float _heightOffset = 0f;
 	[SerializeField] private float _randomYaw = 25f;
 	[SerializeField] private float _despawnBehind = 60f;
-	[SerializeField] private bool _logState = true;
 	#endregion
 
 	#region 내부 변수
@@ -158,10 +157,5 @@ public class CRoadPropSpawner : MonoBehaviour
 		center.y += _heightOffset;
 		prop.Go = Instantiate(prop.Prefab, center, rotation, _root);
 		prop.Go.transform.localScale *= _scale;
-
-		if (_logState)
-		{
-			CPrint.Log($"CRoadPropSpawner : {prop.Name} 물건을 {prop.Arc:F0}m 길 위에 놓음");
-		}
 	}
 }

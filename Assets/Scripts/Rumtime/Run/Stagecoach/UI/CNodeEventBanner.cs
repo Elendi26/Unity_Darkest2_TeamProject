@@ -50,11 +50,6 @@ public class CNodeEventBanner : MonoBehaviour
 		_icon.enabled = icon != null;
 		_root.gameObject.SetActive(true);
 		_group.blocksRaycasts = true;
-
-		if (_logState)
-		{
-			CPrint.Log($"CNodeEventBanner : '{title}' 띠 표시 → 누르면 이벤트 시작");
-		}
 	}
 
 	public void Hide()

@@ -15,6 +15,8 @@ public class CCrossroadNodeHandler : MonoBehaviour, INodeHandler
 	#region 인스펙터
 	// 게임 매니저 없이 주행 씬만 재생할 때 직접 열 씬
 	[SerializeField] private string _crossroadScenePath = "Assets/Scenes/UI/The_Crossroads_Test.unity";
+	// 교차로에 들어가고 나올 때 화면을 검게 덮었다 걷는 시간
+	[SerializeField] private float _fadeDuration = 0.4f;
 	[SerializeField] private bool _logState = true;
 	#endregion
 
@@ -53,6 +55,9 @@ public class CCrossroadNodeHandler : MonoBehaviour, INodeHandler
 		_isBusy = true;
 		_isLeaving = false;
 		_isOpenedByMode = false;
+
+		// 주행 숨기기가 끝날 때까지 검게 덮어 둔다
+		yield return CRunScreenFade.Cover(_fadeDuration);
 
 		SceneManager.sceneLoaded -= HandleSceneLoaded;
 		SceneManager.sceneLoaded += HandleSceneLoaded;
@@ -102,6 +107,7 @@ public class CCrossroadNodeHandler : MonoBehaviour, INodeHandler
 			CPrint.Error($"CCrossroadNodeHandler : 열린 교차로 씬에 TheCrossroadManager 가 없습니다. ({_crossroadScenePath})");
 			ShowDrivingScene();
 			yield return UnloadCrossroadScene();
+			yield return CRunScreenFade.Uncover(_fadeDuration);
 			Finish();
 			yield break;
 		}
@@ -121,6 +127,9 @@ public class CCrossroadNodeHandler : MonoBehaviour, INodeHandler
 		{
 			CPrint.Log("CCrossroadNodeHandler : 교차로 입장 → 파티를 꾸리고 출정하면 다음 길로");
 		}
+
+		yield return null;
+		yield return CRunScreenFade.Uncover(_fadeDuration);
 	}
 
 	// 에디터에서는 빌드 설정에 없어도 경로로 불러온다
@@ -218,11 +227,16 @@ public class CCrossroadNodeHandler : MonoBehaviour, INodeHandler
 		_isLeaving = true;
 		TheCrossroadManager.OnDeparted -= HandleDeparted;
 
+		// 교차로 화면을 검게 덮은 뒤 주행 쪽으로 바꾼다
+		yield return CRunScreenFade.Cover(_fadeDuration);
+
 		// 교차로 쪽 리스너·EventSystem 을 먼저 끄고 주행 쪽을 켠다 → 언로드 동안 둘씩 겹치지 않게
 		MuteScene(_crossroadScene);
 		ShowDrivingScene();
 
 		yield return UnloadCrossroadScene();
+		yield return null;
+		yield return CRunScreenFade.Uncover(_fadeDuration);
 
 		if (_logState)
 		{
@@ -242,7 +256,7 @@ public class CCrossroadNodeHandler : MonoBehaviour, INodeHandler
 
 			if (gameManager != null)
 			{
-				yield return gameManager.CloseAdditiveModeAsync(gameManager.CrossroadsModeId).ToCoroutine();
+				yield return gameManager.CloseAdditiveModeAsync(gameManager.CrossroadsModeId, false).ToCoroutine();
 				yield break;
 			}
 		}

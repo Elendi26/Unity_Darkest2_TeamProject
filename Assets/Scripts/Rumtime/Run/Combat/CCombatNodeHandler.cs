@@ -49,6 +49,8 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	[SerializeField] private string _combatScenePath = "Assets/Scenes/UI/Combat_test.unity";
 	// 마지막 적이 쓰러지고 닫기까지 기다리는 시간 (쓰러지는 모습을 보여 주게)
 	[SerializeField] private float _closeDelay = 1.5f;
+	// 전투에 들어가고 나올 때 화면을 검게 덮었다 걷는 시간
+	[SerializeField] private float _fadeDuration = 0.4f;
 	// 전투가 끝나지 않을 때 이겼다고 치고 넘어가는 키 → 전투 쪽 마무리 전까지 임시
 	[SerializeField] private bool _allowSkipKey = true;
 	[SerializeField] private Key _skipKey = Key.F9;
@@ -57,6 +59,14 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	// 괴물 소굴·성채 노드에 도착해도 전투를 연다
 	[SerializeField] private bool _handleCreatureDen = true;
 	[SerializeField] private bool _handleFortress = true;
+	// 전투를 닫고 화면이 밝아지면 결과창을 띄운다 ('계속' 을 눌러야 주행이 이어진다)
+	[SerializeField] private bool _showResult = true;
+	// 결과창 글꼴 (비우면 기본 글꼴)
+	[SerializeField] private Font _resultFont;
+	// 이겼을 때 보상 (유물·횃불·장신구 확률)
+	[SerializeField] private CCombatRewardTable _victoryReward = new CCombatRewardTable();
+	// 건너뛰기(F9)도 이긴 것으로 보고 보상을 준다 → 전투 쪽 마무리 전까지 시험용
+	[SerializeField] private bool _rewardOnSkip = true;
 
 	[Header("배경 (마차 옆 길가를 찍어 깐다)")]
 	[SerializeField] private bool _useBackdrop = true;
@@ -74,15 +84,6 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	#endregion
 
 	#region 내부 변수
-	private enum ECombatResult
-	{
-		None = 0,
-		Victory,
-		Defeat,
-		Skipped,
-		Abandoned,
-	}
-
 	private readonly List<Behaviour> _hidden = new List<Behaviour>();
 	private readonly CCombatBackdrop _backdrop = new CCombatBackdrop();
 	private CRunPauseMenu _pauseMenu;
@@ -103,6 +104,8 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	// 라운드가 바뀐 것을 알아보려고 기억하는 행동 순서 목록
 	private List<CEntityRuntimeData> _lastRoundOrder;
 	private readonly System.Random _tokenRandom = new System.Random();
+	// 결과창에 띄울 내용 (전투 씬을 내리기 전에 모은다)
+	private CCombatResultData _result;
 	#endregion
 
 	public ENodeType Type => ENodeType.Combat;
@@ -199,6 +202,9 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 		// 전투 씬을 올리기 전에 길가를 찍어 둔다 → 올린 뒤에는 원점의 전투 모델이 함께 찍힐 수 있다
 		CaptureBackdrop();
 
+		// 주행 숨기기·영웅 세우기가 끝날 때까지 검게 덮어 둔다
+		yield return CRunScreenFade.Cover(_fadeDuration);
+
 		// 씬이 올라오는 즉시 주행 쪽을 숨긴다 → 카메라·EventSystem 이 둘씩 겹치지 않게
 		SceneManager.sceneLoaded -= HandleSceneLoaded;
 		SceneManager.sceneLoaded += HandleSceneLoaded;
@@ -256,6 +262,7 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 			_backdrop.Release();
 			ShowDrivingScene();
 			yield return UnloadCombatScene();
+			yield return CRunScreenFade.Uncover(_fadeDuration);
 			Finish();
 			yield break;
 		}
@@ -276,6 +283,11 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 
 			CPrint.Log($"CCombatNodeHandler : '{_combatName}' 전투 시작{skip}");
 		}
+
+		// 영웅·적은 스포너 Start 에서 선다 → 한두 프레임 기다렸다가 걷는다
+		yield return null;
+		yield return null;
+		yield return CRunScreenFade.Uncover(_fadeDuration);
 	}
 
 	// 에디터에서는 빌드 설정에 없어도 경로로 불러온다
@@ -674,8 +686,21 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 			yield return new WaitForSeconds(_closeDelay);
 		}
 
-		// 씬을 내리기 전에 영웅 상태를 남긴다 → 내릴 때 파티 줄이 다시 읽는다
+		// 전투 화면을 검게 덮은 뒤 주행 쪽으로 바꾼다 → 주행 화면이 툭 튀어나오지 않게
+		yield return CRunScreenFade.Cover(_fadeDuration);
+
+		// 씬을 내리기 전에 영웅 상태를 남긴다 → 내릴 때 파티 줄이 다시 읽는다 (결과창 내용도 이때 모은다)
+		// 건너뛰기를 이긴 것으로 보는 동안은 결과창도 승리로
+		bool isSkipWin = _rewardOnSkip && result == ECombatResult.Skipped;
+
+		_result = new CCombatResultData
+		{
+			Result = isSkipWin ? ECombatResult.Victory : result,
+			Kind = CCombatContext.Kind,
+			PlaceName = CCombatContext.PlaceName,
+		};
 		SaveHeroes();
+		GiveRewards(result);
 		UnlinkPauseMenu();
 
 		// 전투 쪽 리스너·EventSystem 을 먼저 끄고 주행 쪽을 켠다 → 언로드 동안 둘씩 겹치지 않게
@@ -686,6 +711,19 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 		yield return UnloadCombatScene();
 
 		CleanupLeakedCombatManager();
+		yield return null;
+		yield return CRunScreenFade.Uncover(_fadeDuration);
+
+		// 화면이 다 밝아진 뒤 결과창 → '계속' 을 누를 때까지 주행을 멈춰 둔다
+		if (_showResult && _result != null)
+		{
+			bool isClosed = false;
+
+			CCombatResultView.Show(transform, _result, _resultFont, () => isClosed = true);
+			yield return new WaitUntil(() => isClosed);
+		}
+
+		_result = null;
 		Finish();
 	}
 
@@ -764,20 +802,15 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	// 전투에서 바뀐 체력·스트레스를 프로필에 쓴다
 	private void SaveHeroes()
 	{
+		if (_heroSpawner == null)
+		{
+			return;
+		}
+
 		DataSaveManager saveManager = DataSaveManager.Instance;
-
-		if (_heroSpawner == null || saveManager == null || saveManager.CurrentSlotIndex < 0)
-		{
-			return;
-		}
-
-		UserProfileData profile = saveManager.LoadProfile(saveManager.CurrentSlotIndex);
-
-		if (profile == null || profile.PartyHeroes == null)
-		{
-			return;
-		}
-
+		bool hasSlot = saveManager != null && saveManager.CurrentSlotIndex >= 0;
+		UserProfileData profile = hasSlot ? saveManager.LoadProfile(saveManager.CurrentSlotIndex) : null;
+		bool canSave = profile != null && profile.PartyHeroes != null;
 		List<CEntityRuntimeData> heroes = _heroSpawner.SpawnedHeroData;
 		int saved = 0;
 
@@ -790,15 +823,21 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 				continue;
 			}
 
-			UserProfileData.HeroSaveData save = FindSave(profile, hero.HeroBasicData.HeroID);
+			UserProfileData.HeroSaveData save = canSave ? FindSave(profile, hero.HeroBasicData.HeroID) : null;
+			bool isDead = hero.IsDead();
+			int hp = isDead ? 0 : Mathf.Max(0, Mathf.RoundToInt(hero.GetStat(EEntityStat.HP)));
+			int stress = Mathf.Max(0, Mathf.RoundToInt(hero.GetStat(EEntityStat.Stress)));
+
+			// 전투 전 값은 아직 덮어쓰지 않은 프로필에서 (프로필이 없으면 변화 없이)
+			AddResultRow(hero.HeroBasicData, save != null ? save.CurrentHP : hp, hp, save != null ? save.CurrentStress : stress, stress, isDead);
 
 			if (save == null)
 			{
 				continue;
 			}
 
-			save.CurrentHP = hero.IsDead() ? 0 : Mathf.Max(0, Mathf.RoundToInt(hero.GetStat(EEntityStat.HP)));
-			save.CurrentStress = Mathf.Max(0, Mathf.RoundToInt(hero.GetStat(EEntityStat.Stress)));
+			save.CurrentHP = hp;
+			save.CurrentStress = stress;
 			saved++;
 		}
 
@@ -808,6 +847,55 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 		}
 
 		saveManager.SaveProfile(profile, saveManager.CurrentSlotIndex);
+	}
+
+	// 이겼을 때만 (건너뛰기는 시험용으로 켜 두면) 유물·횃불·장신구를 준다
+	private void GiveRewards(ECombatResult result)
+	{
+		bool isWin = result == ECombatResult.Victory || (_rewardOnSkip && result == ECombatResult.Skipped);
+
+		if (!isWin || _victoryReward == null)
+		{
+			return;
+		}
+
+		CStagecoachController controller = FindFirstObjectByType<CStagecoachController>();
+
+		if (controller == null || controller.RunData == null)
+		{
+			CPrint.Warn("CCombatNodeHandler : 런 데이터가 없어 전투 보상을 주지 않습니다.");
+			return;
+		}
+
+		List<string> lines = _result != null ? _result.Rewards : new List<string>();
+
+		_victoryReward.Give(controller.RunData, controller.Stagecoach != null ? controller.Stagecoach.Inventory : null, _tokenRandom, lines);
+
+		if (_logState && lines.Count > 0)
+		{
+			CPrint.Log($"CCombatNodeHandler : 전투 보상 → {string.Join(", ", lines)}");
+		}
+	}
+
+	private void AddResultRow(CEntityBasicDataSO data, int hpBefore, int hpAfter, int stressBefore, int stressAfter, bool isDead)
+	{
+		if (_result == null)
+		{
+			return;
+		}
+
+		_result.Heroes.Add(new CCombatResultData.CHeroRow
+		{
+			Name = data.Name,
+			Portrait = data.HeroPortrait,
+			HpBefore = hpBefore,
+			HpAfter = hpAfter,
+			MaxHp = data.MaxHP,
+			StressBefore = stressBefore,
+			StressAfter = stressAfter,
+			MaxStress = data.MaxStress,
+			IsDead = isDead,
+		});
 	}
 
 	private static UserProfileData.HeroSaveData FindSave(UserProfileData profile, string heroId)
@@ -835,7 +923,7 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 
 			if (gameManager != null)
 			{
-				yield return gameManager.CloseAdditiveModeAsync(gameManager.CombatModeId).ToCoroutine();
+				yield return gameManager.CloseAdditiveModeAsync(gameManager.CombatModeId, false).ToCoroutine();
 				yield break;
 			}
 		}

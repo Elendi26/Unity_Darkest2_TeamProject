@@ -49,6 +49,9 @@ public class CDriveIntroFade : MonoBehaviour
 		_cover.rectTransform.offsetMax = Vector2.zero;
 
 		SetState(EIntroState.Holding);
+
+		// 여관 등에서 검게 덮은 채로 넘어왔으면 → 이 연출이 같은 검은 화면으로 이어받는다
+		CRunScreenFade.Clear();
 	}
 
 	private void Update()

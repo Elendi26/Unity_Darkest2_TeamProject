@@ -71,6 +71,7 @@ public class CInnPartyView : MonoBehaviour
 		public PlayableGraph Graph;
 		public RectTransform Label;
 		public CEntityBasicDataSO Data;
+		public UserProfileData.HeroSaveData Save;
 		public int Slot;
 		// 테두리를 켜고 끌 때 바꿔 끼우는 재질 목록 (렌더러마다)
 		public Renderer[] Renderers;
@@ -262,6 +263,7 @@ public class CInnPartyView : MonoBehaviour
 
 		seated.Seat = seat;
 		seated.Data = data;
+		seated.Save = save;
 		seated.Slot = slot;
 
 		if (data.HeroModel != null)
@@ -624,18 +626,17 @@ public class CInnPartyView : MonoBehaviour
 		ordered.Sort((a, b) => b.Slot.CompareTo(a.Slot));
 
 		List<CEntityBasicDataSO> heroes = new List<CEntityBasicDataSO>();
+		List<UserProfileData.HeroSaveData> saves = new List<UserProfileData.HeroSaveData>();
 
 		for (int i = 0; i < ordered.Count; i++)
 		{
 			heroes.Add(ordered[i].Data);
+			saves.Add(ordered[i].Save);
 		}
 
 		SetHovered(null);
 
-		if (CHeroPopupLink.Open(heroes, heroes.IndexOf(target.Data)) && _logState)
-		{
-			CPrint.Log($"CInnPartyView : 영웅 정보 창 열기 ({target.Data.HeroID})");
-		}
+		CHeroPopupLink.Open(heroes, saves, heroes.IndexOf(target.Data));
 	}
 	#endregion
 
