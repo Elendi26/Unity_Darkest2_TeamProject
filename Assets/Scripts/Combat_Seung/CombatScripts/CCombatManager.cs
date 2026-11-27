@@ -4,8 +4,10 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using System;
+#if UNITY_EDITOR
 using UnityEditor.Experimental.GraphView;
 using Newtonsoft.Json.Bson;
+#endif
 
 public enum ECombatPhase
 {
