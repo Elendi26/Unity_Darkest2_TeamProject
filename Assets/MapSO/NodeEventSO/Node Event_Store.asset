@@ -15,18 +15,7 @@ MonoBehaviour:
   _title: 고물상
   _body: 떠돌이 상인이 물건을 펼쳐 놓았다.
   _leaveLabel: 떠나기
-  _options:
-  - Label: 횃불 기름
-    CostType: 1
-    Cost: 10
-    CloseAfter: 0
-    Effects:
-    - rid: 1002
+  _options: []
   references:
     version: 2
-    RefIds:
-    - rid: 1002
-      type: {class: CRunValueDeltaEffect, ns: , asm: Assembly-CSharp}
-      data:
-        _type: 3
-        _delta: 25
+    RefIds: []

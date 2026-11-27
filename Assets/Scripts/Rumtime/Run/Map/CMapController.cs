@@ -42,7 +42,7 @@ public class CMapController : MonoBehaviour
     private void Start()
     {
         int seed = _seed != 0 ? _seed : Environment.TickCount;
-        CMapGraph graph = _fixedMap != null ? _fixedMap.Build(seed) : new CMapGenerator(_config).Generate(seed);
+        CMapGraph graph = _fixedMap != null ? _fixedMap.Build(seed) : new CMapGenerator(_config, GetScoutBonus()).Generate(seed);
 
         if (graph == null)
         {
@@ -60,6 +60,19 @@ public class CMapController : MonoBehaviour
     }
 
     // IRoadTravelProvider 인터페이스로만 이동 담당을 꺼낸다
+    // 마차 업그레이드(까마귀 둥지 등)의 정찰 보정 → 지점·길이 미리 보일 확률에 더한다
+    private float GetScoutBonus()
+    {
+        IStagecoachProvider provider = _travelSource as IStagecoachProvider;
+
+        if (provider == null || provider.Stagecoach == null)
+        {
+            return 0f;
+        }
+
+        return provider.Stagecoach.GetStat(ERunStat.ScoutChance);
+    }
+
     private IRoadTravel GetTravel()
     {
         if (_travelSource == null)
@@ -104,6 +117,15 @@ public class CMapController : MonoBehaviour
             }
 
             _runner.RegisterHandler(handler);
+
+            // 노드 종류 여러 개를 받는 컴포넌트 (전투 → 괴물 소굴·성채)
+            if (_handlerSources[i] is INodeHandlerGroup group && group.ExtraHandlers != null)
+            {
+                for (int j = 0; j < group.ExtraHandlers.Count; j++)
+                {
+                    _runner.RegisterHandler(group.ExtraHandlers[j]);
+                }
+            }
         }
     }
 

@@ -19,6 +19,8 @@ public class CRoadEventData : ScriptableObject
     [SerializeField] private bool _alwaysCombat = false;
     [SerializeField] private bool _blocksRoad = false;
     [SerializeField] private ERoadHazard _hazard = ERoadHazard.None;
+    // 전투로 이어질 때 어떤 전투인지 (None 이면 길을 막는 이벤트는 방책, 아니면 습격)
+    [SerializeField] private ECombatKind _combatKind = ECombatKind.None;
     #endregion
 
     public string Id => _id;
@@ -35,6 +37,19 @@ public class CRoadEventData : ScriptableObject
     public bool AlwaysCombat => _alwaysCombat;
     public bool BlocksRoad => _blocksRoad;
     public ERoadHazard Hazard => _hazard;
+    // 전투 종류 (방책·습격 등)
+    public ECombatKind CombatKind
+    {
+        get
+        {
+            if (_combatKind != ECombatKind.None)
+            {
+                return _combatKind;
+            }
+
+            return _blocksRoad ? ECombatKind.Barricade : ECombatKind.Ambush;
+        }
+    }
 
     public bool ShouldStartCombat(CRunData runData)
     {

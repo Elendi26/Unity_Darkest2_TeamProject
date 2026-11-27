@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// 여관 분위기 → 방 전체를 어둡게 (조명·주변광을 낮추고, 화면 위에 어두운 막 + 가장자리 비네트)
+// 여관 분위기
 public class CInnMood : MonoBehaviour
 {
 	#region 상수
@@ -95,7 +95,6 @@ public class CInnMood : MonoBehaviour
 		RenderSettings.ambientSkyColor = _ambientSky * _ambientScale;
 		RenderSettings.ambientEquatorColor = _ambientEquator * _ambientScale;
 		RenderSettings.ambientGroundColor = _ambientGround * _ambientScale;
-		// 주행 씬이 스카이박스 주변광이면 색 대신 세기가 쓰인다
 		RenderSettings.ambientIntensity = _ambientIntensity * _ambientScale;
 	}
 
@@ -136,7 +135,6 @@ public class CInnMood : MonoBehaviour
 		rect.offsetMax = Vector2.zero;
 	}
 
-	// 가운데는 투명, 가장자리로 갈수록 흰색 (이미지 색으로 물들인다) → 화면에 늘리면 타원이 된다
 	private static Sprite GetVignette(float start)
 	{
 		if (_vignette != null)

@@ -36,9 +36,6 @@ public class CFixedMapData : ScriptableObject
 	// 행 목록
 	public IReadOnlyList<CFixedMapRow> Rows => _rows;
 
-	/// <summary>
-	/// 적어 둔 행·칸·길로 지도 그래프를 만든다 (형식이 잘못되면 null) / 경태
-	/// </summary>
 	public CMapGraph Build(int seed)
 	{
 		if (_rows == null || _rows.Length < 2)
@@ -76,9 +73,6 @@ public class CFixedMapData : ScriptableObject
 		return graph;
 	}
 
-	/// <summary>
-	/// 지도에 쓰인 칸 종류를 모은다 (도착 처리기 등록용) / 경태
-	/// </summary>
 	public void CollectNodeTypes(List<CNodeTypeData> result)
 	{
 		if (_rows == null)

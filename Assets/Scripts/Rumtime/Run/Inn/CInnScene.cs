@@ -4,8 +4,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
-// 여관 씬 → 왼쪽 위 제목 띠, 아래쪽 메뉴 줄(보급상·마차 정비공·저장하고 메인 메뉴로 / 떠나기), 한 줄 대사를 띄우고
-//  누른 버튼을 여관 처리기에 알린다 (가운데는 비워 둔다 → 여관 실내와 앉아 있는 파티가 보이게)
 public class CInnScene : MonoBehaviour
 {
 	#region 인스펙터
@@ -246,7 +244,6 @@ public class CInnScene : MonoBehaviour
 	}
 
 	// 화살표 판 버튼 → 아이콘이 있으면 아이콘(+ 올리면 이름 풍선), 없으면 글자
-	//  ㄴ 판은 왼쪽 가운데 기준으로 놓는다
 	private Button CreatePlateButton(string name, RectTransform parent, Sprite plate, Vector2 position, Vector2 size, string label, Sprite icon, UnityEngine.Events.UnityAction onClick, out Graphic content)
 	{
 		Image image = CUIBuilder.CreateImage(name, parent, plate, Color.white);

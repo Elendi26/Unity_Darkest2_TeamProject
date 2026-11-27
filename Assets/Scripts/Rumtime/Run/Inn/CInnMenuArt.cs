@@ -1,7 +1,5 @@
 using UnityEngine;
 
-// 여관 메뉴용 그림을 코드로 그린다 → 화살표 모양 판(테두리 포함), 문 아이콘 (이미지 파일 없이)
-//  ㄴ 한 번 만들면 재사용한다
 public static class CInnMenuArt
 {
 	#region 상수
@@ -64,7 +62,7 @@ public static class CInnMenuArt
 		return _plate;
 	}
 
-	// 문 + 밖으로 나가는 화살표 (흰색, 이미지 색으로 물들인다)
+	// 문 + 밖으로 나가는 화살표
 	public static Sprite GetDoorIcon()
 	{
 		if (_door != null)

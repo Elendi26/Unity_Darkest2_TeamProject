@@ -299,11 +299,6 @@ public class CInventoryView : MonoBehaviour
 
 		_isOpen = isOpen;
 
-		if (_logState)
-		{
-			CPrint.Log($"CInventoryView : {(isOpen ? "열기" : "닫기")}");
-		}
-
 		if (isOpen)
 		{
 			_selected = -1;
@@ -411,7 +406,7 @@ public class CInventoryView : MonoBehaviour
 		// 종류별 안내 한 줄 (보관만 / 가득 차 못 씀 / 장신구 등) 은 아이템이 정한다
 		string note = item.GetDetailNote(_ctx != null ? _ctx.RunData : null);
 
-		return string.IsNullOrEmpty(note) ? item.Description : $"{item.Description}\n\n{note}";
+		return string.IsNullOrEmpty(note) ? item.FullDescription : $"{item.FullDescription}\n\n{note}";
 	}
 
 	#region 끌어다 놓기

@@ -2,9 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // 영웅 정보 창(HeroPopup_UI)의 장신구 두 칸(Accessories/Acce 1·2)에 끌어다 놓기를 붙인다
-//  ㄴ 창은 팀원 UI → 원본은 건드리지 않고, 실행 중에 칸 위에 아이콘·놓는 곳을 덧붙인다
-//  ㄴ 짐칸의 장신구를 끌어와 놓으면 끼우고, 칸을 끌어 짐칸에 놓으면 뗀다 (짐칸 쪽이 받는다)
-//  ㄴ 같은 영웅의 두 칸끼리 끌면 맞바꾼다
+
 public class CHeroPopupTrinkets : MonoBehaviour
 {
 	#region 상수
@@ -97,7 +95,7 @@ public class CHeroPopupTrinkets : MonoBehaviour
 
 			CTrinketItemData trinket = CHeroTrinkets.Get(_heroId, i);
 
-			// 아이콘 그림은 비워 두어도 칸 전체가 놓는 곳이어야 한다 → 투명으로 남긴다
+			// 아이콘 그림은 비워 두어도 칸 전체가 놓는 곳이어야 한다
 			_slots[i].Icon.sprite = trinket != null ? trinket.Icon : null;
 			_slots[i].Icon.color = trinket != null && trinket.Icon != null ? Color.white : new Color(1f, 1f, 1f, 0f);
 

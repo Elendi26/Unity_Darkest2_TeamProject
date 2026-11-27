@@ -6,10 +6,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 // 주행 화면 아래쪽 파티 줄 → 교차로에서 고른 영웅을 초상화·이름·체력·스트레스로 보여 준다
-//  ㄴ 오른쪽이 맨 앞 영웅(파티 슬롯 0), 왼쪽으로 갈수록 뒤
-//  ㄴ 교차로에서 출정하기 전(이번 런 파티를 아직 안 골랐을 때)에는 숨긴다
-//  ㄴ 저장된 프로필을 읽는다 → 교차로·여관 등 덧붙은 씬이 닫힐 때 다시 읽는다 (매 프레임 읽지 않는다)
-//  ㄴ 영웅을 누르면 영웅 정보 창을 연다 (CHeroPopupLink)
+
 public class CPartyBarView : MonoBehaviour
 {
 	#region 상수
@@ -136,8 +133,6 @@ public class CPartyBarView : MonoBehaviour
 
 		List<UserProfileData.HeroSaveData> party = LoadParty();
 
-		// 영웅 데이터는 모델·텍스처·애니메이션까지 끌고 와 무겁다 → 시작할 때 말고 파티가 정해진 뒤 처음 한 번만 읽는다
-		//  ㄴ 교차로 씬이 이미 같은 데이터를 올려 두었으므로 이때는 거의 비용이 없다
 		if (party.Count > 0 && _heroes.Count == 0)
 		{
 			LoadHeroData();
@@ -169,11 +164,6 @@ public class CPartyBarView : MonoBehaviour
 			// 맨 앞(슬롯 0)이 오른쪽 끝
 			Fill(_slots[SLOT_COUNT - 1 - save.PartySlotIndex], data, save);
 			_partyCount++;
-		}
-
-		if (_logState)
-		{
-			CPrint.Log($"CPartyBarView : 파티 {_partyCount}명 표시");
 		}
 	}
 

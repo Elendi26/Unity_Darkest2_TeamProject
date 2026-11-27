@@ -41,6 +41,22 @@ public abstract class CItemDataBase : ScriptableObject
 	public virtual ERunValue BuyCurrency => ERunValue.Gold;
 	// 짐칸에서 '사용' 버튼으로 쓸 수 있는 종류인지
 	public virtual bool IsUsable => false;
+	// 설명 + 효과 줄 (짐칸·상점 설명 칸에 띄운다)
+	public string FullDescription
+	{
+		get
+		{
+			string effect = GetEffectText();
+
+			return string.IsNullOrEmpty(effect) ? Description : $"{Description}\n\n{effect}";
+		}
+	}
+
+	// 오르고 내리는 능력치 등 효과 줄 (없으면 null) → 데이터에서 만들어 설명과 어긋나지 않게 한다
+	public virtual string GetEffectText()
+	{
+		return null;
+	}
 
 	// 지금 상태에서 못 쓰게 막혀 있는지 (예: 횃불이 가득 차 기름을 못 쓴다)
 	public virtual bool IsBlocked(CRunData runData)

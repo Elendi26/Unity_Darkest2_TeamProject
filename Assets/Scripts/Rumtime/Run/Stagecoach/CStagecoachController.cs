@@ -76,6 +76,17 @@ public class CStagecoachController : MonoBehaviour, IRoadTravelProvider, IRunCon
             Random = new System.Random(seed),
         };
 
+        // 앞 지역에서 넘어왔으면 지역 진입 효과 (이어하기는 같은 지역을 다시 여는 것이라 주지 않는다)
+        if (carried != null && !CRunCarry.LastTakenWasRestored)
+        {
+            int applied = _stagecoach.RunRegionEnterEffects(_ctx);
+
+            if (applied > 0)
+            {
+                CPrint.Log($"CStagecoachController : 새 지역 진입 → 마차 업그레이드 효과 {applied}개 적용");
+            }
+        }
+
         // 런 데이터(CRunContext)는 역마차를 모른다 → 역마차는 주행에 따로 넘긴다
         _travel = new CRoadTravel(_config, _stagecoach, _ctx, GetEventResolver(), _combatStarterSource as IRoadCombatStarter);
     }

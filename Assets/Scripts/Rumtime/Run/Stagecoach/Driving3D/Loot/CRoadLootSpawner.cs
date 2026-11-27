@@ -231,11 +231,6 @@ public class CRoadLootSpawner : MonoBehaviour
 		// 꽝 → 수풀만 터지고 글자는 띄우지 않는다
 		if (string.IsNullOrEmpty(message))
 		{
-			if (_logState)
-			{
-				CPrint.Log("CRoadLootSpawner : 빈 수풀");
-			}
-
 			return;
 		}
 

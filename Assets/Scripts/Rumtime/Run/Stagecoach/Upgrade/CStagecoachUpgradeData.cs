@@ -9,11 +9,15 @@ public class CStagecoachUpgradeData : CItemDataBase
     [SerializeField] private EStagecoachSlot _slot = EStagecoachSlot.General;
     [SerializeField] private CRunStatModifier[] _modifiers;
     [SerializeReference] private List<IRunEffect> _beforeNodeEffects = new List<IRunEffect>();
+    // 새 지역(주행 씬)에 들어설 때마다 (예: 바퀴 +1)
+    [SerializeReference] private List<IRunEffect> _regionEnterEffects = new List<IRunEffect>();
     #endregion
 
     public EStagecoachSlot Slot => _slot;
     public IReadOnlyList<CRunStatModifier> Modifiers => _modifiers;
     public IReadOnlyList<IRunEffect> BeforeNodeEffects => _beforeNodeEffects;
+    // 새 지역에 들어설 때 효과
+    public IReadOnlyList<IRunEffect> RegionEnterEffects => _regionEnterEffects;
     // 마차 업그레이드는 겹치지 않는다
     public override int MaxStack => 1;
     // 마차 아이템은 패물로 산다

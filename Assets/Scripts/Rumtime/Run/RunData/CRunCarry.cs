@@ -12,7 +12,12 @@ public static class CRunCarry
 
 	#region 내부 변수
 	private static CRunSnapshot _pending;
+	// 기다리는 기록이 세이브 파일에서 되살린 것인지 (이어하기)
+	private static bool _isPendingRestored;
 	#endregion
+
+	// 마지막으로 꺼낸 기록이 이어하기로 되살린 것인지 → 같은 지역을 다시 여는 것이라 지역 진입 효과를 또 주지 않는다
+	public static bool LastTakenWasRestored { get; private set; }
 
 	// 이번 런에서 교차로 출정으로 파티를 골랐는지 → 세이브에 함께 넣고 이어하기 때 되살린다
 	public static bool PartyChosen { get; private set; }
@@ -22,6 +27,8 @@ public static class CRunCarry
 	private static void ResetOnPlay()
 	{
 		_pending = null;
+		_isPendingRestored = false;
+		LastTakenWasRestored = false;
 		PartyChosen = false;
 	}
 
@@ -34,6 +41,7 @@ public static class CRunCarry
 		}
 
 		_pending = CRunSnapshot.Capture(runData, stagecoach);
+		_isPendingRestored = false;
 
 		// 파일 저장은 구독한 쪽에 맡긴다 → 런 쪽은 세이브 형식을 몰라도 된다
 		CRunSaveData save = _pending.ToSave(nextScenePath);
@@ -54,6 +62,7 @@ public static class CRunCarry
 		PartyChosen = save.PartyChosen;
 		CHeroTrinkets.Restore(save.HeroTrinkets);
 		_pending = CRunSnapshot.FromSave(save);
+		_isPendingRestored = _pending != null;
 		return _pending != null;
 	}
 
@@ -73,7 +82,9 @@ public static class CRunCarry
 	{
 		CRunSnapshot snapshot = _pending;
 
+		LastTakenWasRestored = snapshot != null && _isPendingRestored;
 		_pending = null;
+		_isPendingRestored = false;
 		return snapshot;
 	}
 }

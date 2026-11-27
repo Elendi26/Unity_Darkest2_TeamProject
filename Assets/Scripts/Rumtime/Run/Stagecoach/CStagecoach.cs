@@ -298,6 +298,35 @@ public class CStagecoach
         return total;
     }
 
+    // 새 지역(주행 씬)에 들어설 때 → 단 업그레이드의 지역 진입 효과 (철테 바퀴 +1 등), 적용한 개수를 돌려준다
+    public int RunRegionEnterEffects(CRunContext ctx)
+    {
+        int applied = 0;
+
+        for (int i = 0; i < _equipped.Count; i++)
+        {
+            IReadOnlyList<IRunEffect> effects = _equipped[i].RegionEnterEffects;
+
+            if (effects == null)
+            {
+                continue;
+            }
+
+            for (int j = 0; j < effects.Count; j++)
+            {
+                if (effects[j] == null)
+                {
+                    continue;
+                }
+
+                effects[j].Apply(ctx);
+                applied++;
+            }
+        }
+
+        return applied;
+    }
+
     public void RunBeforeNodeEffects(CRunContext ctx)
     {
         for (int i = 0; i < _equipped.Count; ++i)

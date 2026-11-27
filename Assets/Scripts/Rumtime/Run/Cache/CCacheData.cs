@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 은닉처 노드 데이터 → 뒤지면 재화와 아이템 범주마다 정한 만큼 무작위로 떨어진다 (전투 없이 자원을 얻는 지점)
+// 은닉처 노드 데이터 → 뒤지면 재화와 아이템 범주마다 정한 만큼 무작위로 떨어진다
 [CreateAssetMenu(menuName = "Map/Cache_")]
 public class CCacheData : ScriptableObject
 {
