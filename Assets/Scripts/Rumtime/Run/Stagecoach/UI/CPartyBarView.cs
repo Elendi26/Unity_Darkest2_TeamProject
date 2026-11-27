@@ -45,7 +45,6 @@ public class CPartyBarView : MonoBehaviour
 	[SerializeField] private Color _portraitHoverColor = Color.white;
 	// 교차로·여관처럼 위에 덧붙은 씬이 열려 있으면 숨긴다
 	[SerializeField] private bool _hideUnderOverlayScene = true;
-	[SerializeField] private bool _logState = true;
 	#endregion
 
 	#region 내부 변수
@@ -58,6 +57,7 @@ public class CPartyBarView : MonoBehaviour
 		public RectTransform HpFill;
 		public Image[] Pips;
 		public CEntityBasicDataSO Data;
+		public UserProfileData.HeroSaveData Save;
 	}
 
 	private readonly CSlot[] _slots = new CSlot[SLOT_COUNT];
@@ -171,6 +171,7 @@ public class CPartyBarView : MonoBehaviour
 	{
 		slot.Root.SetActive(true);
 		slot.Data = data;
+		slot.Save = save;
 		slot.Portrait.sprite = data.HeroPortrait;
 		slot.Portrait.enabled = data.HeroPortrait != null;
 		slot.Portrait.color = _portraitColor;
@@ -280,21 +281,20 @@ public class CPartyBarView : MonoBehaviour
 	private void OpenPopup(CEntityBasicDataSO data)
 	{
 		List<CEntityBasicDataSO> heroes = new List<CEntityBasicDataSO>();
+		List<UserProfileData.HeroSaveData> saves = new List<UserProfileData.HeroSaveData>();
 
 		for (int i = 0; i < SLOT_COUNT; i++)
 		{
 			if (_slots[i].Data != null)
 			{
 				heroes.Add(_slots[i].Data);
+				saves.Add(_slots[i].Save);
 			}
 		}
 
 		int index = heroes.IndexOf(data);
 
-		if (CHeroPopupLink.Open(heroes, index) && _logState)
-		{
-			CPrint.Log($"CPartyBarView : 영웅 정보 창 열기 ({data.HeroID})");
-		}
+		CHeroPopupLink.Open(heroes, saves, index);
 	}
 	#endregion
 

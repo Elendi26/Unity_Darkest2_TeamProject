@@ -38,10 +38,13 @@ public class CShopView : MonoBehaviour, IShopView
 	// 상점이 열리면 오른쪽 짐칸 패널도 연다 (비우면 씬에서 찾는다)
 	[SerializeField] private CInventoryView _inventoryView;
 	[SerializeField] private bool _openInventory = true;
+	// 보급품 탭 (보급·횃불 아이템이 없으면 끈다)
+	[SerializeField] private bool _showSupplyTab = false;
 	#endregion
 
 	#region 내부 변수
 	private const int TAB_COUNT = 5;
+	private const int SUPPLY_TAB = 1;
 	private const float TITLE_CREST_SHIFT = 60f;
 	private static readonly string[] TAB_NAMES = { "모든 상품", "보급품", "전투 물품", "장신구", "마차" };
 
@@ -529,12 +532,20 @@ public class CShopView : MonoBehaviour, IShopView
 
 	private void BuildTabs(RectTransform panel)
 	{
+		// 꺼 둔 탭은 건너뛰고 남은 탭을 왼쪽부터 붙여 놓는다 (아이콘은 원래 탭 번호대로)
+		int slot = 0;
+
 		for (int i = 0; i < TAB_COUNT; i++)
 		{
+			if (i == SUPPLY_TAB && !_showSupplyTab)
+			{
+				continue;
+			}
+
 			Sprite icon = _tabIcons != null && i < _tabIcons.Length ? _tabIcons[i] : null;
 			Image tab = CUIBuilder.CreateImage($"Tab_{i}", panel, icon, _tabOffColor);
 
-			Place(tab.rectTransform, new Vector2(0f, 1f), new Vector2(60f + i * 70f, -48f), new Vector2(52f, 52f));
+			Place(tab.rectTransform, new Vector2(0f, 1f), new Vector2(60f + slot * 70f, -48f), new Vector2(52f, 52f));
 			tab.preserveAspect = true;
 			tab.raycastTarget = true;
 
@@ -542,6 +553,7 @@ public class CShopView : MonoBehaviour, IShopView
 
 			tab.gameObject.AddComponent<Button>().onClick.AddListener(() => SelectTab(index));
 			_tabImages[i] = tab;
+			slot++;
 		}
 
 		_tabTitle = CreateText("TabTitle", panel, TAB_NAMES[0], 26, TextAnchor.MiddleRight);

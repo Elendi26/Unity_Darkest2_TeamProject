@@ -12,6 +12,8 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 {
 	#region 인스펙터
 	[SerializeField] private string _innScenePath = "Assets/Scenes/Inn/Inn.unity";
+	// 여관 떠나기 → 화면을 검게 덮는 시간 (마지막 여관이면 덮은 채로 다음 노드 씬으로 넘어가 그쪽 시작 연출이 밝힌다)
+	[SerializeField] private float _leaveFadeDuration = 0.6f;
 	// 보급상 (아이템)
 	[SerializeField] private CShopData _shopData;
 	// 마차 정비공 (수리·강화)
@@ -199,7 +201,7 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 
 			if (gameManager != null)
 			{
-				yield return gameManager.CloseAdditiveModeAsync(gameManager.InnModeId).ToCoroutine();
+				yield return gameManager.CloseAdditiveModeAsync(gameManager.InnModeId, !CRunScreenFade.IsCovered).ToCoroutine();
 				yield break;
 			}
 		}
@@ -369,6 +371,10 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 
 	private IEnumerator LeaveRoutine()
 	{
+		// 여관 화면부터 검게 덮는다 → 주행 화면이 잠깐 비치지 않게
+		bool isLastNode = _node != null && _node.IsEnd;
+
+		yield return CRunScreenFade.Cover(_leaveFadeDuration);
 		EndSession();
 
 		// 여관 쪽 리스너를 먼저 끄고 주행 쪽을 켠다 → 언로드 동안 둘씩 겹치지 않게
@@ -383,6 +389,13 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 		}
 
 		Finish();
+
+		// 지도 끝 여관이면 덮은 채로 다음 노드 씬이 열린다 → 그 씬 시작 연출(CDriveIntroFade)이 밝힌다
+		if (!isLastNode)
+		{
+			yield return null;
+			yield return CRunScreenFade.Uncover(_leaveFadeDuration);
+		}
 	}
 
 	private void EndSession()

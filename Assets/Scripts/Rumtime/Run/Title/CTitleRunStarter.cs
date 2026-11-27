@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 타이틀에서 모험을 시작한다 → 첫 모험이면 튜토리얼, 아니면 바로 주행 씬. 이어하기는 프로필에 저장된 런으로
+// 타이틀에서 모험을 시작한다 → 새 고해는 늘 튜토리얼(출발 → 교차로)부터. 이어하기는 프로필에 저장된 런으로
 public class CTitleRunStarter : MonoBehaviour
 {
 	#region 인스펙터
@@ -21,9 +21,9 @@ public class CTitleRunStarter : MonoBehaviour
 			return;
 		}
 
+		// 새 고해는 늘 출발 길(튜토리얼 씬)부터 → 교차로에서 파티를 꾸려야 전투를 치를 수 있다
 		int slot = CTutorialProgress.CurrentSlot;
-		bool isFirstRun = !CTutorialProgress.IsDone(slot);
-		string modeId = isFirstRun ? GetTutorialModeId(gameManager) : gameManager.NodeModeId;
+		string modeId = GetTutorialModeId(gameManager);
 
 		// 새 모험은 지난 런을 이어받지 않는다
 		CRunCarry.Take();
@@ -31,7 +31,7 @@ public class CTitleRunStarter : MonoBehaviour
 
 		if (_logState)
 		{
-			CPrint.Log($"CTitleRunStarter : 슬롯 {slot} {(isFirstRun ? "첫 모험" : "새 모험")} → {modeId}");
+			CPrint.Log($"CTitleRunStarter : 슬롯 {slot} 새 고해 → {modeId}");
 		}
 
 		gameManager.ChangeGameMode(modeId);

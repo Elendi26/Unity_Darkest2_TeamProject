@@ -22,6 +22,11 @@ public static class CHeroPopupLink
 	private static bool _addedCanvas;
 	private static bool _prevOverrideSorting;
 	private static int _prevSortingOrder;
+	// 전투 밖에서 창에 넘기려고 세이브 값으로 만든 영웅들 (꺼진 오브젝트 아래에 둔다)
+	private static readonly List<CEntityRuntimeData> _runtimeHeroes = new List<CEntityRuntimeData>();
+	private static UnityEngine.GameObject _runtimeRoot;
+	// 지난번에 만든 영웅들의 세이브 값·장신구 (같으면 다시 쓴다)
+	private static string _runtimeKey;
 	#endregion
 
 	// 에디터에서 도메인 리로드를 꺼 둬도 지난 재생의 창을 붙잡고 있지 않게
@@ -32,10 +37,62 @@ public static class CHeroPopupLink
 		_hookedButtons.Clear();
 		_inventory = null;
 		_openedInventory = false;
+		_runtimeHeroes.Clear();
+		_runtimeRoot = null;
+		_runtimeKey = null;
 	}
 
 	// 여기서 연 창이 지금 열려 있는지
 	public static bool IsOpen => _opened != null && IsVisible(_opened);
+
+	// 전투 밖에는 전투용 영웅(CEntityRuntimeData)이 없다 → 세이브 값으로 창에 넘길 영웅을 만든다
+	//  ㄴ heroes 와 saves 는 같은 순서, 세이브 값·장신구가 그대로면 지난번 것을 다시 쓴다
+	//  ㄴ 왜? → 만들 때마다 전투 쪽 초기화 로그·토큰 로드 오류가 영웅 수만큼 찍힌다
+	public static bool Open(List<CEntityBasicDataSO> heroes, List<UserProfileData.HeroSaveData> saves, int index)
+	{
+		if (heroes == null || saves == null || heroes.Count != saves.Count || index < 0 || index >= heroes.Count)
+		{
+			return false;
+		}
+
+		string key = MakeRuntimeKey(heroes, saves);
+
+		if (key != _runtimeKey || !IsRuntimeAlive())
+		{
+			ClearRuntimeHeroes();
+
+			for (int i = 0; i < heroes.Count; i++)
+			{
+				CEntityRuntimeData hero = CreateRuntimeHero(heroes[i], saves[i]);
+
+				if (hero != null)
+				{
+					_runtimeHeroes.Add(hero);
+				}
+			}
+
+			_runtimeKey = key;
+		}
+
+		int targetIndex = -1;
+
+		for (int i = 0; i < _runtimeHeroes.Count; i++)
+		{
+			if (_runtimeHeroes[i].HeroBasicData == heroes[index])
+			{
+				targetIndex = i;
+				break;
+			}
+		}
+
+		if (targetIndex < 0)
+		{
+			return false;
+		}
+
+		// 창은 넘긴 목록을 붙잡고 있다 → 다시 만들 때 창 쪽 목록까지 비지 않게 복사해서 넘긴다
+		return Open(new List<CEntityRuntimeData>(_runtimeHeroes), targetIndex);
+	}
 
 	// 넘긴 순서대로 창의 이전·다음 버튼이 돈다
 	public static bool Open(List<CEntityRuntimeData> heroes, int index)
@@ -118,6 +175,117 @@ public static class CHeroPopupLink
 		_opened = null;
 		HideInventory();
 	}
+
+	#region 전투 밖 영웅
+	// 전투 스포너와 같은 순서로 채운다 (세이브 체력·스트레스, 자리 → 랭크) + 끼운 장신구 능력치
+	private static CEntityRuntimeData CreateRuntimeHero(CEntityBasicDataSO data, UserProfileData.HeroSaveData save)
+	{
+		if (data == null || save == null || save.CurrentHP <= 0)
+		{
+			return null;
+		}
+
+		if (_runtimeRoot == null)
+		{
+			// 꺼 둔 채로 두면 아래 영웅들의 Awake·Update 가 돌지 않는다
+			_runtimeRoot = new UnityEngine.GameObject("HeroPopupRuntimeHeroes");
+			_runtimeRoot.SetActive(false);
+			UnityEngine.Object.DontDestroyOnLoad(_runtimeRoot);
+		}
+
+		UnityEngine.GameObject go = new UnityEngine.GameObject(data.HeroID);
+
+		go.transform.SetParent(_runtimeRoot.transform, false);
+
+		CEntityRuntimeData hero = go.AddComponent<CEntityRuntimeData>();
+
+		hero.Init(data, ToRank(save.PartySlotIndex), save.CurrentHP, save.CurrentStress);
+		CHeroTrinketEffects.Apply(hero, false);
+
+		return hero;
+	}
+
+	private static ERank ToRank(int partySlotIndex)
+	{
+		switch (partySlotIndex)
+		{
+			case 0:
+				return ERank.One;
+			case 1:
+				return ERank.Two;
+			case 2:
+				return ERank.Three;
+			case 3:
+				return ERank.Four;
+		}
+
+		return ERank.None;
+	}
+
+	// 영웅·자리·체력·스트레스·끼운 장신구를 한 줄로 이어 붙인다
+	private static string MakeRuntimeKey(List<CEntityBasicDataSO> heroes, List<UserProfileData.HeroSaveData> saves)
+	{
+		System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+		for (int i = 0; i < heroes.Count; i++)
+		{
+			CEntityBasicDataSO data = heroes[i];
+			UserProfileData.HeroSaveData save = saves[i];
+
+			if (data == null || save == null)
+			{
+				sb.Append("-|");
+				continue;
+			}
+
+			sb.Append(data.HeroID).Append(',').Append(save.PartySlotIndex).Append(',').Append(save.CurrentHP).Append(',').Append(save.CurrentStress);
+
+			List<CTrinketItemData> trinkets = CHeroTrinkets.GetEquipped(data.HeroID);
+
+			for (int j = 0; j < trinkets.Count; j++)
+			{
+				sb.Append(',').Append(trinkets[j] != null ? trinkets[j].Id : "-");
+			}
+
+			sb.Append('|');
+		}
+
+		return sb.ToString();
+	}
+
+	// 씬을 오가며 누가 지웠는지
+	private static bool IsRuntimeAlive()
+	{
+		if (_runtimeRoot == null)
+		{
+			return false;
+		}
+
+		for (int i = 0; i < _runtimeHeroes.Count; i++)
+		{
+			if (_runtimeHeroes[i] == null)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private static void ClearRuntimeHeroes()
+	{
+		for (int i = 0; i < _runtimeHeroes.Count; i++)
+		{
+			if (_runtimeHeroes[i] != null)
+			{
+				UnityEngine.Object.Destroy(_runtimeHeroes[i].gameObject);
+			}
+		}
+
+		_runtimeHeroes.Clear();
+		_runtimeKey = null;
+	}
+	#endregion
 
 	#region 짐칸
 	// 정보 창 옆(오른쪽)에 짐칸을 열고 창보다 위로 올린다

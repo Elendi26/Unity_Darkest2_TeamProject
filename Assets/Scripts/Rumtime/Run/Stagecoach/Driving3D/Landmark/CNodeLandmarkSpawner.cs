@@ -27,7 +27,6 @@ public class CNodeLandmarkSpawner : MonoBehaviour
 	// 장면 건물·나무 자리를 몇 점(2.5m) 더 넓혀 볼지
 	[SerializeField] private int _sceneObjectPadding = 0;
 	[SerializeField] private float _despawnBehind = 60f;
-	[SerializeField] private bool _logState = true;
 	#endregion
 
 	#region 내부 변수
@@ -242,11 +241,6 @@ public class CNodeLandmarkSpawner : MonoBehaviour
 		landmark.Go.transform.localScale *= _scale;
 
 		_path.ClearDecorAround(position, _treeClearRadius, _hiddenMaterial, _groundKeywords);
-
-		if (_logState)
-		{
-			CPrint.Log($"CNodeLandmarkSpawner : {landmark.Name} 건축물을 {landmark.Arc:F0}m 지점 오른쪽에 세움");
-		}
 	}
 
 	// 건축물 주변 장식을 숨긴다
@@ -321,11 +315,6 @@ public class CNodeLandmarkSpawner : MonoBehaviour
 		BuildSceneCoverage(landmark);
 
 		ClearAround(landmark);
-
-		if (_logState)
-		{
-			CPrint.Log($"CNodeLandmarkSpawner : {landmark.Name} 노드 장면을 {landmark.Arc:F0}m 지점 길 {(tile.PlaceOnLeft ? "왼쪽" : "오른쪽")}에 놓음 (폭 {landmark.TileBounds.size.x:F0}m, 깊이 {landmark.TileBounds.size.z:F0}m)");
-		}
 	}
 
 	private void SpawnTileOnRoad(CLandmark landmark, CNodeLandmarkTile tile, Vector3 center, Vector3 forward)
@@ -347,11 +336,6 @@ public class CNodeLandmarkSpawner : MonoBehaviour
 		BuildSceneCoverage(landmark);
 
 		ClearAround(landmark);
-
-		if (_logState)
-		{
-			CPrint.Log($"CNodeLandmarkSpawner : {landmark.Name} 노드 장면을 {landmark.Arc:F0}m 지점 길에 겹쳐 놓음 (장면 속 길 X {tile.RoadX:F0}, 정지 Z {tile.StopZ:F0})");
-		}
 	}
 
 	// 놓인 장면 메시를 읽어 바닥·건물이 덮은 자리를 길 로컬 점으로 기록한다 → 못 읽으면 null (상자 방식)
@@ -392,11 +376,6 @@ public class CNodeLandmarkSpawner : MonoBehaviour
 			{
 				landmark.SceneRoad = road;
 			}
-		}
-
-		if (_logState)
-		{
-			CPrint.Log($"CNodeLandmarkSpawner : {landmark.Name} 장면이 덮은 자리 바닥 {ground.Count}점 · 건물·나무 {objects.Count}점");
 		}
 	}
 

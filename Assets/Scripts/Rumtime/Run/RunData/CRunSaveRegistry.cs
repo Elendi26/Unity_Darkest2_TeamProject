@@ -41,6 +41,9 @@ public class CRunSaveRegistry : ScriptableObject
 		}
 	}
 
+	// 짐칸에 들어갈 수 있는 모든 아이템 (전투 보상 장신구 후보 등)
+	public IReadOnlyList<CItemDataBase> Items => _items;
+
 	public bool TryGetItem(string id, out CItemDataBase item)
 	{
 		item = null;
