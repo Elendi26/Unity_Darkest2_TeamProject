@@ -226,4 +226,47 @@ public class DataSaveManager : MonoBehaviour
         return false;
 
     }
+
+    /// <summary>
+    /// 사망한 영웅 저장 데이터에서 삭제하는 함수
+    /// </summary>
+    /// <param name="deadHeroID"></param>
+    public void RemoveDeadHeroInParty(string deadHeroID)
+    {
+        if(CurrentSlotIndex < 0 && string.IsNullOrEmpty(deadHeroID))
+        {
+            return;
+        }
+
+        // 프로필 데이터 가져오고
+        UserProfileData profile = LoadProfile(CurrentSlotIndex);
+        if(profile == null)
+        {
+            return;
+        }
+
+
+        // 파티 리스트에 죽은 히어로 아이디와 일치하는 엔티티를 찾아서 파티에서 제거한 후 
+        int removeIndex = profile.PartyHeroes.RemoveAll(hero => hero.HeroID == deadHeroID);
+
+        if(removeIndex > 0 )
+        {
+            for(int i = 0; i < profile.PartyHeroes.Count; i++)
+            {
+                profile.PartyHeroes[i].PartySlotIndex = i;
+
+            }
+
+            // 전투 저장 데이터에 죽은 영웅 데이터 존재한다면 삭제
+            if(profile.CurrentCombat != null && profile.CurrentCombat.CombatEntities != null)
+            {
+                profile.CurrentCombat.CombatEntities.RemoveAll(e => e.IsHero && e.EntityID == deadHeroID);
+            }
+        }
+
+        // 시간 저장 및 데이터 저장.
+        profile.LastSaveTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        SaveProfile(profile, CurrentSlotIndex);
+
+    }
 }

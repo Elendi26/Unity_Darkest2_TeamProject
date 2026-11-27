@@ -155,7 +155,7 @@ public class CCombatSelectedSkill : MonoBehaviour
         {
             if(_currentTurn.SelectType != ECombatSelectType.Move)
             {
-                if (!target.IsCorpse)
+                if (!target.IsDead() || target.IsCorpse)
                 {
                     for (int i = 0; i < _teamRanks.Length; i++)
                     {
@@ -252,9 +252,11 @@ public class CCombatSelectedSkill : MonoBehaviour
         {
             if (_teamRanks[i].Targetable && _teamRanks[i] != null)
             {
-                if(!_entity.IsDead())
+                CEntityRuntimeData entity = _teamRanks[i].GetEntityRuntimeData();
+
+                if (entity != null && (!entity.IsDead() || entity.IsCorpse))
                 {                
-                    targets.Add(_teamRanks[i].GetEntityRuntimeData());
+                    targets.Add(entity);
                 }
 
             }
@@ -262,13 +264,14 @@ public class CCombatSelectedSkill : MonoBehaviour
 
         for (int j = 0; j < _enemyRanks.Length; j++)
         {
-            if (_enemyRanks[j].Targetable && _enemyRanks[j] != null)
+            if (_enemyRanks[j] != null && _enemyRanks[j].Targetable)
             {
-                if (!_entity.IsDead())
-                {
-                    targets.Add(_enemyRanks[j].GetEntityRuntimeData());
-                }
+                CEntityRuntimeData entity = _enemyRanks[j].GetEntityRuntimeData();
 
+                if (entity != null && (!entity.IsDead() || entity.IsCorpse))
+                {
+                    targets.Add(entity);
+                }
             }
         }
 
@@ -339,8 +342,7 @@ public class CCombatSelectedSkill : MonoBehaviour
     private void SkillExcute(CEntityRuntimeData target)
     {
         Coroutine coroutine = StartCoroutine(UseSkillCoroutine(target));
-        StopCoroutine(coroutine);
-
+      
         _animation.IdleAnimate();
     }
 
@@ -369,6 +371,10 @@ public class CCombatSelectedSkill : MonoBehaviour
         _skillData.UseSKill(_entity, target, critical, hit);
 
         // 여기 앞이나 뒤에 연출 코드를 넣으시면 됩니다
+        if (!hit)
+        {
+            target.ShowDamageTextUI(0f);
+        }
         // 만약 코루틴으로 연출을 넣으실 땐 CSkillDataSO의 Delay를 참조해서 사용해주세요
         // 애니메이션이 해당 Delay를 참조해서 해당 시간동안 작동하기 때문에 해당 Delay를 참조하면 동일한 시간동안 움직일 수 있습니다
         // 추천하는 형태는 UseSkillAnimationCoroutine F12로 따라가셔서 확인해보시면 될 것 같습니다
@@ -377,7 +383,12 @@ public class CCombatSelectedSkill : MonoBehaviour
         Coroutine targetAnimation = hit ? StartCoroutine(_animation.HitAnimationCoroutine(target.GetAnimator(), _skillData.UseSkillDelay, _skillData.AfterSkillDelay)) : StartCoroutine(_animation.DodgeAnimationCoroutine(target.GetAnimator(), _skillData.UseSkillDelay, _skillData.AfterSkillDelay));
 
         yield return animationA;
-        yield return targetAnimation;
+
+        if (targetAnimation != null)
+        {
+            yield return targetAnimation;
+        }
+
     }
     
     private void OffIndicator()

@@ -210,6 +210,14 @@ public class CCombatCurrentTurn : MonoBehaviour
             yield break;
         }
 
+        if(_entityAnimation == null || _entity.GetAnimator() == null)
+        {
+            CPrint.Warn("몬스터의 애니메이터가 비어있다");
+            yield break;
+        }
+
+        _entityAnimation.InputAnimationData(_entity.GetAnimator(), decision.SelectedSkill);
+
         // Play -> 광역 여부 어떻게 되는지 잘 모르겠습니다.
         if (decision.SelectedSkill.AOE)
         {

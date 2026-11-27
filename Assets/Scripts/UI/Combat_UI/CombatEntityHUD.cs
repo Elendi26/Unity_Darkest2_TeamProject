@@ -22,7 +22,10 @@ public class CombatEntityHUD : MonoBehaviour
     [SerializeField] private CEntityRuntimeData _eRuntimeData;
     #endregion
 
-
+    private void Update()
+    {
+        
+    }
     private void OnEnable()
     {
         if( _eRuntimeData != null )
@@ -50,6 +53,7 @@ public class CombatEntityHUD : MonoBehaviour
     {
         if(data == null)
         {
+            Destroy(gameObject);
             return;
         }
 

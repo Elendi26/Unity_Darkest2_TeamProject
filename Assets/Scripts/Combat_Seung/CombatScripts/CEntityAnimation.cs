@@ -63,7 +63,7 @@ public class CEntityAnimation : MonoBehaviour
     {
         Debug.Log("스킬 애니메이션 발동");
 
-        _animator.SetTrigger("UseSKill");
+        _animator.SetTrigger("UseSkill");
 
         yield return new WaitForSeconds(_useSkillDelay);
 
@@ -74,24 +74,58 @@ public class CEntityAnimation : MonoBehaviour
 
     public IEnumerator HitAnimationCoroutine(Animator target, float useDelay, float afterDelay)
     {
+        if(target == null)
+        {
+            yield break;
+        }
         target.SetTrigger("Hit");
 
         yield return new WaitForSeconds(useDelay);
 
+        if (target == null)
+        {
+            yield break;
+        }
+
         target.SetTrigger($"Hit_Recovery");
 
         yield return new WaitForSeconds(afterDelay);
+
+        if (target == null)
+        {
+            yield break;
+        }
+
+        IdleAnimate(target);
     }
 
     public IEnumerator DodgeAnimationCoroutine(Animator target, float useDelay, float afterDelay)
     {
+        if (target == null)
+        {
+            yield break;
+        }
+
         target.SetTrigger("Dodge");
 
         yield return new WaitForSeconds(useDelay);
 
+        if (target == null)
+        {
+            yield break;
+        }
+
         target.SetTrigger($"Dodge_Recovery");
 
         yield return new WaitForSeconds(afterDelay);
+
+        if (target == null)
+        {
+            yield break;
+        }
+
+        IdleAnimate(target);
+
     }
 
     public void MoveAnimation()
@@ -106,6 +140,11 @@ public class CEntityAnimation : MonoBehaviour
 
     public void IdleAnimate(Animator target)
     {
-        _animator.SetTrigger("Idle");
+        if (target == null)
+        {
+            return;
+        }
+
+        target.SetTrigger("Idle");
     }
 }
