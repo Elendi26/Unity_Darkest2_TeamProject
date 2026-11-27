@@ -11804,6 +11804,7 @@ MonoBehaviour:
   _masterVolume: 1
   _bgmVolume: 1
   _sfxVolume: 1
+  _sfxMixScale: 0.5
   _sfxPoolSize: 10
 --- !u!4 &1569845844
 Transform:
