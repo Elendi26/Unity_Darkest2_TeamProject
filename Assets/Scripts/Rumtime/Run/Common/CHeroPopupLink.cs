@@ -38,7 +38,7 @@ public static class CHeroPopupLink
 	public static bool IsOpen => _opened != null && IsVisible(_opened);
 
 	// 넘긴 순서대로 창의 이전·다음 버튼이 돈다
-	public static bool Open(List<CEntityBasicDataSO> heroes, int index)
+	public static bool Open(List<CEntityRuntimeData> heroes, int index)
 	{
 		HeroPopup_UI popup = HeroPopup_UI.instance;
 
@@ -53,7 +53,7 @@ public static class CHeroPopupLink
 			return false;
 		}
 
-		popup.OpenPopup(heroes, index);
+		popup.OpenPopupExceptTheCrossRoad(heroes, index);
 		SetVisible(popup, true);
 		HookCloseButtons(popup);
 
