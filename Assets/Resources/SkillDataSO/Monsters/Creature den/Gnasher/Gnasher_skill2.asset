@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bce350e4230aa349ab9a623eb6f02f0, type: 3}
+  m_Name: Gnasher_skill2
+  m_EditorClassIdentifier: 
+  _heroName: Gnasher
+  _skillID: Fetch
+  _skillName: "\uBB3C\uC5B4\uC624\uAE30"
+  _skillExplain: 
+  _skillType: range
+  _skillDetail: 
+  _index: 0
+  _rank: 12
+  _target: 12
+  _type: 1
+  _areaOfEffect: 0
+  _critical: 0
+  _cooldown: -1
+  _charges: -1
+  _skillEffect:
+  - rid: 6238335920434053120
+  _skillSelfEffect: 0
+  _skillEffectForSelf: []
+  _skillIcon: {fileID: 0}
+  _skillTypeIcon: {fileID: 0}
+  _skillRangeImage: {fileID: 0}
+  _testAnimation: {fileID: 0}
+  _activeImage: {fileID: 0}
+  _inactiveImage: {fileID: 0}
+  _baseWeight: 10
+  _lowHpWeight: 10
+  _useSkillDelay: 1.08
+  _afterSkillDelay: 1.08
+  _anticSfxId: EN_RangeAntic
+  _useSfxId: EN_RangeUse
+  _returnSfxId: EN_RangeReturn
+  references:
+    version: 2
+    RefIds:
+    - rid: 6238335920434053120
+      type: {class: CSkillDamage, ns: , asm: Assembly-CSharp}
+      data:
+        _minDamage: 2
+        _maxDamage: 4
+        _combo: 0

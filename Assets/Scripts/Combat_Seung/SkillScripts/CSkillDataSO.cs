@@ -19,6 +19,13 @@ public enum EInteractCombo
     True,
     False
 }
+public enum ESkillSfxPhase
+{
+    Antic,
+    Use,
+    Return
+}
+
 
 [Flags]
 public enum ERank
@@ -87,7 +94,10 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     [SerializeField] private float _useSkillDelay = 1.08f;
     [SerializeField] private float _afterSkillDelay = 1.08f;
 
-
+    [Header("스킬 사운드 SO ID")]
+    [SerializeField] private string _anticSfxId;
+    [SerializeField] private string _useSfxId;
+    [SerializeField] private string _returnSfxId;
     #endregion
 
 
@@ -125,6 +135,9 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     public float UseSkillDelay => _useSkillDelay;
     public float AfterSkillDelay => _afterSkillDelay;
 
+    public string AnticSfxId => _anticSfxId;
+    public string UseSfxId => _useSfxId;
+    public string ReturnSfxId => _returnSfxId;
     #endregion
 
     public int GetRankBitmask()
@@ -146,6 +159,7 @@ public class CSkillDataSO : ScriptableObject, ICombatData
     {
         return this;
     }
+
 
     public void UseSKill(CEntityRuntimeData entity, CEntityRuntimeData target, bool critical, bool hit)
     {
@@ -257,6 +271,24 @@ public class CSkillDataSO : ScriptableObject, ICombatData
 
                 break;
         }
+    }
+
+    public void PlaySkillSfx(ESkillSfxPhase phase)
+    {
+        string targetId = phase switch
+        {
+            ESkillSfxPhase.Antic => _anticSfxId,
+            ESkillSfxPhase.Use => _useSfxId,
+            ESkillSfxPhase.Return => _returnSfxId,
+            _ => string.Empty
+        };
+
+        if (string.IsNullOrWhiteSpace(targetId))
+        {
+            return;
+        }
+
+        CSoundManager.Instance?.PlaySfxOneShot(targetId);
     }
 }
 

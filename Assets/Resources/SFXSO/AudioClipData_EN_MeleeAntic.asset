@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2de66a3114acf7c458e414368a275052, type: 3}
+  m_Name: AudioClipData_EN_MeleeAntic
+  m_EditorClassIdentifier: 
+  _id: EN_MeleeAntic
+  _clip: {fileID: 8300000, guid: a55b6dffe530f7f4797b324d9469dc9b, type: 3}

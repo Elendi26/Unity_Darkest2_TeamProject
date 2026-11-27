@@ -41,6 +41,9 @@ MonoBehaviour:
   _lowHpWeight: 10
   _useSkillDelay: 1.08
   _afterSkillDelay: 1.08
+  _anticSfxId: GR_RangeAntic
+  _useSfxId: GR_RangeUse
+  _returnSfxId: GR_RangeReturn
   references:
     version: 2
     RefIds:
