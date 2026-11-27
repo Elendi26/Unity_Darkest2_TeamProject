@@ -43,6 +43,7 @@ public class CCombatResultView : MonoBehaviour
 
 		view._onClosed = onClosed;
 		view.Build(canvas, data, font != null ? font : CUIBuilder.GetDefaultFont());
+		CRunSound.PlayOpenUI();
 		return view;
 	}
 
@@ -71,6 +72,7 @@ public class CCombatResultView : MonoBehaviour
 		}
 
 		_isClosed = true;
+		CRunSound.PlayCloseUI();
 
 		Action onClosed = _onClosed;
 

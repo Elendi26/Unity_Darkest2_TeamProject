@@ -3479,7 +3479,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &840648559
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6059,11 +6059,6 @@ MonoBehaviour:
     IsAll: 0
     Category: 1
     Title: "\uC804\uD22C"
-  - Button: {fileID: 840648560}
-    Icon: {fileID: 1068301548}
-    IsAll: 0
-    Category: 2
-    Title: "\uD683\uBD88"
   - Button: {fileID: 546048598}
     Icon: {fileID: 936951763}
     IsAll: 0

@@ -123,6 +123,7 @@ public static class CHeroPopupLink
 		if (_opened == null)
 		{
 			ShowInventory();
+			CRunSound.PlayOpenUI();
 		}
 
 		_opened = popup;
@@ -139,6 +140,7 @@ public static class CHeroPopupLink
 
 		SetVisible(_opened, false);
 		Release();
+		CRunSound.PlayCloseUI();
 	}
 
 	// 여는 쪽이 매 프레임 부른다 → ESC 로 닫고, 다른 쪽에서 닫혔으면 정리한다

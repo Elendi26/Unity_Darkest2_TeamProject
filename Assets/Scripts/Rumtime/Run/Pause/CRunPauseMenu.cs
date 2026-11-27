@@ -147,6 +147,7 @@ public class CRunPauseMenu : MonoBehaviour
 		_prevTimeScale = Time.timeScale;
 		Time.timeScale = 0f;
 		SetMenuVisible(true);
+		CRunSound.PlayOpenUI();
 
 		if (_logState)
 		{
@@ -246,6 +247,7 @@ public class CRunPauseMenu : MonoBehaviour
 		_isPaused = false;
 		Time.timeScale = _prevTimeScale;
 		SetMenuVisible(false);
+		CRunSound.PlayCloseUI();
 
 		if (_settingsPanel != null)
 		{

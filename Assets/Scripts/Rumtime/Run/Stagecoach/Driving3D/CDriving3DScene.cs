@@ -56,6 +56,8 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 	#endregion
 
 	#region 내부 변수
+	// 달리는 동안 도는 바퀴 소리 (멈추면 사운드 매니저에 돌려준다)
+	private AudioSource _drivingLoop;
 	private CRoadTravel _travel;
 	private CRunValue _torch;
 	private CCoachPhysics _physics;
@@ -134,6 +136,7 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 
 	private void OnDestroy()
 	{
+		StopDrivingLoop();
 		UnbindRunner();
 
 		if (_map != null)
@@ -710,6 +713,8 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 	// 길을 막는 이벤트(전투)가 끝나 다시 달리게 되면 → 방책 한쪽을 치워 길을 연다
 	private void HandleTravelStateChanged(ETravelState prev, ETravelState next)
 	{
+		UpdateDrivingSound(prev, next);
+
 		if (prev != ETravelState.RoadEvent || !_isBlockedEvent)
 		{
 			return;
@@ -721,6 +726,38 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 		{
 			CPrint.Warn("CDriving3DScene : 길을 막는 이벤트가 끝났는데 열 방책이 없습니다.");
 		}
+	}
+
+	// 출발할 때 채찍질·말 울음 → 달리는 동안(Driving)만 바퀴 소리를 돌린다 (사건·도착으로 멈추면 끈다)
+	private void UpdateDrivingSound(ETravelState prev, ETravelState next)
+	{
+		if (next != ETravelState.Driving)
+		{
+			StopDrivingLoop();
+			return;
+		}
+
+		// 길 위 사건을 마치고 다시 달릴 때는 채찍질 없이 바퀴 소리만
+		if (prev == ETravelState.Departing)
+		{
+			CSoundManager.Instance?.PlaySfxGroup(CRunSound.DRIVING_WHIP, CRunSound.DRIVING_HORSE);
+		}
+
+		if (_drivingLoop == null)
+		{
+			_drivingLoop = CSoundManager.Instance?.PlaySfxLoop(CRunSound.DRIVING_LOOP);
+		}
+	}
+
+	private void StopDrivingLoop()
+	{
+		if (_drivingLoop == null)
+		{
+			return;
+		}
+
+		CSoundManager.Instance?.StopSfxLoop(_drivingLoop);
+		_drivingLoop = null;
 	}
 
 	private void ApplyAutoArrive(ref Vector2 input, ref bool brake)
@@ -916,6 +953,14 @@ public class CDriving3DScene : MonoBehaviour, INodeArrivalPresenter
 	// 노드에 도착 → 카메라가 건축물로 옮겨 가고, 잠시 뒤 노드 이벤트
 	public void Present(CNodeInstance node, Action onDone)
 	{
+		// 들어가기 전 나레이션 (교차로·병원·은닉처·상점·감시탑·여관)
+		CNodeTypeData nodeType = node != null ? node.TypeData : null;
+
+		if (nodeType != null)
+		{
+			CRunSound.PlayOnce(CRunSound.GetNodeArriveSound(nodeType.Type));
+		}
+
 		// 카메라 연출이 끝나면 이벤트 이름 띠를 띄우고, 띠를 눌러야 이벤트가 시작된다
 		Action original = onDone;
 

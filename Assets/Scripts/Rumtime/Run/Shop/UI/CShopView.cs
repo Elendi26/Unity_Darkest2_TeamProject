@@ -106,6 +106,7 @@ public class CShopView : MonoBehaviour, IShopView
 		ScrollToTop();
 		SetVisible(true);
 		OpenInventory();
+		CRunSound.PlayOpenUI();
 	}
 
 	public void SetLook(Sprite portrait, Sprite crest, Sprite banner)
@@ -142,10 +143,17 @@ public class CShopView : MonoBehaviour, IShopView
 
 	public void Close()
 	{
+		bool wasOpen = IsOpen;
+
 		_onLeave = null;
 		_onBuy = null;
 		SetVisible(false);
 		CloseInventory();
+
+		if (wasOpen)
+		{
+			CRunSound.PlayCloseUI();
+		}
 	}
 
 	#region 칸 갱신

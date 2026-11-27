@@ -186,10 +186,13 @@ public class CGarageView : MonoBehaviour, IInventoryUseHandler
 		SetVisible(true);
 		RefreshAll();
 		OpenInventory();
+		CRunSound.PlayOpenUI();
 	}
 
 	public void Close()
 	{
+		bool wasOpen = IsOpen;
+
 		if (_stagecoach != null)
 		{
 			_stagecoach.OnEquipped -= HandleEquipChanged;
@@ -199,6 +202,11 @@ public class CGarageView : MonoBehaviour, IInventoryUseHandler
 		_onLeave = null;
 		SetVisible(false);
 		CloseInventory();
+
+		if (wasOpen)
+		{
+			CRunSound.PlayCloseUI();
+		}
 	}
 
 	private void OnDestroy()
