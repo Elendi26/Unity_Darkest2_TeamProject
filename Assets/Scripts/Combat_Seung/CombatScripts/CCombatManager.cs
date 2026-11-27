@@ -42,9 +42,11 @@ public class CCombatManager : MonoBehaviour
     [Header("시체 프리펩")]
     [SerializeField] private GameObject _corpsePrefab;
 
-
     [Header("영웅 팝업 UI 캔버스")]
     [SerializeField] private CanvasGroup _heroPopupCanvasG;
+
+    [Header("현재 라운드 표시 텍스트")]
+    [SerializeField] private TextMeshProUGUI _roundText;
 
 
     #endregion
@@ -117,6 +119,15 @@ public class CCombatManager : MonoBehaviour
         }
 
     }
+
+    public void FixedUpdate()
+    {
+        if (_roundText != null)
+        {
+            _roundText.text = _currentRound.ToString();
+        }
+    }
+
 
     private void OnEnable()
     {
@@ -377,7 +388,7 @@ public class CCombatManager : MonoBehaviour
     {
         _heroSpawner.SpawnedHeroData.IndexOf(data);
 
-        HeroPopup_UI.instance.OpenPopupinCombatScene(_heroSpawner.SpawnedHeroData, _heroSpawner.SpawnedHeroData.IndexOf(data));
+        HeroPopup_UI.instance.OpenPopupExceptTheCrossRoad(_heroSpawner.SpawnedHeroData, _heroSpawner.SpawnedHeroData.IndexOf(data));
 
         if (_heroPopupCanvasG != null)
         {
@@ -519,6 +530,30 @@ public class CCombatManager : MonoBehaviour
 
         // 다음턴
         TurnOver();
+    }
+
+    /// <summary>
+    /// 전투 상황일 경우 현재의 턴을 프로필 세이브 데이터에 저장하는 함수
+    /// </summary>
+    /// <param name="runtimeData"></param>
+    public void SaveCurrentTurnData(CEntityRuntimeData runtimeData)
+    {
+        if(DataSaveManager.Instance == null || runtimeData == null)
+        {
+            return;
+        }
+
+        UserProfileData.CombatSaveData data = new UserProfileData.CombatSaveData();
+        data.IsIncombat = true;
+        data.CurrentRound = _currentRound;
+        data.CurrentTurnEntityID = _currentTurn.Entity.EntityName;
+
+        // TODO :퇴장 시점의 전투 상황에 남아있는 턴의 대기열 저장
+        // 현재 전투에 어떤 엔티티들이 남아있는지 저장
+
+
+        // 마지막에 저장
+        DataSaveManager.Instance.SaveCombatState(data);
     }
 
 }

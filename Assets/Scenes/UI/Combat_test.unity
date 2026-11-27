@@ -905,6 +905,7 @@ MonoBehaviour:
   _enemyspawner: {fileID: 1029264145}
   _corpsePrefab: {fileID: 2679585739398302153, guid: 406f7f0c5603a0a499fcb0856a190c98, type: 3}
   _heroPopupCanvasG: {fileID: 1211770605}
+  _roundText: {fileID: 1320145666}
 --- !u!4 &52760427
 Transform:
   m_ObjectHideFlags: 0

@@ -66,7 +66,7 @@ public class TurnOrder_UI : MonoBehaviour
                 }
 
                 // 사망했거나 시체인 상태의 엔티티는 제외한다.
-                if (entities[i] != null && (!entities[i].IsDead() || !entities[i].IsCorpse))
+                if (entities[i] != null && !entities[i].IsDead() && !entities[i].IsCorpse)
                 {
                     entityList.Add(entities[i]);
                 }

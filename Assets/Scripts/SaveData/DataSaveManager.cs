@@ -186,5 +186,44 @@ public class DataSaveManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 전투 상황 종료 시 상황을 저장하여 고해 이어하기를 눌렀을 경우 전투로 다시 돌아가지 않도록 하는 함수.
+    /// </summary>
+    public void CombatStageClear()
+    {
+        if(_currentSlotIndex < 0)
+        {
+            return;
+        }
 
+        // 프로필 데이터 불러오기
+        UserProfileData profileData = LoadProfile(CurrentSlotIndex);
+
+        if(profileData == null)
+        {
+            return;
+        }
+
+        profileData.CurrentCombat = null;
+        profileData.LastSaveTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        SaveProfile(profileData, CurrentSlotIndex);
+
+    }
+    /// <summary>
+    /// 이어하기 버튼 클릭시 전투 중 인지 판단하여 전투로 들어갈지 역마차로 이어갈지 판단하는 함수
+    /// </summary>
+    public bool InCombatJudgement(int slotIndex)
+    {
+        // 프로필 데이터 로드하고
+        UserProfileData profileData = LoadProfile(slotIndex);
+
+        // 밑 조건이면 전투씬으로 들어가는 것
+        if(profileData != null && profileData.CurrentCombat != null && profileData.CurrentCombat.IsIncombat)
+        {
+            return true;
+        }
+
+        return false;
+
+    }
 }
