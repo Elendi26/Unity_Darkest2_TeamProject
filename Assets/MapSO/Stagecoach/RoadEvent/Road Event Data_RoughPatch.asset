@@ -26,6 +26,7 @@ MonoBehaviour:
   _bumpCount: 4
   _combatWhenEmpty: 4
   _combatId: roadcombat_roughpatch
+  _sfxId: OnRoughPatch
   references:
     version: 2
     RefIds:
