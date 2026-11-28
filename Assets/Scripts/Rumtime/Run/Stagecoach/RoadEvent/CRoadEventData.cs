@@ -21,6 +21,8 @@ public class CRoadEventData : ScriptableObject
     [SerializeField] private ERoadHazard _hazard = ERoadHazard.None;
     // 전투로 이어질 때 어떤 전투인지 (None 이면 길을 막는 이벤트는 방책, 아니면 습격)
     [SerializeField] private ECombatKind _combatKind = ECombatKind.None;
+    // 이벤트가 일어날 때 내는 효과음 (비우면 소리 없음)
+    [SerializeField] private string _sfxId = "";
     #endregion
 
     public string Id => _id;
@@ -37,6 +39,8 @@ public class CRoadEventData : ScriptableObject
     public bool AlwaysCombat => _alwaysCombat;
     public bool BlocksRoad => _blocksRoad;
     public ERoadHazard Hazard => _hazard;
+    // 이벤트 효과음
+    public string SfxId => _sfxId;
     // 전투 종류 (방책·습격 등)
     public ECombatKind CombatKind
     {

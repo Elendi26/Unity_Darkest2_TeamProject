@@ -240,6 +240,7 @@ public class CRoadTravel : IRoadTravel
     {
         SetState(ETravelState.RoadEvent);
         OnRoadEventStarted?.Invoke(data);
+        CRunSound.PlayOnce(data != null ? data.SfxId : null);
 
         // 바퀴·장갑이 이미 0 → 효과 대신 전투 (끝나면 다시 달린다)
         if (data != null && data.ShouldStartCombat(_ctx.RunData))

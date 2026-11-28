@@ -27,6 +27,7 @@ MonoBehaviour:
   _combatWhenEmpty: 5
   _combatId: roadcombat_dangerpath
   _hazard: 1
+  _sfxId: OnDangerPath
   references:
     version: 2
     RefIds:
