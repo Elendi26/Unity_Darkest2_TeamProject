@@ -10,10 +10,8 @@ public class CAssetManager : CManagerSingleton<CAssetManager>
 {
     protected override bool IsDontDestroy => true;
 
-    #region µñ¼Å³Ê¸®
     private readonly Dictionary<string, UnityEngine.Object> _assetCache = new Dictionary<string, UnityEngine.Object>();
     private readonly Dictionary<string, AsyncOperationHandle> _handleMap = new Dictionary<string, AsyncOperationHandle>();
-    #endregion    
 
 
     /// <summary>

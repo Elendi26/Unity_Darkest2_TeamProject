@@ -1,7 +1,10 @@
-using System;
 using Cysharp.Threading.Tasks;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class CFadeController : CManagerSingleton<CFadeController>
@@ -19,14 +22,17 @@ public class CFadeController : CManagerSingleton<CFadeController>
     #endregion
 
     #region 내부 변수
-    private CanvasGroup _fadeCanvasGroup;
-    private GameObject _fadeInstance;
-    private AsyncOperationHandle<GameObject> _loadHandle;
-    private bool _isLoadingPrefab;
-    private int _fadeVersion;
+    private CanvasGroup _group;
+    private GameObject _ui;
+    private AsyncOperationHandle<GameObject> _handle;
+    private bool _loading;
+    private bool _prevNav;
+    private int _version;
+    private readonly List<InputDevice> _disabledDevices = new List<InputDevice>();
     #endregion
 
-    public bool IsReady => _fadeCanvasGroup != null;
+    // 프로퍼티
+    public bool IsReady => _group != null;
 
     protected override void Awake()
     {
@@ -39,7 +45,7 @@ public class CFadeController : CManagerSingleton<CFadeController>
     /// </summary>
     public async UniTask<bool> PreloadFadeUIAsync()
     {
-        return await EnsureFadeUIAsync();
+        return await LoadAsync();
     }
 
     /// <summary>
@@ -53,7 +59,7 @@ public class CFadeController : CManagerSingleton<CFadeController>
         }
 
         float targetDuration = duration >= 0f ? duration : _fadeInDuration;
-        await FadeToAsync(1f, targetDuration, blocksRaycasts: true);
+        await RunFadeAsync(1f, targetDuration, blocksRaycasts: true);
     }
 
     /// <summary>
@@ -67,23 +73,62 @@ public class CFadeController : CManagerSingleton<CFadeController>
         }
 
         float targetDuration = duration >= 0f ? duration : _fadeOutDuration;
-        await FadeToAsync(0f, targetDuration, blocksRaycasts: false);
+        await RunFadeAsync(0f, targetDuration, blocksRaycasts: false);
     }
 
-    private async UniTask<bool> EnsureFadeUIAsync()
+    private void LockInput()
     {
-        if (_fadeCanvasGroup != null)
+        if (EventSystem.current != null)
+        {
+            _prevNav = EventSystem.current.sendNavigationEvents;
+            EventSystem.current.sendNavigationEvents = false;
+            EventSystem.current.SetSelectedGameObject(null);
+        }
+
+        _disabledDevices.Clear();
+        foreach (InputDevice device in InputSystem.devices)
+        {
+            if (device != null && device.added && device.enabled)
+            {
+                InputSystem.DisableDevice(device);
+                _disabledDevices.Add(device);
+            }
+        }
+    }
+
+    private void UnlockInput()
+    {
+        if (EventSystem.current != null)
+        {
+            EventSystem.current.sendNavigationEvents = _prevNav;
+        }
+
+        for (int i = 0; i < _disabledDevices.Count; i++)
+        {
+            InputDevice device = _disabledDevices[i];
+            if (device != null && device.added)
+            {
+                InputSystem.EnableDevice(device);
+            }
+        }
+
+        _disabledDevices.Clear();
+    }
+
+    private async UniTask<bool> LoadAsync()
+    {
+        if (_group != null)
         {
             return true;
         }
 
-        if (_isLoadingPrefab)
+        if (_loading)
         {
             try
             {
                 await UniTask.WaitUntil
                 (
-                    () => !_isLoadingPrefab,
+                    () => !_loading,
                     cancellationToken: this.GetCancellationTokenOnDestroy()
                 );
             }
@@ -92,20 +137,20 @@ public class CFadeController : CManagerSingleton<CFadeController>
                 return false;
             }
 
-            return _fadeCanvasGroup != null;
+            return _group != null;
         }
 
-        _isLoadingPrefab = true;
+        _loading = true;
 
         try
         {
             if (_fadePrefabRef != null && _fadePrefabRef.RuntimeKeyIsValid())
             {
-                _loadHandle = Addressables.InstantiateAsync(_fadePrefabRef, transform);
+                _handle = Addressables.InstantiateAsync(_fadePrefabRef, transform);
             }
             else if (!string.IsNullOrWhiteSpace(_fadePrefabAddress))
             {
-                _loadHandle = Addressables.InstantiateAsync(_fadePrefabAddress, transform);
+                _handle = Addressables.InstantiateAsync(_fadePrefabAddress, transform);
             }
             else
             {
@@ -113,19 +158,19 @@ public class CFadeController : CManagerSingleton<CFadeController>
                 return false;
             }
 
-            _fadeInstance = await _loadHandle.ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
+            _ui = await _handle.ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
 
-            if (_loadHandle.Status == AsyncOperationStatus.Succeeded && _fadeInstance != null)
+            if (_handle.Status == AsyncOperationStatus.Succeeded && _ui != null)
             {
-                _fadeCanvasGroup = _fadeInstance.GetComponentInChildren<CanvasGroup>(true);
+                _group = _ui.GetComponentInChildren<CanvasGroup>(true);
 
-                if (_fadeCanvasGroup == null)
+                if (_group == null)
                 {
                     CPrint.Error("CFadeController : FadeCanvas 프리팹에 CanvasGroup이 없습니다.");
                     return false;
                 }
 
-                SetAlphaImmediate(0f, blocksRaycasts: false);
+                ApplyState(0f, blocksRaycasts: false);
                 CPrint.Log("CFadeController : FadeCanvas 선제 로드 완료");
                 return true;
             }
@@ -144,72 +189,87 @@ public class CFadeController : CManagerSingleton<CFadeController>
         }
         finally
         {
-            _isLoadingPrefab = false;
+            _loading = false;
         }
     }
 
-    private void SetAlphaImmediate(float alpha, bool blocksRaycasts)
+    private void ApplyState(float alpha, bool blocksRaycasts)
     {
-        if (_fadeCanvasGroup == null)
+        if (_group == null)
         {
             return;
         }
 
-        _fadeCanvasGroup.alpha = Mathf.Clamp01(alpha);
-        _fadeCanvasGroup.interactable = blocksRaycasts;
-        _fadeCanvasGroup.blocksRaycasts = blocksRaycasts;
+        _group.alpha = Mathf.Clamp01(alpha);
+        _group.interactable = blocksRaycasts;
+        _group.blocksRaycasts = blocksRaycasts;
     }
 
-    private async UniTask FadeToAsync(float targetAlpha, float duration, bool blocksRaycasts)
+    private async UniTask RunFadeAsync(float targetAlpha, float duration, bool blocksRaycasts)
     {
-        if (_fadeCanvasGroup == null)
+        if (_group == null)
         {
             return;
         }
 
-        int currentVersion = ++_fadeVersion;
+        int currentVersion = ++_version;
 
-        _fadeCanvasGroup.blocksRaycasts = true;
-        _fadeCanvasGroup.interactable = true;
+        _group.blocksRaycasts = true;
+        _group.interactable = true;
+        LockInput();
 
-        float startAlpha = _fadeCanvasGroup.alpha;
-        if (duration <= 0f || Mathf.Approximately(startAlpha, targetAlpha))
+        try
         {
-            SetAlphaImmediate(targetAlpha, blocksRaycasts);
-            return;
-        }
-
-        float elapsed = 0f;
-        while (elapsed < duration)
-        {
-            if (currentVersion != _fadeVersion || _fadeCanvasGroup == null)
+            float startAlpha = _group.alpha;
+            if (duration <= 0f || Mathf.Approximately(startAlpha, targetAlpha))
             {
+                if (currentVersion == _version && _group != null)
+                {
+                    ApplyState(targetAlpha, blocksRaycasts);
+                }
                 return;
             }
 
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            _fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, t);
-            await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken: this.GetCancellationTokenOnDestroy());
-        }
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                if (currentVersion != _version || _group == null)
+                {
+                    return;
+                }
 
-        if (currentVersion == _fadeVersion && _fadeCanvasGroup != null)
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                _group.alpha = Mathf.Lerp(startAlpha, targetAlpha, t);
+                await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken: this.GetCancellationTokenOnDestroy());
+            }
+
+            if (currentVersion == _version && _group != null)
+            {
+                ApplyState(targetAlpha, blocksRaycasts);
+            }
+        }
+        finally
         {
-            SetAlphaImmediate(targetAlpha, blocksRaycasts);
+            if (currentVersion == _version)
+            {
+                UnlockInput();
+            }
         }
     }
 
     protected override void OnDestroy()
     {
-        _fadeVersion++;
+        _version++;
+        UnlockInput();
 
-        if (_loadHandle.IsValid())
+        if (_handle.IsValid())
         {
-            Addressables.ReleaseInstance(_loadHandle);
+            Addressables.ReleaseInstance(_handle);
         }
 
-        _fadeInstance = null;
-        _fadeCanvasGroup = null;
+        _ui = null;
+        _group = null;
         base.OnDestroy();
     }
 }

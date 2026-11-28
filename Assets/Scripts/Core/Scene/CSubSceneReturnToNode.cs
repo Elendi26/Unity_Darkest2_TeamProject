@@ -6,13 +6,11 @@ using UnityEngine.SceneManagement;
 
 public class CAdditiveSceneReturn : MonoBehaviour
 {
-    #region 내부 변수
+    // 내부 변수
     private bool _isReturning;
-    #endregion
 
-    #region 버튼 / 직접 호출용 메서드
     /// <summary>
-    /// 현재 활성화된 애디티브 모드를 닫고 노드로 복귀합니다.
+    /// 현재 활성화된 애디티브 모드를 닫고 노드로 복귀
     /// </summary>
     public void ReturnToMain()
     {
@@ -21,17 +19,15 @@ public class CAdditiveSceneReturn : MonoBehaviour
     }
 
     /// <summary>
-    /// 지정한 모드 ID의 애디티브 모드를 닫고 노드로 복귀합니다.
+    /// 지정한 모드 ID의 애디티브 모드를 닫고 노드로 복귀
     /// </summary>
     public void ReturnToMain(string modeId)
     {
         ReturnToMainAsync(modeId).Forget();
     }
-    #endregion
 
-    #region 인풋 매니저 연결용
     /// <summary>
-    /// 인풋 액션과 연동합니다.
+    /// InputAction과 연동합니다.
     /// </summary>
     public void OnReturnInput(InputAction.CallbackContext context)
     {
@@ -42,7 +38,6 @@ public class CAdditiveSceneReturn : MonoBehaviour
 
         ReturnToMain();
     }
-    #endregion
 
     private string ResolveTargetAdditiveModeId()
     {

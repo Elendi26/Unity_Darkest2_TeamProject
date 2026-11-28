@@ -12,16 +12,16 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
     protected override bool IsDontDestroy => true;
 
     #region 내부 변수
-    private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> _additiveHandlesByKey
+    private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> _additiveHandles
        = new Dictionary<string, AsyncOperationHandle<SceneInstance>>();
-    private readonly Dictionary<string, string> _modeIdToSceneKey
+    private readonly Dictionary<string, string> _modeMap
        = new Dictionary<string, string>();
-    private AsyncOperationHandle<SceneInstance> _singleSceneHandle;
-    private bool _isTransitioning;
+    private AsyncOperationHandle<SceneInstance> _singleHandle;
+    private bool _transitioning;
     #endregion
 
-    public bool IsTransitioning => _isTransitioning;
-    public bool HasAnyAdditiveScene => _additiveHandlesByKey.Count > 0;
+    public bool IsTransitioning => _transitioning;
+    public bool HasAnyAdditiveScene => _additiveHandles.Count > 0;
 
     /// <summary>
     /// 지정한 씬 키 또는 모드 ID에 해당하는 Additive 씬이 현재 로드되어 있는지 확인합니다.
@@ -33,8 +33,8 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
             return false;
         }
 
-        string resolvedKey = ResolveSceneKey(keyOrModeId);
-        return _additiveHandlesByKey.TryGetValue(resolvedKey, out var handle) && handle.IsValid();
+        string resolvedKey = ResolveKey(keyOrModeId);
+        return _additiveHandles.TryGetValue(resolvedKey, out var handle) && handle.IsValid();
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
             return false;
         }
 
-        return await LoadSceneInternalAsync
+        return await LoadAsync
         (
             sceneKey: sceneAddress,
             loadSceneFunc: mode => Addressables.LoadSceneAsync(sceneAddress, mode),
@@ -86,7 +86,7 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
         }
 
         string sceneKey = sceneRef.RuntimeKey.ToString();
-        return await LoadSceneInternalAsync
+        return await LoadAsync
         (
             sceneKey: sceneKey,
             loadSceneFunc: mode => Addressables.LoadSceneAsync(sceneRef, mode),
@@ -114,21 +114,21 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
             return false;
         }
 
-        if (_isTransitioning)
+        if (_transitioning)
         {
             CPrint.Warn($"CAddressableSceneManager : 이미 씬 전환 중입니다. 언로드 무시 ({keyOrModeId})");
             return false;
         }
 
-        string sceneKey = ResolveSceneKey(keyOrModeId);
-        if (!_additiveHandlesByKey.TryGetValue(sceneKey, out var handle))
+        string sceneKey = ResolveKey(keyOrModeId);
+        if (!_additiveHandles.TryGetValue(sceneKey, out var handle))
         {
             CPrint.Warn($"CAddressableSceneManager : 언로드할 Additive 씬 핸들이 없습니다 ({keyOrModeId})");
             onUnloaded?.Invoke();
             return false;
         }
 
-        _isTransitioning = true;
+        _transitioning = true;
         bool succeeded = false;
 
         try
@@ -149,8 +149,8 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
                 succeeded = true;
             }
 
-            RemoveModeMappingsForKey(sceneKey);
-            _additiveHandlesByKey.Remove(sceneKey);
+            RemoveModeMap(sceneKey);
+            _additiveHandles.Remove(sceneKey);
 
             if (succeeded)
             {
@@ -177,14 +177,14 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
             }
             finally
             {
-                _isTransitioning = false;
+                _transitioning = false;
             }
         }
 
         return succeeded;
     }
 
-    private async UniTask<bool> LoadSceneInternalAsync
+    private async UniTask<bool> LoadAsync
         (
         string sceneKey,
         Func<LoadSceneMode, AsyncOperationHandle<SceneInstance>> loadSceneFunc,
@@ -195,13 +195,13 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
         Action<SceneInstance> onLoaded
         )
     {
-        if (_isTransitioning)
+        if (_transitioning)
         {
             CPrint.Warn($"CAddressableSceneManager : 이미 씬 전환 중입니다. 요청 무시 ({sceneKey})");
             return false;
         }
 
-        _isTransitioning = true;
+        _transitioning = true;
         bool succeeded = false;
 
         try
@@ -216,7 +216,7 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
 
             if (handle.Status == AsyncOperationStatus.Succeeded)
             {
-                RegisterLoadedScene(sceneKey, modeId, handle, loadMode);
+                RegisterScene(sceneKey, modeId, handle, loadMode);
                 CPrint.Log($"어드레서블 씬 로드 성공({sourceLabel}, {loadMode}) : {sceneInstance.Scene.name} [{sceneKey}]");
                 onLoaded?.Invoke(sceneInstance);
                 succeeded = true;
@@ -245,16 +245,16 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
             }
             finally
             {
-                _isTransitioning = false;
+                _transitioning = false;
             }
         }
 
         return succeeded;
     }
 
-    private string ResolveSceneKey(string keyOrModeId)
+    private string ResolveKey(string keyOrModeId)
     {
-        if (_modeIdToSceneKey.TryGetValue(keyOrModeId, out string mappedKey))
+        if (_modeMap.TryGetValue(keyOrModeId, out string mappedKey))
         {
             return mappedKey;
         }
@@ -262,28 +262,28 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
         return keyOrModeId;
     }
 
-    private void RegisterLoadedScene(string sceneKey, string modeId, AsyncOperationHandle<SceneInstance> handle, LoadSceneMode loadMode)
+    private void RegisterScene(string sceneKey, string modeId, AsyncOperationHandle<SceneInstance> handle, LoadSceneMode loadMode)
     {
         if (loadMode == LoadSceneMode.Single)
         {
-            _additiveHandlesByKey.Clear();
-            _modeIdToSceneKey.Clear();
-            _singleSceneHandle = handle;
+            _additiveHandles.Clear();
+            _modeMap.Clear();
+            _singleHandle = handle;
             return;
         }
 
-        _additiveHandlesByKey[sceneKey] = handle;
+        _additiveHandles[sceneKey] = handle;
 
         if (!string.IsNullOrWhiteSpace(modeId))
         {
-            _modeIdToSceneKey[modeId] = sceneKey;
+            _modeMap[modeId] = sceneKey;
         }
     }
 
-    private void RemoveModeMappingsForKey(string sceneKey)
+    private void RemoveModeMap(string sceneKey)
     {
         List<string> keysToRemove = null;
-        foreach (var pair in _modeIdToSceneKey)
+        foreach (var pair in _modeMap)
         {
             if (pair.Value == sceneKey)
             {
@@ -299,13 +299,13 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
 
         for (int i = 0; i < keysToRemove.Count; i++)
         {
-            _modeIdToSceneKey.Remove(keysToRemove[i]);
+            _modeMap.Remove(keysToRemove[i]);
         }
     }
 
     protected override void OnDestroy()
     {
-        foreach (var pair in _additiveHandlesByKey)
+        foreach (var pair in _additiveHandles)
         {
             if (pair.Value.IsValid())
             {
@@ -313,9 +313,9 @@ public class CAddressableSceneManager : CManagerSingleton<CAddressableSceneManag
             }
         }
 
-        _additiveHandlesByKey.Clear();
-        _modeIdToSceneKey.Clear();
-        _singleSceneHandle = default;
+        _additiveHandles.Clear();
+        _modeMap.Clear();
+        _singleHandle = default;
         base.OnDestroy();
     }
 }

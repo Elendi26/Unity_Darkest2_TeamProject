@@ -5,11 +5,9 @@ using UnityEngine.InputSystem;
 
 public class CNodeSceneModeTrigger : MonoBehaviour
 {
-    #region 내부 변수
+    // 내부 변수
     private bool _isRequesting;
-    #endregion
 
-    #region 버튼 / 직접 호출용 메서드
     /*
     // OpenAdditiveMode(CGameManager.Instance.modeId); 로 사용합니다.
     */
@@ -19,12 +17,7 @@ public class CNodeSceneModeTrigger : MonoBehaviour
     /// </summary>
     public void OpenCrossroads()
     {
-        if (CGameManager.Instance == null)
-        {
-            return;
-        }
-
-        OpenAdditiveMode(CGameManager.Instance.CrossroadsModeId);
+        TryOpenByManager(gm => gm.CrossroadsModeId);
     }
 
     /// <summary>
@@ -32,12 +25,7 @@ public class CNodeSceneModeTrigger : MonoBehaviour
     /// </summary>
     public void OpenCombat()
     {
-        if (CGameManager.Instance == null)
-        {
-            return;
-        }
-
-        OpenAdditiveMode(CGameManager.Instance.CombatModeId);
+        TryOpenByManager(gm => gm.CombatModeId);
     }
 
     /// <summary>
@@ -45,26 +33,19 @@ public class CNodeSceneModeTrigger : MonoBehaviour
     /// </summary>
     public void OpenInn()
     {
-        if (CGameManager.Instance == null)
-        {
-            return;
-        }
-
-        OpenAdditiveMode(CGameManager.Instance.InnModeId);
+        TryOpenByManager(gm => gm.InnModeId);
     }
 
     /// <summary>
-    /// 지정한 모드 ID의 애디티브 모드 전환을 요청합니다.
+    /// 지정한 모드 ID을 Additive로 엽니다.
     /// </summary>
     public void OpenAdditiveMode(string modeId)
     {
         OpenAdditiveModeAsync(modeId).Forget();
     }
-    #endregion
 
-    #region 인풋 매니저 연결용
     /// <summary>
-    /// Crossroads 인풋 매니저 콜백을 처리합니다.
+    /// Crossroads InputAction 콜백
     /// </summary>
     public void OnCrossroadsInput(InputAction.CallbackContext context)
     {
@@ -77,7 +58,7 @@ public class CNodeSceneModeTrigger : MonoBehaviour
     }
 
     /// <summary>
-    /// Combat 입력 액션 콜백을 처리합니다.
+    /// Combat InputAction 콜백
     /// </summary>
     public void OnCombatInput(InputAction.CallbackContext context)
     {
@@ -90,7 +71,7 @@ public class CNodeSceneModeTrigger : MonoBehaviour
     }
 
     /// <summary>
-    /// Inn 입력 액션 콜백을 처리합니다.
+    /// Inn InputAction 콜백
     /// </summary>
     public void OnInnInput(InputAction.CallbackContext context)
     {
@@ -101,7 +82,16 @@ public class CNodeSceneModeTrigger : MonoBehaviour
 
         OpenInn();
     }
-    #endregion
+
+    private void TryOpenByManager(Func<CGameManager, string> modeIdSelector)
+    {
+        if (CGameManager.Instance == null || modeIdSelector == null)
+        {
+            return;
+        }
+
+        OpenAdditiveMode(modeIdSelector(CGameManager.Instance));
+    }
 
     private async UniTask OpenAdditiveModeAsync(string modeId)
     {
@@ -125,7 +115,9 @@ public class CNodeSceneModeTrigger : MonoBehaviour
 
         try
         {
-            await CGameManager.Instance.ChangeGameModeAsync(modeId).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            await CGameManager.Instance
+                .ChangeGameModeAsync(modeId)
+                .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
         }
         catch (OperationCanceledException)
         {
@@ -135,5 +127,10 @@ public class CNodeSceneModeTrigger : MonoBehaviour
         {
             _isRequesting = false;
         }
+    }
+
+    private void OnDestroy()
+    {
+        _isRequesting = false;
     }
 }
