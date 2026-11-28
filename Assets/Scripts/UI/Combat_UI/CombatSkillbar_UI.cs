@@ -288,5 +288,9 @@ public class CombatSkillbar_UI : MonoBehaviour
         }
     }
 
+    public void ShowAndHideSkillbar(bool isActive)
+    {
+
+    }
 
 }

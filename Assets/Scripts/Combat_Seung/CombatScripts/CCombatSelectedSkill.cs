@@ -72,7 +72,6 @@ public class CCombatSelectedSkill : MonoBehaviour
 
             SkillExcute(targets);
 
-            CCombatManager.Instance.TurnOver();
         }
 
         else
@@ -169,8 +168,6 @@ public class CCombatSelectedSkill : MonoBehaviour
                             OffIndicator();
 
                             _currentTurn.StateReset();
-
-                            CCombatManager.Instance.TurnOver();
 
                             return;
                         }
@@ -275,13 +272,13 @@ public class CCombatSelectedSkill : MonoBehaviour
             }
         }
 
-        SkillExcute(targets);
-
         OffIndicator();
 
         _currentTurn.StateReset();
 
-        CCombatManager.Instance.TurnOver();
+        SkillExcute(targets);
+
+        //CCombatManager.Instance.TurnOver();
     }
 
 
@@ -344,6 +341,8 @@ public class CCombatSelectedSkill : MonoBehaviour
         Coroutine coroutine = StartCoroutine(UseSkillCoroutine(target));
       
         _animation.IdleAnimate();
+
+        CCombatManager.Instance.TurnOver();
     }
 
     private void SkillExcute(List<CEntityRuntimeData> targets)
@@ -361,6 +360,8 @@ public class CCombatSelectedSkill : MonoBehaviour
 
             _animation.IdleAnimate(targets[i].GetAnimator());
         }
+
+        CCombatManager.Instance.TurnOver();
     }
 
     private IEnumerator UseSkillCoroutine(CEntityRuntimeData target)

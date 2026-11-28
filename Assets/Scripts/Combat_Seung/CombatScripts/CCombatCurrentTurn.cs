@@ -37,7 +37,7 @@ public class CCombatCurrentTurn : MonoBehaviour
 
     // 이벤트
 
-    // 현재 턴이 누구인지 이벤트를 보낸다. (영웅 턴일 때만)
+    // 현재 턴이 누구인지 이벤트를 보낸다.
     public event Action<CEntityRuntimeData> ChangedEntityTurn;
 
     private void OnEnable()
@@ -75,17 +75,24 @@ public class CCombatCurrentTurn : MonoBehaviour
             return;
         }
 
+        // 모든 엔티티의 턴 시작시 이벤트를 호출하는 것으로 수정
+        ChangedEntityTurn?.Invoke(_entity);
+
         if (_entity.IsHero())
         {
+            CSoundManager.Instance?.PlaySfxOneShot("TurnHero");
+
             SetSkillData();
 
             _combatSkillbar.HeroTurnSkillDataSet(_skillData);
 
-            ChangedEntityTurn?.Invoke(_entity);
+            
         }
 
         else
         {
+            CSoundManager.Instance?.PlaySfxOneShot("TurnEnemy");
+
             CPrint.Log($"적 몬스터 턴 진입 {_entity.EntityName}");
 
             StartCoroutine(ExecuteEnemyTurn());
@@ -185,13 +192,12 @@ public class CCombatCurrentTurn : MonoBehaviour
             _isExecutingEnemyTurn = false;
             CPrint.Log("턴 종료");
             stateManager?.TurnOver();
-            //return;
             yield break;
         }
 
         // 여기서부터 ai 반영
-        // 여기서 한번 대기 추가 (0.5초)
-        yield return new WaitForSeconds(0.5f);
+        // 여기서 한번 대기 추가 (1초)
+        yield return new WaitForSeconds(1f);
         CMonsterBrainDecision decision = brain.Decide(_entity, combatEntities);
 
         // 사용 가능 스킬이 없거나 판단 실패 시 Pass -> 즉시 턴 종료
@@ -212,12 +218,15 @@ public class CCombatCurrentTurn : MonoBehaviour
 
         if(_entityAnimation == null || _entity.GetAnimator() == null)
         {
+            _isExecutingEnemyTurn = false;
             CPrint.Warn("몬스터의 애니메이터가 비어있다");
+            stateManager?.TurnOver();
             yield break;
         }
 
         _entityAnimation.InputAnimationData(_entity.GetAnimator(), decision.SelectedSkill);
 
+        _isExecutingEnemyTurn = false;
         // Play -> 광역 여부 어떻게 되는지 잘 모르겠습니다.
         if (decision.SelectedSkill.AOE)
         {
@@ -230,10 +239,10 @@ public class CCombatCurrentTurn : MonoBehaviour
         }
 
         // 대기한번 걸고 (0.5초)
-        yield return new WaitForSeconds(0.5f);
-        _isExecutingEnemyTurn = false;
+        //yield return new WaitForSeconds(1f);
+        //_isExecutingEnemyTurn = false;
         CPrint.Log("턴 종료");
-        stateManager?.TurnOver();
+        //stateManager?.TurnOver();
 
         /*
         //적용은 이렇게 됩니다.

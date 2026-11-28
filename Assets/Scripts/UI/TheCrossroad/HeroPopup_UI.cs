@@ -257,8 +257,15 @@ public class HeroPopup_UI : MonoBehaviour
             return;
         }
 
+
+
         _currentHeroSaveData = null;
         _currentHeroDataSO = data.HeroBasicData;
+
+        // 이름 갱신
+        _jopTitle.text = _currentHeroDataSO.JobTitle;
+        _heroName.text = _currentHeroDataSO.Name;
+        _heroName2.text = _currentHeroDataSO.Name;
 
         _currentEntity = data;
 

@@ -229,6 +229,7 @@ public class CCombatManager : MonoBehaviour
 
     private void CombatStart()
     {
+        CSoundManager.Instance?.PlaySfxOneShot("BattleStart");
 
         ChangePhase(ECombatPhase.RoundStart);
     }
