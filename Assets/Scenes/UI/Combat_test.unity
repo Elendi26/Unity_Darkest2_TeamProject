@@ -11888,6 +11888,9 @@ MonoBehaviour:
   _enemiesGroupSO:
   - {fileID: 11400000, guid: 0668442f0b8285b4db33ad0f0c699046, type: 2}
   - {fileID: 11400000, guid: 0668442f0b8285b4db33ad0f0c699046, type: 2}
+  - {fileID: 11400000, guid: 6e24550a2b1733343af2ca1107a97e1d, type: 2}
+  - {fileID: 11400000, guid: 7a7c97c4017de3f42a174df5294730cf, type: 2}
+  - {fileID: 11400000, guid: d4a91076a3c251249aeeb67eb913d19c, type: 2}
   _spawnPoints:
   - {fileID: 112268925}
   - {fileID: 20962627}

@@ -14,6 +14,8 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 	[SerializeField] private string _innScenePath = "Assets/Scenes/Inn/Inn.unity";
 	// 여관 떠나기 → 화면을 검게 덮는 시간 (마지막 여관이면 덮은 채로 다음 노드 씬으로 넘어가 그쪽 시작 연출이 밝힌다)
 	[SerializeField] private float _leaveFadeDuration = 0.6f;
+	// 여관에 들어오면 파티 영웅마다 채울 체력 (0 이면 안 채운다)
+	[SerializeField] private int _enterHealHp = 5;
 	// 보급상 (아이템)
 	[SerializeField] private CShopData _shopData;
 	// 마차 정비공 (수리·강화)
@@ -49,6 +51,13 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 
 		_node = node;
 		_onComplete = onComplete;
+
+		// 여관 씬이 열리기 전에 채운다 → 앉은 영웅 체력 표시에 바로 보이게
+		if (_enterHealHp > 0)
+		{
+			new CPartyHealEffect(_enterHealHp).Apply(GetRunContext());
+		}
+
 		StartCoroutine(EnterRoutine());
 	}
 
@@ -450,9 +459,16 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 			return;
 		}
 
-		// 이어하기는 지금 주행 씬부터 다시 연다
-		// TODO : 지도 진행(현재 노드)도 저장해서 여관 다음 칸부터 이어가기 / 경태
-		CRunCarry.Save(ctx.RunData, stagecoach, gameObject.scene.path);
+		string resumePath = gameObject.scene.path;
+		CRunSceneFlow flow = FindSceneFlow();
+
+		if (flow != null && flow.CompletesTutorial && _node != null && _node.IsEnd)
+		{
+			resumePath = flow.NextScenePath;
+			CTutorialProgress.MarkDone(CTutorialProgress.CurrentSlot);
+		}
+
+		CRunCarry.Save(ctx.RunData, stagecoach, resumePath);
 
 		if (_logState)
 		{
@@ -461,6 +477,24 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 
 		// 타이틀은 Single 로 열린다 → 여관·주행 씬은 함께 내려가고 세션은 OnDestroy 에서 정리된다
 		gameManager.ChangeGameMode(gameManager.TitleModeId);
+	}
+
+	// 이 핸들러가 있는 주행 씬의 지도 흐름
+	private CRunSceneFlow FindSceneFlow()
+	{
+		GameObject[] roots = gameObject.scene.GetRootGameObjects();
+
+		for (int i = 0; i < roots.Length; i++)
+		{
+			CRunSceneFlow flow = roots[i] != null ? roots[i].GetComponentInChildren<CRunSceneFlow>(true) : null;
+
+			if (flow != null)
+			{
+				return flow;
+			}
+		}
+
+		return null;
 	}
 	#endregion
 
