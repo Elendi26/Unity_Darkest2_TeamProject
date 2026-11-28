@@ -16,4 +16,4 @@ MonoBehaviour:
   _displayName: 안전한 길
   _weight: 1
   _minRoadEvents: 0
-  _maxRadEvents: 1
+  _maxRadEvents: 0

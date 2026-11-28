@@ -21,7 +21,8 @@ public class CCombatRewardTable
 	#endregion
 
 	// 보상을 주고, 결과창에 띄울 줄을 lines 에 더한다
-	public void Give(CRunData runData, CInventory inventory, System.Random random, List<string> lines)
+	//  ㄴ minTrinkets → 확률과 상관없이 장신구를 적어도 이만큼 준다 (성채 전투 등)
+	public void Give(CRunData runData, CInventory inventory, System.Random random, List<string> lines, int minTrinkets = 0)
 	{
 		if (runData == null || random == null)
 		{
@@ -31,7 +32,7 @@ public class CCombatRewardTable
 		GiveValue(runData, ERunValue.Gold, "유물", RollRange(random, _goldMin, _goldMax), lines);
 		GiveValue(runData, ERunValue.Torch, "횃불", RollRange(random, _torchMin, _torchMax), lines);
 
-		int trinketCount = RollTrinketCount(random);
+		int trinketCount = Mathf.Max(RollTrinketCount(random), minTrinkets);
 
 		if (trinketCount <= 0)
 		{

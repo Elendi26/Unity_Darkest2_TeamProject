@@ -32,12 +32,14 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 1000
-      type: {class: CRunValueDeltaEffect, ns: , asm: Assembly-CSharp}
+      type: {class: CPartyHealEffect, ns: , asm: Assembly-CSharp}
       data:
-        _type: 3
-        _delta: 40
+        _hpPercent: 0.6
+        _stressRelief: 3
+        _heroDataPath: EntityBasicDataSO
     - rid: 1001
-      type: {class: CRunValueDeltaEffect, ns: , asm: Assembly-CSharp}
+      type: {class: CPartyHealEffect, ns: , asm: Assembly-CSharp}
       data:
-        _type: 3
-        _delta: 10
+        _hpPercent: 0.25
+        _stressRelief: 0
+        _heroDataPath: EntityBasicDataSO
