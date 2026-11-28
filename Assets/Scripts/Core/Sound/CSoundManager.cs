@@ -22,6 +22,10 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
     [Range(0f, 1f)]
     [SerializeField] private float _sfxVolume = 1f;
 
+    [Header("BGM 대비 SFX 출력 크기")]
+    [Range(0f, 1f)]
+    [SerializeField] private float _sfxMixScale = 0.5f;
+
     [Header("SFX 풀 크기")]
     [SerializeField] private int _sfxPoolSize = 10;
     #endregion
@@ -64,6 +68,14 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
         get
         {
             return _sfxVolume;
+        }
+    }
+
+    public float SfxMixScale
+    {
+        get
+        {
+            return _sfxMixScale;
         }
     }
     #endregion
@@ -146,7 +158,7 @@ public class CSoundManager : CManagerSingleton<CSoundManager>
 
     private float GetEffectiveSfxVolume()
     {
-        return _masterVolume * _sfxVolume;
+        return _masterVolume * _sfxVolume * _sfxMixScale;
     }
 
     private void RefreshBgmVolume()
