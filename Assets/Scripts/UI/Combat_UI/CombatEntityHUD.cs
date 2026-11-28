@@ -29,6 +29,12 @@ public class CombatEntityHUD : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
+    }
+
+    private void LateUpdate()
+    {
+        transform.position = Camera.main.WorldToScreenPoint(_eRuntimeData.transform.position);
     }
     private void OnEnable()
     {

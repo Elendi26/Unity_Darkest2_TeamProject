@@ -70,6 +70,8 @@ public class CEntityAnimation : MonoBehaviour
         _animator.SetTrigger($"Skill_Recovery");
 
         yield return new WaitForSeconds(_afterSkillDelay);
+
+        IdleAnimate();
     }
 
     public IEnumerator HitAnimationCoroutine(Animator target, float useDelay, float afterDelay)
