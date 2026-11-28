@@ -83,7 +83,9 @@ public class TurnOrder_UI : MonoBehaviour
                 continue;
             }
 
-            if(i < entityList.Count)
+            _portraitSlots[i].color = new Color(1f, 1f, 1f, 1f);
+
+            if (i < entityList.Count)
             {   
                 _portraitSlots[i].gameObject.SetActive(true);
 
@@ -92,11 +94,14 @@ public class TurnOrder_UI : MonoBehaviour
 
                 if (entityList[i].IsHero())
                 {
+                    _mark[i].color = new Color(1f, 1f, 1f, 1f);
                     _mark[i].color = Color.yellow;
+                    
                 }
 
                 else
                 {
+                    _mark[i].color = new Color(1f, 1f, 1f, 1f);
                     _mark[i].color = Color.cyan;
                 }
 
@@ -105,7 +110,8 @@ public class TurnOrder_UI : MonoBehaviour
             else
             {
                 // 남은 턴이 4명 미만일 때 비어있는 슬롯은 비활성화한다.
-                _portraitSlots[i].gameObject.SetActive(false);
+                _portraitSlots[i].color = new Color(1f, 1f, 1f, 0f);
+                _mark[i].color = new Color(1f, 1f, 1, 0f);
             }
         }
     }

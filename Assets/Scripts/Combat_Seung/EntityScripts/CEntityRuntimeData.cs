@@ -415,14 +415,14 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         if(IsHero())
         {
             _corpseModel = Instantiate(CCombatManager.Instance.HCorpsePrefab, transform.position, Quaternion.Euler(0,45f,0), transform);
-            _corpseModel.transform.localPosition = new Vector3(0, 0.75f, 0);
+            _corpseModel.transform.localPosition = new Vector3(0, 0.6f, 0);
             _corpseModel.transform.localScale = transform.localScale;
         }
 
         else
         {
             _corpseModel = Instantiate(CCombatManager.Instance.ECorpsePrefab, transform.position, Quaternion.Euler(0, 45f, 0), transform);
-            _corpseModel.transform.localPosition = new Vector3(0, 0.75f, 0);
+            _corpseModel.transform.localPosition = new Vector3(0, 0.6f, 0);
             _corpseModel.transform.localScale = transform.localScale;
         }
 
@@ -545,7 +545,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         }
 
         // 엔티티 머리 윗 부분에 UI 출력
-        Vector3 spawnPos = transform.position + new Vector3(0.3f, 2, 0);
+        Vector3 spawnPos = transform.position + new Vector3(0.6f, 3, 0) - (Camera.main.transform.forward * 0.5f);
         CombatDirection_UI directionUI = Instantiate(CCombatManager.Instance.DirectPrefab, spawnPos, Quaternion.identity);
 
         directionUI.DamageDiretion(damage);
@@ -564,7 +564,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             return;
         }
 
-        Vector3 spawnPos = transform.position + new Vector3(0.3f, 1, 0);
+        Vector3 spawnPos = transform.position + new Vector3(0.3f, 1, 0) - (Camera.main.transform.forward * 0.5f);
         CombatDirection_UI directionUI = Instantiate(CCombatManager.Instance.DirectPrefab, spawnPos, Quaternion.identity);
 
         directionUI.OnDeathDoor(aleady0hp);
@@ -580,7 +580,7 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
             return;
         }
 
-        Vector3 spawnPos = transform.position + new Vector3(0.3f, 1, 0);
+        Vector3 spawnPos = transform.position + new Vector3(0.3f, 1, 0) - (Camera.main.transform.forward * 0.5f);
         CombatDirection_UI directionUI = Instantiate(CCombatManager.Instance.DirectPrefab, spawnPos, Quaternion.identity);
         directionUI.OnDeathblow();
     }

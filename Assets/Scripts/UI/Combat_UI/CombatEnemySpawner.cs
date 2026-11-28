@@ -15,6 +15,9 @@ public class CombatEnemySpawner : MonoBehaviour
     [Header("적 랭크 칸")]
     [SerializeField] private CCombatRank[] _enemyRank = new CCombatRank[4];
 
+    [Header("HUD 스폰포인트")]
+    [SerializeField] private GameObject _HUDspawnPoint;
+
     [Header("체력 HUD 프리팹")]
     [SerializeField] private CombatEntityHUD _hudPrefab;
 
@@ -116,10 +119,10 @@ public class CombatEnemySpawner : MonoBehaviour
             runtimeData.MonsterBrain = monsterAI;
 
             // HUD UI소환
-            CombatEntityHUD hudUI = Instantiate(_hudPrefab, _spawnPoints[i].transform);
+            CombatEntityHUD hudUI = Instantiate(_hudPrefab, _HUDspawnPoint.transform);
 
             // 위치, 회전, 스케일 값 고정
-            spawnEnemy.transform.localPosition = new Vector3(0, 0.1f, 0);
+            spawnEnemy.transform.localPosition = Vector3.zero;
             spawnEnemy.transform.localRotation = Quaternion.Euler(0, _rotationAngle, 0);
             spawnEnemy.transform.localScale = spawnEnemy.transform.localScale * _scaleMulti;
 

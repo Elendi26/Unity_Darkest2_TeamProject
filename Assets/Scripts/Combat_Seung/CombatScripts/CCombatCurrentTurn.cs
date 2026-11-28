@@ -82,6 +82,8 @@ public class CCombatCurrentTurn : MonoBehaviour
         {
             CSoundManager.Instance?.PlaySfxOneShot("TurnHero");
 
+            _combatSkillbar.ShowAndHideSkillbar(true);
+
             SetSkillData();
 
             _combatSkillbar.HeroTurnSkillDataSet(_skillData);
@@ -92,6 +94,9 @@ public class CCombatCurrentTurn : MonoBehaviour
         else
         {
             CSoundManager.Instance?.PlaySfxOneShot("TurnEnemy");
+
+
+            _combatSkillbar.ShowAndHideSkillbar(false);
 
             CPrint.Log($"적 몬스터 턴 진입 {_entity.EntityName}");
 

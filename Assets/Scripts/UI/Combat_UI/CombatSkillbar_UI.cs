@@ -8,6 +8,8 @@ using UnityEngine;
 public class CombatSkillbar_UI : MonoBehaviour
 {
     #region 인스펙터
+    [Header("스킬바 캔버스 그룹 등록")]
+    [SerializeField] private CanvasGroup _skillbarCanvasG;
     [Header("스킬 슬롯 등록")]
     [SerializeField] private List<CombatSkillSlot_UI> _skillSlot = new List<CombatSkillSlot_UI>();
 
@@ -290,7 +292,28 @@ public class CombatSkillbar_UI : MonoBehaviour
 
     public void ShowAndHideSkillbar(bool isActive)
     {
+        if (_skillbarCanvasG != null)
+        {
+            if(isActive)
+            {
+                _skillbarCanvasG.alpha = 1f;
+                _skillbarCanvasG.interactable = true;
+                _skillbarCanvasG.blocksRaycasts = true;
+                _skillTooltipPanel.alpha = 1f;
+                _skillTooltipPanel.interactable = true;
+                _skillTooltipPanel.blocksRaycasts = true;
+            }
 
+            else
+            {
+                _skillbarCanvasG.alpha = 0f;
+                _skillbarCanvasG.interactable = false;
+                _skillbarCanvasG.blocksRaycasts = false;
+                _skillTooltipPanel.alpha = 0f;
+                _skillTooltipPanel.interactable = false;
+                _skillTooltipPanel.blocksRaycasts = false;
+            }
+        }
     }
 
 }

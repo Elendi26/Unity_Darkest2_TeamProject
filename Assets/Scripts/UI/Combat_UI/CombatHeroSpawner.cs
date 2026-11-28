@@ -16,6 +16,9 @@ public class CombatHeroSpawner : MonoBehaviour
     [Header("영웅 전용 HUD 프리팹")]
     [SerializeField] private CombatEntityHUD _prefabHUD;
 
+    [Header("HUD 스폰포인트")]
+    [SerializeField] private GameObject _HUDspawnPoint;
+
     [Header("영웅 모델링 회전값")]
     [SerializeField] private float _rotationAngle = 45f;
 
@@ -187,7 +190,7 @@ public class CombatHeroSpawner : MonoBehaviour
         }
 
         // HUD UI소환
-        CombatEntityHUD hudUI = Instantiate(_prefabHUD, _spawnPoints[heroSaveData.PartySlotIndex]);
+        CombatEntityHUD hudUI = Instantiate(_prefabHUD, _HUDspawnPoint.transform);
 
         hudUI.RenewHUD(runtimeData);
 
@@ -200,8 +203,6 @@ public class CombatHeroSpawner : MonoBehaviour
         spawnModel.transform.localScale = spawnModel.transform.localScale * _scaleMulti;
 
         hudUI.transform.localPosition = Vector3.zero;
-
-
 
     }
 
