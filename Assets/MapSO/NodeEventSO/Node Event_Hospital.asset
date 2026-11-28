@@ -34,12 +34,12 @@ MonoBehaviour:
     - rid: 1000
       type: {class: CPartyHealEffect, ns: , asm: Assembly-CSharp}
       data:
-        _hpPercent: 0.6
-        _stressRelief: 3
+        _hpPercent: 0.2
+        _stressRelief: 0
         _heroDataPath: EntityBasicDataSO
     - rid: 1001
       type: {class: CPartyHealEffect, ns: , asm: Assembly-CSharp}
       data:
-        _hpPercent: 0.25
+        _hpPercent: 0.1
         _stressRelief: 0
         _heroDataPath: EntityBasicDataSO

@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [Serializable]
-public class CRunValueDeltaEffect : IRunEffect
+public class CRunValueDeltaEffect : IRunEffect, IRunEffectText
 {
     #region 인스펙터
     [SerializeField] private ERunValue _type = ERunValue.Wheels;
@@ -18,6 +18,17 @@ public class CRunValueDeltaEffect : IRunEffect
     {
         _type = type;
         _delta = delta;
+    }
+
+    // 예: 바퀴 +1, 횃불 -10
+    public string GetText()
+    {
+        if (_delta == 0)
+        {
+            return null;
+        }
+
+        return $"{CRunValueTable.GetName(_type)} {(_delta > 0 ? "+" : string.Empty)}{_delta}";
     }
 
     public void Apply(CRunContext ctx)
