@@ -18,6 +18,6 @@ MonoBehaviour:
   _typeIndex: 0
   _enemyBasicData:
   - {fileID: 11400000, guid: 34aa0d7c137858b4a9ce531d09f14d27, type: 2}
+  - {fileID: 11400000, guid: 34aa0d7c137858b4a9ce531d09f14d27, type: 2}
   - {fileID: 11400000, guid: 9387c748c209da54c8815cfbf79a4c4e, type: 2}
-  - {fileID: 11400000, guid: ae3a2c635fdb69c4cb1c854237dc1ac5, type: 2}
-  - {fileID: 11400000, guid: fb0c1b51df96db44a91e44b5e343a930, type: 2}
+  - {fileID: 11400000, guid: 9387c748c209da54c8815cfbf79a4c4e, type: 2}
