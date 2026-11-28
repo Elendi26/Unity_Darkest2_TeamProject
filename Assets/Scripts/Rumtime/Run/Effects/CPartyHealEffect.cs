@@ -2,20 +2,54 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 파티 영웅들의 체력을 최대 체력의 일정 비율만큼 채우고 스트레스를 덜어 준다 (병원 등)
-//  ㄴ 영웅 체력·스트레스는 팀 세이브(프로필 파티)에 있다 → 프로필 값을 고쳐 저장하고 파티 칸을 다시 그린다
-//  ㄴ 쓰러진(체력 0) 영웅은 되살리지 않는다
+// 파티 영웅들의 체력을 최대 체력의 일정 비율만큼 채운다
 [Serializable]
-public class CPartyHealEffect : IRunEffect
+public class CPartyHealEffect : IRunEffect, IRunEffectText
 {
 	#region 인스펙터
 	// 최대 체력의 몇 %를 채울지 (0~1)
 	[SerializeField, Range(0f, 1f)] private float _hpPercent = 0.5f;
+	// 비율과 함께 더 채울 고정 체력
+	[SerializeField] private int _hpFlat = 0;
 	// 덜어 줄 스트레스
 	[SerializeField] private int _stressRelief = 0;
 	// 영웅 원본 데이터(최대 체력)를 찾을 Resources 폴더
 	[SerializeField] private string _heroDataPath = "EntityBasicDataSO";
 	#endregion
+
+	public CPartyHealEffect()
+	{
+		// Do Nothing
+	}
+
+	// 코드에서 고정 체력만 채울 때
+	public CPartyHealEffect(int hpFlat)
+	{
+		_hpPercent = 0f;
+		_hpFlat = hpFlat;
+	}
+
+	public string GetText()
+	{
+		List<string> parts = new List<string>();
+
+		if (_hpPercent > 0f)
+		{
+			parts.Add($"체력 {Mathf.RoundToInt(_hpPercent * 100f)}% 회복");
+		}
+
+		if (_hpFlat > 0)
+		{
+			parts.Add($"체력 +{_hpFlat}");
+		}
+
+		if (_stressRelief > 0)
+		{
+			parts.Add($"스트레스 -{_stressRelief}");
+		}
+
+		return string.Join(", ", parts);
+	}
 
 	public void Apply(CRunContext ctx)
 	{
@@ -52,7 +86,7 @@ public class CPartyHealEffect : IRunEffect
 			}
 
 			int maxHp = Mathf.Max(1, data.MaxHP);
-			int hp = Mathf.Min(maxHp, save.CurrentHP + Mathf.CeilToInt(maxHp * _hpPercent));
+			int hp = Mathf.Min(maxHp, save.CurrentHP + Mathf.CeilToInt(maxHp * _hpPercent) + Mathf.Max(0, _hpFlat));
 			int stress = Mathf.Max(0, save.CurrentStress - _stressRelief);
 
 			if (hp == save.CurrentHP && stress == save.CurrentStress)
@@ -80,7 +114,7 @@ public class CPartyHealEffect : IRunEffect
 			partyBar.Refresh();
 		}
 
-		CPrint.Log($"CPartyHealEffect : 영웅 {healed}명 치료 (체력 +{Mathf.RoundToInt(_hpPercent * 100f)}%, 스트레스 -{_stressRelief})");
+		CPrint.Log($"CPartyHealEffect : 영웅 {healed}명 치료 ({GetText()})");
 	}
 
 	private Dictionary<string, CEntityBasicDataSO> LoadHeroData()
