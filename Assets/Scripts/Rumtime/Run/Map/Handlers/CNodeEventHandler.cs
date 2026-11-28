@@ -51,7 +51,9 @@ public class CNodeEventHandler : INodeHandler
 				continue;
 			}
 
-			_labels.Add(option.Cost > 0 ? $"{option.Label} ({CRunValueTable.GetName(option.CostType)} {option.Cost})" : option.Label);
+			string label = GetLabelWithEffect(option);
+
+			_labels.Add(option.Cost > 0 ? $"{label} ({CRunValueTable.GetName(option.CostType)} {option.Cost})" : label);
 			_interactable.Add(CanChoose(option));
 		}
 
@@ -108,6 +110,29 @@ public class CNodeEventHandler : INodeHandler
 
 		_onComplete = null;
 		onComplete?.Invoke();
+	}
+
+	// 선택지 이름 뒤에 효과를 붙인다 (예: 치료받기 · 체력 20% 회복)
+	private static string GetLabelWithEffect(CNodeEventOption option)
+	{
+		if (option.Effects == null || option.Effects.Count == 0)
+		{
+			return option.Label;
+		}
+
+		List<string> texts = new List<string>();
+
+		for (int i = 0; i < option.Effects.Count; i++)
+		{
+			string text = option.Effects[i] is IRunEffectText effectText ? effectText.GetText() : null;
+
+			if (!string.IsNullOrEmpty(text))
+			{
+				texts.Add(text);
+			}
+		}
+
+		return texts.Count > 0 ? $"{option.Label} · {string.Join(", ", texts)}" : option.Label;
 	}
 
 	// 비용이 되어야 고를 수 있다

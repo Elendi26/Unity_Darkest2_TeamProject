@@ -35,6 +35,9 @@ public class CRunSceneFlow : MonoBehaviour
 	// 튜토리얼 씬의 흐름인지 (이 지도를 끝내면 튜토리얼을 마친다)
 	public bool CompletesTutorial => _completesTutorial;
 
+	// 지도를 끝내면 열 씬 (비어 있으면 지금 씬)
+	public string NextScenePath => string.IsNullOrEmpty(_nextScenePath) ? gameObject.scene.path : _nextScenePath;
+
 	private void Awake()
 	{
 		if (_mapController == null)
