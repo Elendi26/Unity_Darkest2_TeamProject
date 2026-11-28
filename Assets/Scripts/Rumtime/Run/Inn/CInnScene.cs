@@ -46,7 +46,6 @@ public class CInnScene : MonoBehaviour
 	[SerializeField] private int _sortingOrder = 40;
 	// 마차 정비공 화면 (비우면 자식에서 찾는다, 없으면 정비소도 일반 상점 화면으로 연다)
 	[SerializeField] private CGarageView _garageView;
-	[SerializeField] private bool _logState = true;
 	#endregion
 
 	// 마차 정비공 화면 (없으면 null)
@@ -349,31 +348,26 @@ public class CInnScene : MonoBehaviour
 	#region 버튼 알림
 	private void NotifyShop()
 	{
-		Notify(OnShopClicked, _shopLabel);
+		Notify(OnShopClicked);
 	}
 
 	private void NotifyGarage()
 	{
-		Notify(OnGarageClicked, _garageLabel);
+		Notify(OnGarageClicked);
 	}
 
 	private void NotifyLeave()
 	{
-		Notify(OnLeaveClicked, _leaveLabel);
+		Notify(OnLeaveClicked);
 	}
 
 	private void NotifySaveQuit()
 	{
-		Notify(OnSaveQuitClicked, _saveQuitLabel);
+		Notify(OnSaveQuitClicked);
 	}
 
-	private void Notify(Action action, string label)
+	private void Notify(Action action)
 	{
-		if (_logState)
-		{
-			CPrint.Log($"CInnScene : {label}");
-		}
-
 		// 여관 씬만 따로 재생하면 받을 곳이 없다
 		if (action == null)
 		{

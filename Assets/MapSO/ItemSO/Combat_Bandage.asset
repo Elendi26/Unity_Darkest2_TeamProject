@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 
   _displayName: 붕대
-  _description: 아군 하나의 체력을 조금 회복하고 출혈을 멈춘다.
+  _description: 아군 하나의 체력을 조금 회복한다.
   _icon: {fileID: 21300000, guid: 586bf395ec682aa45b15b62d8c5fd8bc, type: 3}
   _category: 1
   _rarity: 0
@@ -22,4 +22,16 @@ MonoBehaviour:
   _buyPrice: 10
   _sellPrice: 5
   _target: 1
-  _usableOutOfCombat: 1
+  _innUseEffects:
+  - rid: 1000
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: CPartyHealEffect, ns: , asm: Assembly-CSharp}
+      data:
+        _hpPercent: 0.2
+        _hpFlat: 0
+        _stressRelief: 0
+        _singleTarget: 1
+        _heroDataPath: EntityBasicDataSO

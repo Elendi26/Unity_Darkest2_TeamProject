@@ -172,6 +172,45 @@ public class CInnPartyView : MonoBehaviour
 		}
 	}
 
+	// 짐칸 아이템 등으로 체력·스트레스가 바뀌었다 → 저장본을 다시 읽어 이름표만 새로 만든다
+	public void RefreshLabels()
+	{
+		List<UserProfileData.HeroSaveData> party = LoadParty();
+
+		for (int i = 0; i < _seated.Count; i++)
+		{
+			CSeated seated = _seated[i];
+			UserProfileData.HeroSaveData save = FindSave(party, seated.Data.HeroID, seated.Slot);
+
+			if (save == null)
+			{
+				continue;
+			}
+
+			if (seated.Label != null)
+			{
+				Destroy(seated.Label.gameObject);
+			}
+
+			seated.Save = save;
+			seated.Label = CreateLabel(seated.Data, save);
+			PlaceLabel(seated);
+		}
+	}
+
+	private static UserProfileData.HeroSaveData FindSave(List<UserProfileData.HeroSaveData> party, string heroId, int slot)
+	{
+		for (int i = 0; i < party.Count; i++)
+		{
+			if (party[i].HeroID == heroId && party[i].PartySlotIndex == slot)
+			{
+				return party[i];
+			}
+		}
+
+		return null;
+	}
+
 	// 지금 프로필의 파티 (파티에 들었고 살아 있는 영웅만)
 	private static List<UserProfileData.HeroSaveData> LoadParty()
 	{
