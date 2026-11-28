@@ -618,7 +618,7 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 
 		if (!_isTokenReady)
 		{
-			CPrint.Warn("CCombatNodeHandler : 전투 쪽 토큰 데이터(TokenStructData)를 읽지 못해 장신구 토큰을 주지 않습니다.");
+			CPrint.Once("CCombatNodeHandler.TokenData", "CCombatNodeHandler : 전투 쪽 토큰 데이터(TokenStructData)를 읽지 못해 장신구 토큰을 주지 않습니다.");
 			return;
 		}
 

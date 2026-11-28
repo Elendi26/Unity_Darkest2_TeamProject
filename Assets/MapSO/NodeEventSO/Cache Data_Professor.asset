@@ -29,7 +29,6 @@ MonoBehaviour:
     Chance: 0.5
     Items:
     - {fileID: 11400000, guid: 9dfb31adc15a06d879c9cd68e441f50c, type: 2}
-    - {fileID: 11400000, guid: 194a1647f7157658c28735de4a49ab0f, type: 2}
     - {fileID: 11400000, guid: 1170b41c234d49d19dc15d2cc301990a, type: 2}
     MinKinds: 1
     MaxKinds: 2

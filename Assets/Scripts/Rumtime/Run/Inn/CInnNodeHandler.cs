@@ -37,9 +37,13 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 	private bool _isBusy;
 	// 게임 매니저의 여관 모드로 열었는지 → 닫을 때도 같은 쪽으로 닫는다
 	private bool _isOpenedByMode;
+	// 여관 화면이 열려 있는지 → 붕대 등 여관에서만 쓰는 아이템이 본다
+	private static bool _isInside;
 	#endregion
 
 	public ENodeType Type => ENodeType.Inn;
+	// 여관 화면이 열려 있는지
+	public static bool IsInside => _isInside;
 
 	public void Enter(CNodeInstance node, Action onComplete)
 	{
@@ -129,6 +133,7 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 
 		_session = new CInnSession(_inn, _node, GetRunContext(), GetStagecoach(), FindShopView(), _shopData, _garageData);
 		_session.Begin(Leave, SaveAndQuit);
+		_isInside = true;
 
 		if (_logState)
 		{
@@ -409,6 +414,8 @@ public class CInnNodeHandler : MonoBehaviour, INodeHandler
 
 	private void EndSession()
 	{
+		_isInside = false;
+
 		if (_session != null)
 		{
 			_session.End();

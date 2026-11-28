@@ -27,6 +27,11 @@ public static class CHeroPopupLink
 	private static UnityEngine.GameObject _runtimeRoot;
 	// 지난번에 만든 영웅들의 세이브 값·장신구 (같으면 다시 쓴다)
 	private static string _runtimeKey;
+	// 마지막으로 연 영웅·세이브 목록 → 장신구가 바뀌면 같은 목록으로 다시 채운다
+	private static List<CEntityBasicDataSO> _lastHeroes;
+	private static List<UserProfileData.HeroSaveData> _lastSaves;
+	// 창의 탭 캔버스 (관계·전투 기술·상태) → 다시 채워도 보던 탭을 유지하려고 찾는다
+	private static readonly string[] TAB_CANVAS_FIELDS = { "_rlsCanvas", "_skillCanvas", "_stsCanvas" };
 	#endregion
 
 	// 에디터에서 도메인 리로드를 꺼 둬도 지난 재생의 창을 붙잡고 있지 않게
@@ -40,6 +45,8 @@ public static class CHeroPopupLink
 		_runtimeHeroes.Clear();
 		_runtimeRoot = null;
 		_runtimeKey = null;
+		_lastHeroes = null;
+		_lastSaves = null;
 	}
 
 	// 여기서 연 창이 지금 열려 있는지
@@ -54,6 +61,9 @@ public static class CHeroPopupLink
 		{
 			return false;
 		}
+
+		_lastHeroes = new List<CEntityBasicDataSO>(heroes);
+		_lastSaves = new List<UserProfileData.HeroSaveData>(saves);
 
 		string key = MakeRuntimeKey(heroes, saves);
 
@@ -123,6 +133,8 @@ public static class CHeroPopupLink
 		if (_opened == null)
 		{
 			ShowInventory();
+			CHeroTrinkets.OnChanged -= HandleTrinketsChanged;
+			CHeroTrinkets.OnChanged += HandleTrinketsChanged;
 			CRunSound.PlayOpenUI();
 		}
 
@@ -175,10 +187,60 @@ public static class CHeroPopupLink
 
 		_hookedButtons.Clear();
 		_opened = null;
+		CHeroTrinkets.OnChanged -= HandleTrinketsChanged;
 		HideInventory();
 	}
 
 	#region 전투 밖 영웅
+	// 장신구를 끼우거나 뗐다 → 능력치를 다시 계산해 보던 영웅·탭 그대로 창을 다시 채운다
+	private static void HandleTrinketsChanged(string heroId)
+	{
+		if (_opened == null || _lastHeroes == null || _lastSaves == null)
+		{
+			return;
+		}
+
+		int index = _lastHeroes.IndexOf(_opened.CurrentHeroDataSO);
+
+		if (index < 0)
+		{
+			return;
+		}
+
+		int tab = GetVisibleTab(_opened);
+
+		Open(_lastHeroes, _lastSaves, index);
+
+		switch (tab)
+		{
+			case 0:
+				_opened.OnClickRelationTab();
+				break;
+			case 2:
+				_opened.OnClickStatusTab();
+				break;
+		}
+	}
+
+	// 창은 다시 채울 때 전투 기술 탭으로 돌아간다 → 지금 보이는 탭 번호를 찾아 둔다 (못 찾으면 -1)
+	private static int GetVisibleTab(HeroPopup_UI popup)
+	{
+		const System.Reflection.BindingFlags FLAGS = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+
+		for (int i = 0; i < TAB_CANVAS_FIELDS.Length; i++)
+		{
+			System.Reflection.FieldInfo field = typeof(HeroPopup_UI).GetField(TAB_CANVAS_FIELDS[i], FLAGS);
+			UnityEngine.CanvasGroup group = field != null ? field.GetValue(popup) as UnityEngine.CanvasGroup : null;
+
+			if (group != null && group.alpha > 0f)
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
 	// 전투 스포너와 같은 순서로 채운다 (세이브 체력·스트레스, 자리 → 랭크) + 끼운 장신구 능력치
 	private static CEntityRuntimeData CreateRuntimeHero(CEntityBasicDataSO data, UserProfileData.HeroSaveData save)
 	{

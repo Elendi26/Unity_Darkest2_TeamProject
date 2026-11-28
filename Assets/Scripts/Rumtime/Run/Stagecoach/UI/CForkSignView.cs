@@ -29,7 +29,6 @@ public class CForkSignView : MonoBehaviour
 	[SerializeField] private float _borderGlow = 9f;
 	[SerializeField, Range(0f, 1f)] private float _borderGlowAlpha = 0.45f;
 	[SerializeField] private float _borderInset = 3f;
-	[SerializeField] private bool _logState = true;
 	#endregion
 
 	#region 이벤트
@@ -91,11 +90,6 @@ public class CForkSignView : MonoBehaviour
 			{
 				Fill(_signs[i], links[i], i, _count);
 			}
-		}
-
-		if (_logState)
-		{
-			CPrint.Log($"CForkSignView : 갈림길 표지판 {_count}개");
 		}
 	}
 
@@ -299,11 +293,6 @@ public class CForkSignView : MonoBehaviour
 
 			sign.Group.alpha = i == index ? 1f : _unchosenAlpha;
 			SetHoldFill(sign, i == index ? 1f : 0f);
-		}
-
-		if (_logState)
-		{
-			CPrint.Log($"CForkSignView : {index}번 갈래 선택 (왼쪽부터 0)");
 		}
 
 		OnChosen?.Invoke(index);

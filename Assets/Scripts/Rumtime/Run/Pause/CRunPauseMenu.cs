@@ -148,11 +148,6 @@ public class CRunPauseMenu : MonoBehaviour
 		Time.timeScale = 0f;
 		SetMenuVisible(true);
 		CRunSound.PlayOpenUI();
-
-		if (_logState)
-		{
-			CPrint.Log("CRunPauseMenu : 일시정지");
-		}
 	}
 
 	private bool IsTopScene()
@@ -252,11 +247,6 @@ public class CRunPauseMenu : MonoBehaviour
 		if (_settingsPanel != null)
 		{
 			_settingsPanel.Close();
-		}
-
-		if (_logState)
-		{
-			CPrint.Log("CRunPauseMenu : 계속하기");
 		}
 	}
 
@@ -513,11 +503,6 @@ public class CRunPauseMenu : MonoBehaviour
 		_isLeaving = true;
 		_isPaused = false;
 		Time.timeScale = 1f;
-
-		if (_logState)
-		{
-			CPrint.Log("CRunPauseMenu : 저장하고 게임을 종료합니다.");
-		}
 
 #if UNITY_EDITOR
 		UnityEditor.EditorApplication.isPlaying = false;

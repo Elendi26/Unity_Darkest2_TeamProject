@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 
   _displayName: 약초 묶음
-  _description: 씹으면 마음이 가라앉는다. 자신의 스트레스를 줄인다.
+  _description: 씹으면 기운이 돈다. 아군 하나의 체력을 조금 회복한다.
   _icon: {fileID: 21300000, guid: b59da7ac4ae6b664dbe68a4380b75900, type: 3}
   _category: 1
   _rarity: 1
@@ -22,4 +22,16 @@ MonoBehaviour:
   _buyPrice: 15
   _sellPrice: 8
   _target: 0
-  _usableOutOfCombat: 0
+  _innUseEffects:
+  - rid: 1000
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: CPartyHealEffect, ns: , asm: Assembly-CSharp}
+      data:
+        _hpPercent: 0.1
+        _hpFlat: 0
+        _stressRelief: 0
+        _singleTarget: 1
+        _heroDataPath: EntityBasicDataSO

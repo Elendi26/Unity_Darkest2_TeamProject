@@ -13,6 +13,8 @@ public class CPartyHealEffect : IRunEffect, IRunEffectText
 	[SerializeField] private int _hpFlat = 0;
 	// 덜어 줄 스트레스
 	[SerializeField] private int _stressRelief = 0;
+	// 가장 필요한 영웅 1명만 (체력을 채우면 가장 다친 영웅, 아니면 스트레스가 가장 높은 영웅)
+	[SerializeField] private bool _singleTarget = false;
 	// 영웅 원본 데이터(최대 체력)를 찾을 Resources 폴더
 	[SerializeField] private string _heroDataPath = "EntityBasicDataSO";
 	#endregion
@@ -28,6 +30,8 @@ public class CPartyHealEffect : IRunEffect, IRunEffectText
 		_hpPercent = 0f;
 		_hpFlat = hpFlat;
 	}
+
+	private bool HealsHp => _hpPercent > 0f || _hpFlat > 0;
 
 	public string GetText()
 	{
@@ -48,54 +52,71 @@ public class CPartyHealEffect : IRunEffect, IRunEffectText
 			parts.Add($"스트레스 -{_stressRelief}");
 		}
 
-		return string.Join(", ", parts);
+		string text = string.Join(", ", parts);
+
+		if (_singleTarget)
+		{
+			text = $"{(HealsHp ? "가장 다친" : "스트레스가 가장 높은")} 영웅 1명 {text}";
+		}
+
+		return text;
+	}
+
+	// 지금 효과를 받을 영웅이 있는지 → 없으면 아이템을 써도 낭비라 막는다
+	public bool HasTarget()
+	{
+		UserProfileData profile = LoadProfile();
+
+		if (profile == null)
+		{
+			return false;
+		}
+
+		Dictionary<string, CEntityBasicDataSO> heroes = LoadHeroData();
+
+		for (int i = 0; i < profile.PartyHeroes.Count; i++)
+		{
+			if (GetNeed(profile.PartyHeroes[i], heroes) > 0f)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public void Apply(CRunContext ctx)
 	{
-		DataSaveManager saveManager = DataSaveManager.Instance;
+		UserProfileData profile = LoadProfile();
 
-		if (saveManager == null || saveManager.CurrentSlotIndex < 0)
+		if (profile == null)
 		{
 			CPrint.Warn("CPartyHealEffect : 프로필이 없어 파티를 치료하지 않습니다.");
 			return;
 		}
 
-		UserProfileData profile = saveManager.LoadProfile(saveManager.CurrentSlotIndex);
-
-		if (profile == null || profile.PartyHeroes == null)
-		{
-			return;
-		}
-
 		Dictionary<string, CEntityBasicDataSO> heroes = LoadHeroData();
+		UserProfileData.HeroSaveData single = _singleTarget ? FindNeediest(profile, heroes) : null;
 		int healed = 0;
 
 		for (int i = 0; i < profile.PartyHeroes.Count; i++)
 		{
 			UserProfileData.HeroSaveData save = profile.PartyHeroes[i];
 
-			if (save == null || save.PartySlotIndex < 0 || save.CurrentHP <= 0)
+			if (_singleTarget && save != single)
 			{
 				continue;
 			}
 
-			if (!heroes.TryGetValue(save.HeroID, out CEntityBasicDataSO data))
+			if (GetNeed(save, heroes) <= 0f)
 			{
 				continue;
 			}
 
-			int maxHp = Mathf.Max(1, data.MaxHP);
-			int hp = Mathf.Min(maxHp, save.CurrentHP + Mathf.CeilToInt(maxHp * _hpPercent) + Mathf.Max(0, _hpFlat));
-			int stress = Mathf.Max(0, save.CurrentStress - _stressRelief);
+			int maxHp = Mathf.Max(1, heroes[save.HeroID].MaxHP);
 
-			if (hp == save.CurrentHP && stress == save.CurrentStress)
-			{
-				continue;
-			}
-
-			save.CurrentHP = hp;
-			save.CurrentStress = stress;
+			save.CurrentHP = Mathf.Min(maxHp, save.CurrentHP + Mathf.CeilToInt(maxHp * _hpPercent) + Mathf.Max(0, _hpFlat));
+			save.CurrentStress = Mathf.Max(0, save.CurrentStress - _stressRelief);
 			healed++;
 		}
 
@@ -104,9 +125,76 @@ public class CPartyHealEffect : IRunEffect, IRunEffectText
 			return;
 		}
 
-		saveManager.SaveProfile(profile, saveManager.CurrentSlotIndex);
+		DataSaveManager saveManager = DataSaveManager.Instance;
 
-		// 주행 화면 아래 파티 칸의 체력·스트레스 표시를 바로 바꾼다
+		saveManager.SaveProfile(profile, saveManager.CurrentSlotIndex);
+		RefreshViews();
+
+		CPrint.Log($"CPartyHealEffect : 영웅 {healed}명 치료 ({GetText()})");
+	}
+
+	// 0 이면 받을 게 없다. 클수록 더 필요하다 (체력은 잃은 비율, 스트레스는 쌓인 양)
+	private float GetNeed(UserProfileData.HeroSaveData save, Dictionary<string, CEntityBasicDataSO> heroes)
+	{
+		if (save == null || save.PartySlotIndex < 0 || save.CurrentHP <= 0)
+		{
+			return 0f;
+		}
+
+		if (!heroes.TryGetValue(save.HeroID, out CEntityBasicDataSO data))
+		{
+			return 0f;
+		}
+
+		int maxHp = Mathf.Max(1, data.MaxHP);
+		float hpNeed = HealsHp && save.CurrentHP < maxHp ? 1f - (float)save.CurrentHP / maxHp : 0f;
+		float stressNeed = _stressRelief > 0 ? save.CurrentStress : 0f;
+
+		// 체력을 채우는 효과는 체력 쪽을 먼저 본다
+		if (_singleTarget && HealsHp)
+		{
+			return hpNeed;
+		}
+
+		return hpNeed + stressNeed;
+	}
+
+	private UserProfileData.HeroSaveData FindNeediest(UserProfileData profile, Dictionary<string, CEntityBasicDataSO> heroes)
+	{
+		UserProfileData.HeroSaveData best = null;
+		float bestNeed = 0f;
+
+		for (int i = 0; i < profile.PartyHeroes.Count; i++)
+		{
+			float need = GetNeed(profile.PartyHeroes[i], heroes);
+
+			if (need > bestNeed)
+			{
+				bestNeed = need;
+				best = profile.PartyHeroes[i];
+			}
+		}
+
+		return best;
+	}
+
+	private static UserProfileData LoadProfile()
+	{
+		DataSaveManager saveManager = DataSaveManager.Instance;
+
+		if (saveManager == null || saveManager.CurrentSlotIndex < 0)
+		{
+			return null;
+		}
+
+		UserProfileData profile = saveManager.LoadProfile(saveManager.CurrentSlotIndex);
+
+		return profile != null && profile.PartyHeroes != null ? profile : null;
+	}
+
+	// 주행 화면 아래 파티 칸과 여관 의자 이름표의 체력·스트레스 표시를 바로 바꾼다
+	private static void RefreshViews()
+	{
 		CPartyBarView partyBar = UnityEngine.Object.FindFirstObjectByType<CPartyBarView>();
 
 		if (partyBar != null)
@@ -114,7 +202,12 @@ public class CPartyHealEffect : IRunEffect, IRunEffectText
 			partyBar.Refresh();
 		}
 
-		CPrint.Log($"CPartyHealEffect : 영웅 {healed}명 치료 ({GetText()})");
+		CInnPartyView innParty = UnityEngine.Object.FindFirstObjectByType<CInnPartyView>();
+
+		if (innParty != null)
+		{
+			innParty.RefreshLabels();
+		}
 	}
 
 	private Dictionary<string, CEntityBasicDataSO> LoadHeroData()
