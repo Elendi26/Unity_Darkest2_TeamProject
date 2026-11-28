@@ -412,10 +412,19 @@ public class CEntityRuntimeData : MonoBehaviour, IRankEntity, ICombatData
         }
 
         // 시체 소환
-        _corpseModel = Instantiate(CCombatManager.Instance.CorpsePrefab, transform.position, Quaternion.Euler(0,45f,0), transform.parent);
-        _corpseModel.transform.localPosition = new Vector3(0, 1, 0);
-        _corpseModel.transform.localScale = transform.localScale;
-        
+        if(IsHero())
+        {
+            _corpseModel = Instantiate(CCombatManager.Instance.HCorpsePrefab, transform.position, Quaternion.Euler(0,45f,0), transform);
+            _corpseModel.transform.localPosition = new Vector3(0, 0.75f, 0);
+            _corpseModel.transform.localScale = transform.localScale;
+        }
+
+        else
+        {
+            _corpseModel = Instantiate(CCombatManager.Instance.ECorpsePrefab, transform.position, Quaternion.Euler(0, 45f, 0), transform);
+            _corpseModel.transform.localPosition = new Vector3(0, 0.75f, 0);
+            _corpseModel.transform.localScale = transform.localScale;
+        }
 
         // 시체 체력을 죽은 엔티티의 최대 체력으로 다시 부여 및 체력바 갱신
         float maxHP = GetStat(EEntityStat.MaxHP);

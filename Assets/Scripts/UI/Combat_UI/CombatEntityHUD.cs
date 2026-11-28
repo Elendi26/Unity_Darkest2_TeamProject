@@ -24,7 +24,11 @@ public class CombatEntityHUD : MonoBehaviour
 
     private void Update()
     {
-        
+        if(_eRuntimeData == null)
+        {
+            Destroy(gameObject);
+            return;
+        }
     }
     private void OnEnable()
     {

@@ -42,8 +42,11 @@ public class CCombatManager : MonoBehaviour
     [Header("적 스포너 참조")]
     [SerializeField] private CombatEnemySpawner _enemyspawner;
 
-    [Header("시체 프리펩")]
-    [SerializeField] private GameObject _corpsePrefab;
+    [Header("몬스터 시체 프리펩")]
+    [SerializeField] private GameObject _eCorpsePrefab;
+
+    [Header("영웅 시체 프리팹")]
+    [SerializeField] private GameObject _hCorpsePrefab;
 
     [Header("영웅 팝업 UI 캔버스")]
     [SerializeField] private CanvasGroup _heroPopupCanvasG;
@@ -93,7 +96,8 @@ public class CCombatManager : MonoBehaviour
     public CCombatCurrentTurn CombatCurrentTurn => _currentTurn;
 
     public bool OnPopup => _onPopup;
-    public GameObject CorpsePrefab => _corpsePrefab;
+    public GameObject HCorpsePrefab => _hCorpsePrefab;
+    public GameObject ECorpsePrefab => _eCorpsePrefab;
     public CombatDirection_UI DirectPrefab => _directPrefab;
     #endregion
 

@@ -903,7 +903,8 @@ MonoBehaviour:
   _directPrefab: {fileID: 2017435874253923818, guid: d91bdb9850e40694898159b0b3688c22, type: 3}
   _heroSpawner: {fileID: 1227762582}
   _enemyspawner: {fileID: 1029264145}
-  _corpsePrefab: {fileID: 2679585739398302153, guid: 406f7f0c5603a0a499fcb0856a190c98, type: 3}
+  _eCorpsePrefab: {fileID: 28503666714620381, guid: 68e48fe6f419a804dbf8eef2631d93ed, type: 3}
+  _hCorpsePrefab: {fileID: 1780764204728784787, guid: 793976fef87707c47bbfa91404e8ee73, type: 3}
   _heroPopupCanvasG: {fileID: 1211770605}
   _roundText: {fileID: 1320145666}
   _teamRanks:
