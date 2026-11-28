@@ -42,6 +42,8 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	// 전투 UI(최대 300)·영웅 정보 창(300)보다 위, 끌기 아이콘(1000)보다 아래
 	private const int PAUSE_SORTING_ORDER = 900;
 	private const string DONT_DESTROY_SCENE = "DontDestroyOnLoad";
+	private const string MAIN_CAMERA_TAG = "MainCamera";
+	private const string UNTAGGED_TAG = "Untagged";
 	#endregion
 
 	#region 인스펙터
@@ -65,6 +67,8 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	[SerializeField] private Font _resultFont;
 	// 이겼을 때 보상 (유물·횃불·장신구 확률)
 	[SerializeField] private CCombatRewardTable _victoryReward = new CCombatRewardTable();
+	// 성채 전투를 이기면 확률과 상관없이 주는 장신구 수
+	[SerializeField] private int _fortressMinTrinkets = 1;
 	// 건너뛰기(F9)도 이긴 것으로 보고 보상을 준다 → 전투 쪽 마무리 전까지 시험용
 	[SerializeField] private bool _rewardOnSkip = true;
 
@@ -90,6 +94,8 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	private Action _onComplete;
 	// 바퀴·장갑이 다 닳아 벌어진 길 위 전투 → 이기면 그 값을 하나 되돌린다 (그 밖의 전투는 None)
 	private ERunValue _repairOnWin;
+	// 전투 동안 MainCamera 태그를 뗀 주행 카메라들 (끝나면 되돌린다)
+	private readonly List<GameObject> _untaggedCameras = new List<GameObject>();
 	private Scene _combatScene;
 	private CombatHeroSpawner _heroSpawner;
 	private CombatEnemySpawner _enemySpawner;
@@ -140,6 +146,7 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	{
 		SceneManager.sceneLoaded -= HandleSceneLoaded;
 		_backdrop.Release();
+		RestoreMainCameraTags();
 	}
 
 	// 지도의 전투 노드에 도착했을 때
@@ -227,6 +234,9 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 
 		// 주행 숨기기·영웅 세우기가 끝날 때까지 검게 덮어 둔다
 		yield return CRunScreenFade.Cover(_fadeDuration);
+
+		// 전투 쪽 입력·체력바가 Awake 에서 Camera.main 을 잡는다 → 주행 카메라가 잡히면 꺼진 카메라로 쏴서 적이 안 눌린다
+		UntagMainCameras();
 
 		// 씬이 올라오는 즉시 주행 쪽을 숨긴다 → 카메라·EventSystem 이 둘씩 겹치지 않게
 		SceneManager.sceneLoaded -= HandleSceneLoaded;
@@ -892,7 +902,10 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 
 		List<string> lines = _result != null ? _result.Rewards : new List<string>();
 
-		_victoryReward.Give(controller.RunData, controller.Stagecoach != null ? controller.Stagecoach.Inventory : null, _tokenRandom, lines);
+		// 성채 전투는 이기면 장신구를 적어도 하나 준다
+		int minTrinkets = CCombatContext.Kind == ECombatKind.Fortress ? _fortressMinTrinkets : 0;
+
+		_victoryReward.Give(controller.RunData, controller.Stagecoach != null ? controller.Stagecoach.Inventory : null, _tokenRandom, lines, minTrinkets);
 		RepairOnWin(controller.RunData, lines);
 
 		if (_logState && lines.Count > 0)
@@ -980,6 +993,7 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 		_isBusy = false;
 		_isFighting = false;
 		_repairOnWin = ERunValue.None;
+		RestoreMainCameraTags();
 		CCombatContext.Clear();
 		_combatScene = default;
 		_heroSpawner = null;
@@ -993,6 +1007,36 @@ public class CCombatNodeHandler : MonoBehaviour, INodeHandler, INodeHandlerGroup
 	#endregion
 
 	#region 주행 씬 숨기기
+	// 전투 씬이 올라오기 전, 지금 열린 MainCamera 태그를 잠깐 뗀다 → 전투 씬의 Main Camera 만 Camera.main 이 된다
+	private void UntagMainCameras()
+	{
+		Camera[] cameras = FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+		for (int i = 0; i < cameras.Length; i++)
+		{
+			if (cameras[i] == null || !cameras[i].CompareTag(MAIN_CAMERA_TAG))
+			{
+				continue;
+			}
+
+			cameras[i].tag = UNTAGGED_TAG;
+			_untaggedCameras.Add(cameras[i].gameObject);
+		}
+	}
+
+	private void RestoreMainCameraTags()
+	{
+		for (int i = 0; i < _untaggedCameras.Count; i++)
+		{
+			if (_untaggedCameras[i] != null)
+			{
+				_untaggedCameras[i].tag = MAIN_CAMERA_TAG;
+			}
+		}
+
+		_untaggedCameras.Clear();
+	}
+
 	private void HideDrivingScene(Scene combatScene)
 	{
 		_isDrivingHidden = true;

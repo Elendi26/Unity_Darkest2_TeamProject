@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: AudioClipData_OnHospital
   m_EditorClassIdentifier: 
   _id: OnHospital
-  _clip: {fileID: 8300000, guid: 3b7520312d885804cb2a15acd385ae41, type: 3}
+  _clip: {fileID: 8300000, guid: 0e3d4095b170ad54fbed70889dee909f, type: 3}
